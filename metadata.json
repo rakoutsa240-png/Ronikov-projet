@@ -1,0 +1,6 @@
+{
+  "name": "RONIKOV - Carburant Togo",
+  "description": "Plateforme togolaise de géolocalisation, réservation et paiement anticipé de carburant en stations-service.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
