@@ -1,7 +1,4 @@
-import { PGlite } from '@electric-sql/pglite';
 import { eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/pglite';
-import { migrate } from 'drizzle-orm/pglite/migrator';
 import request from 'supertest';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { computeStockStatus } from '../shared/stock';
@@ -10,15 +7,14 @@ import { createApp } from './app';
 import type { Db } from './db/client';
 import * as schema from './db/schema';
 import { seed } from './db/seed';
+import { createTestDb } from './test/db';
 
 let db: Db;
 let app: ReturnType<typeof createApp>;
 
 beforeAll(async () => {
-  db = drizzle(new PGlite(), { schema }) as unknown as Db;
-  await migrate(db as never, { migrationsFolder: new URL('./db/migrations', import.meta.url).pathname });
-  await seed(db);
-  await seed(db); // running it twice must not duplicate anything
+  db = await createTestDb();
+  await seed(db); // running it a second time must not duplicate anything
   app = createApp(db);
 });
 

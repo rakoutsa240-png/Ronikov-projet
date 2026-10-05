@@ -14,7 +14,8 @@
     "dev:api": "tsx watch server/index.ts",
     "start:api": "tsx server/index.ts",
     "db:generate": "drizzle-kit generate",
-    "db:seed": "tsx server/seed.ts"
+    "db:seed": "tsx server/seed.ts",
+    "user:create": "tsx server/create-user.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

@@ -1,28 +1,45 @@
 import React, { useState } from 'react';
-import { UserRole } from '../types';
-import { X, Check, ShieldCheck, User, Building2, Lock, ArrowRight } from 'lucide-react';
+import { AuthUser } from '../types';
+import { X, ArrowRight } from 'lucide-react';
+import { api, ApiError } from '../api';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess: (name: string, role: UserRole) => void;
+  onAuthenticated: (user: AuthUser) => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
-  onLoginSuccess,
+  onAuthenticated,
 }) => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [role, setRole] = useState<UserRole>('CLIENT');
-  const [phone, setPhone] = useState('90 12 34 56');
-  const [name, setName] = useState('Kofi Mensah');
-  const [password, setPassword] = useState('••••••••');
+  const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // The role comes from the server: sign-up always creates a client account.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLoginSuccess(name || 'Utilisateur RONIKOV', role);
-    onClose();
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const user =
+        mode === 'login'
+          ? await api.login(phone, password)
+          : await api.register({ name, phone, password, email: email || undefined });
+      setPassword('');
+      onAuthenticated(user);
+      onClose();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Serveur RONIKOV injoignable. Réessayez plus tard.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -47,34 +64,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </h2>
         </div>
 
-        {/* Role Picker */}
-        <div className="grid grid-cols-3 gap-1 border border-black p-1 text-xs">
-          <button
-            onClick={() => setRole('CLIENT')}
-            className={`py-2 font-bold uppercase ${
-              role === 'CLIENT' ? 'bg-black text-white' : 'bg-white text-black'
-            }`}
-          >
-            Client
-          </button>
-          <button
-            onClick={() => setRole('STATION_PRO')}
-            className={`py-2 font-bold uppercase ${
-              role === 'STATION_PRO' ? 'bg-black text-white' : 'bg-white text-black'
-            }`}
-          >
-            Gérant Pro
-          </button>
-          <button
-            onClick={() => setRole('ADMIN')}
-            className={`py-2 font-bold uppercase ${
-              role === 'ADMIN' ? 'bg-black text-white' : 'bg-white text-black'
-            }`}
-          >
-            Admin
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'register' && (
             <div className="space-y-1">
@@ -90,6 +79,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
+          {mode === 'register' && (
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase block text-black">E-mail (facultatif)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="kofi@exemple.tg"
+                className="w-full p-2.5 border border-black text-xs font-bold focus:outline-none"
+              />
+            </div>
+          )}
+
           <div className="space-y-1">
             <label className="text-xs font-bold uppercase block text-black">
               Numéro de Téléphone Togolais (+228)
@@ -99,7 +101,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 +228
               </span>
               <input
-                type="text"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -114,6 +118,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <input
               type="password"
               required
+              minLength={mode === 'register' ? 8 : undefined}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
@@ -121,9 +127,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             />
           </div>
 
+          {error && (
+            <p role="alert" className="text-xs font-bold text-red-700 border border-red-700 bg-red-50 p-2">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="w-full py-3 bg-black text-white font-bold text-xs uppercase tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
+            disabled={isSubmitting}
+            className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs uppercase tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
           >
             <span>{mode === 'login' ? 'Se Connecter' : 'Créer Mon Compte'}</span>
             <ArrowRight className="w-4 h-4" />
@@ -132,7 +145,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         <div className="text-center text-xs pt-2 border-t border-neutral-200">
           <button
-            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+            onClick={() => {
+              setMode(mode === 'login' ? 'register' : 'login');
+              setError(null);
+            }}
             className="text-neutral-600 font-bold uppercase hover:text-black underline"
           >
             {mode === 'login'

@@ -11,7 +11,11 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core';
+
+export const userRoleEnum = pgEnum('user_role', ['CLIENT', 'STATION_PRO', 'ADMIN']);
 
 export const fuelTypeEnum = pgEnum('fuel_type', ['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE']);
 
@@ -62,4 +66,48 @@ export const fuelPrices = pgTable(
     effectiveFrom: timestamp('effective_from', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('fuel_prices_fuel_effective_idx').on(t.fuelType, t.effectiveFrom)],
+);
+
+// Phones are stored as +228 followed by 8 digits. The role is only ever set by the server.
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: text('name').notNull(),
+    phone: text('phone').notNull(),
+    email: text('email'),
+    passwordHash: text('password_hash').notNull(),
+    role: userRoleEnum('role').notNull().default('CLIENT'),
+    isPremium: boolean('is_premium').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('users_phone_idx').on(t.phone)],
+);
+
+// Which stations a manager (STATION_PRO) runs.
+export const stationManagers = pgTable(
+  'station_managers',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.stationId] })],
+);
+
+// Sign-in sessions. Only a SHA-256 hash of the cookie value is stored.
+export const sessions = pgTable(
+  'sessions',
+  {
+    tokenHash: text('token_hash').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('sessions_user_idx').on(t.userId)],
 );
