@@ -8,6 +8,9 @@ function mockApi(stations: unknown, prices: unknown, routes: Record<string, () =
     const path = url.replace(/^.*\/api/, '');
     if (routes[path]) return routes[path]();
     if (path === '/me') return Response.json({error: 'Connexion requise'}, {status: 401});
+    if (['/reservations/mine', '/notifications', '/reservations'].includes(path) || path.endsWith('/reservations')) {
+      return Response.json([]);
+    }
     const body = path === '/stations' ? stations : path === '/prices' ? prices : null;
     return new Response(JSON.stringify(body), {status: body ? 200 : 404});
   });

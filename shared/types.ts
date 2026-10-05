@@ -49,6 +49,7 @@ export interface Reservation {
   validatedAt?: string;
   userName: string;
   userPhone: string;
+  qrPayload?: string; // signed QR content, only sent to the ticket's owner
 }
 
 export type UserRole = 'CLIENT' | 'STATION_PRO' | 'ADMIN';
@@ -67,7 +68,7 @@ export interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  timestamp: string;
+  timestamp: string; // ISO date from the API, or a ready-made label in the demo data
   read: boolean;
   type: 'RESERVATION' | 'STOCK' | 'SYSTEM' | 'PREMIUM';
   stationBrand?: string;

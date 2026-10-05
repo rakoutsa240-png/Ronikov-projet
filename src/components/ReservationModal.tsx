@@ -4,6 +4,9 @@ import { Gauge } from './Gauge';
 import { MixxByYasBadge, MoovAfricaBadge, CardPaymentBadge, PaymentMethodLabel } from './PaymentLogos';
 import { TicketCard } from './TicketCard';
 import { X, Check, ShieldCheck, ArrowRight, Printer, Copy, Clock, AlertTriangle, Phone, Smartphone, CreditCard } from 'lucide-react';
+import { api, ApiError } from '../api';
+import { MAX_LITERS_PER_RESERVATION, SERVICE_FEE_XOF } from '../../shared/reservations';
+import { FUEL_LABELS } from '../../shared/stock';
 
 interface ReservationModalProps {
   station: Station | null;
@@ -11,7 +14,12 @@ interface ReservationModalProps {
   onClose: () => void;
   onCompleteReservation: (reservation: Reservation) => void;
   isUserPremium?: boolean;
+  defaultPaymentPhone?: string; // +228XXXXXXXX
 }
+
+// "+22890123456" -> "90 12 34 56"
+const formatLocalPhone = (phone?: string) =>
+  (phone ?? '').replace(/^\+228/, '').replace(/(\d{2})(?=\d)/g, '$1 ');
 
 export const ReservationModal: React.FC<ReservationModalProps> = ({
   station,
@@ -19,21 +27,30 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   onClose,
   onCompleteReservation,
   isUserPremium = false,
+  defaultPaymentPhone,
 }) => {
-  if (!isOpen || !station) return null;
-
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedFuel, setSelectedFuel] = useState<FuelType>('SUPER');
   const [liters, setLiters] = useState<number>(10);
   const [inputMode, setInputMode] = useState<'liters' | 'fcfa'>('liters');
   const [fcfaAmount, setFcfaAmount] = useState<number>(7000);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('MIXX_BY_YAS');
-  const [phoneNumber, setPhoneNumber] = useState<string>('90 12 34 56');
+  const [phoneNumber, setPhoneNumber] = useState<string>(formatLocalPhone(defaultPaymentPhone));
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [generatedReservation, setGeneratedReservation] = useState<Reservation | null>(null);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
 
-  const fuelStock = station.stock[selectedFuel];
+  // Each opening starts a fresh booking.
+  useEffect(() => {
+    if (!isOpen) return;
+    setStep(1);
+    setPaymentError(null);
+    setGeneratedReservation(null);
+    setPhoneNumber(formatLocalPhone(defaultPaymentPhone));
+  }, [isOpen, station?.id, defaultPaymentPhone]);
+
+  const fuelStock = station?.stock[selectedFuel];
   const pricePerLiter = fuelStock?.pricePerLiter || 700;
 
   // Sync FCFA / Liters
@@ -45,56 +62,34 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
     }
   }, [liters, fcfaAmount, selectedFuel, inputMode, pricePerLiter]);
 
-  const fuelLabels: Record<FuelType, string> = {
-    SUPER: 'Super Sans Plomb',
-    GAZOLE: 'Gazole (Désel)',
-    MELANGE: 'Mélange 2 Temps',
-    KEROSENE: 'Pétrole / Kérosène',
-  };
+  const fuelLabels = FUEL_LABELS;
 
   const totalFuelCost = liters * pricePerLiter;
-  const serviceFee = isUserPremium ? 0 : 150;
+  // Shown for information: the API computes the amount actually charged.
+  const serviceFee = isUserPremium ? 0 : SERVICE_FEE_XOF;
   const totalPayable = totalFuelCost + serviceFee;
 
-  const handleProcessPayment = () => {
+  // Payment is simulated; the API creates the ticket and its code.
+  const handleProcessPayment = async () => {
+    if (!station) return;
     setIsProcessing(true);
-
-    setTimeout(() => {
-      // Generate unique random secure voucher code RNK-XXXX-XX
-      const randomPart1 = Math.floor(1000 + Math.random() * 9000);
-      const randomPart2 = Math.random().toString(36).substring(2, 4).toUpperCase();
-      const code = `RNK-${randomPart1}-${randomPart2}`;
-
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + 120 * 60 * 1000); // 2 hours
-
-      const newReservation: Reservation = {
-        id: `res-${Date.now()}`,
-        code,
+    setPaymentError(null);
+    try {
+      const reservation = await api.createReservation({
         stationId: station.id,
-        stationName: station.name,
-        stationBrand: station.brand,
-        stationAddress: station.address,
         fuelType: selectedFuel,
-        fuelLabel: fuelLabels[selectedFuel],
         liters,
-        pricePerLiter,
-        totalAmountXOF: totalPayable,
-        serviceFeeXOF: serviceFee,
         paymentMethod,
-        phonePayment: `+228 ${phoneNumber}`,
-        status: 'PENDING',
-        createdAt: now.toISOString(),
-        expiresAt: expiresAt.toISOString(),
-        userName: 'Client Togo',
-        userPhone: `+228 ${phoneNumber}`,
-      };
-
-      setGeneratedReservation(newReservation);
-      onCompleteReservation(newReservation);
-      setIsProcessing(false);
+        paymentPhone: phoneNumber,
+      });
+      setGeneratedReservation(reservation);
+      onCompleteReservation(reservation);
       setStep(4);
-    }, 1800);
+    } catch (e) {
+      setPaymentError(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -102,6 +97,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
+
+  if (!isOpen || !station) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
@@ -220,7 +217,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                   <input
                     type="range"
                     min="2"
-                    max={Math.min(100, fuelStock?.availableLiters || 50)}
+                    max={Math.min(MAX_LITERS_PER_RESERVATION, fuelStock?.availableLiters || 50)}
                     value={liters}
                     onChange={(e) => setLiters(Number(e.target.value))}
                     className="w-full accent-amber-400 cursor-pointer"
@@ -430,6 +427,12 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                   </span>
                 </p>
               </div>
+            )}
+
+            {paymentError && (
+              <p role="alert" className="text-xs font-mono-code font-bold text-red-300 border border-red-500/60 bg-red-500/10 p-3 rounded-xl">
+                {paymentError}
+              </p>
             )}
 
             {/* Summary Banner */}

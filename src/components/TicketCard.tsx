@@ -28,8 +28,8 @@ export const TicketCard: React.FC<TicketCardProps> = ({
     window.print();
   };
 
-  // Payload encoded in the QR code (contains full voucher data so any scanner reads valid structured text)
-  const qrPayload = `RONIKOV-TICKET|CODE:${reservation.code}|STATION:${reservation.stationName}|FUEL:${reservation.fuelLabel}|LITERS:${reservation.liters}L|AMOUNT:${reservation.totalAmountXOF}FCFA|EXPIRES:${reservation.expiresAt}`;
+  // The API signs the QR content so an edited screenshot is refused at the pump.
+  const qrPayload = reservation.qrPayload ?? `RONIKOV-TICKET|CODE:${reservation.code}|STATION:${reservation.stationName}|FUEL:${reservation.fuelLabel}|LITERS:${reservation.liters}L|AMOUNT:${reservation.totalAmountXOF}FCFA|EXPIRES:${reservation.expiresAt}`;
 
   return (
     <div className="space-y-6 relative">

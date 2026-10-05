@@ -285,7 +285,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         title="Cliquer pour ouvrir le ticket et le QR Code grand format"
                       >
                         <QRCodeImage 
-                          value={`RONIKOV-TICKET|CODE:${res.code}|STATION:${res.stationName}|FUEL:${res.fuelLabel}|LITERS:${res.liters}L|AMOUNT:${res.totalAmountXOF}FCFA`} 
+                          value={res.qrPayload ?? `RONIKOV-TICKET|CODE:${res.code}|STATION:${res.stationName}|FUEL:${res.fuelLabel}|LITERS:${res.liters}L|AMOUNT:${res.totalAmountXOF}FCFA`} 
                           size={90} 
                         />
                       </div>
