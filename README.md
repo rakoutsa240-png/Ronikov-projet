@@ -71,6 +71,7 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In produc
 | --- | --- |
 | `GET /api/stations?city=&fuel=&available=true` | Stations with stock; litres already reserved are subtracted and the status (`AVAILABLE`, `LOW`, `OUT_OF_STOCK`) is computed |
 | `GET /api/stations/:id` | One station |
+| `GET /api/stations/:id/price-history?days=30` | Price changes of one station over the period (plus the price in force when it starts) |
 | `GET /api/prices` | Current official price per fuel and average availability |
 | `POST /api/auth/register` | Create a client account (`name`, `phone`, `password`, optional `email`) and sign in |
 | `POST /api/auth/login` | Sign in with `phone` and `password` |
@@ -84,6 +85,7 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In produc
 | `GET /api/reservations` | Admin: every ticket, codes masked |
 | `GET /api/notifications`, `POST /api/notifications/read-all` | The account's notifications |
 | `PATCH /api/stations/:id/stock/:fuelType` | Manager or admin: tank level `stockLiters` and `maxCapacityLiters`; admin only: `pricePerLiter` |
+| `POST /api/stations` | Admin: add a station (`name`, `brand`, `district`, `city`, `address`, `lat`, `lng`, `phone`, optional `operatingHours`, `amenities`, `isPartner`, `fuels`) |
 | `PATCH /api/stations/:id` | Manager or admin: `queueTimeMinutes`; admin only: `isPartner`, `isActive` |
 | `PUT /api/prices` | Admin: new official prices (kept as history), optionally applied to every station |
 | `GET /api/users`, `PATCH /api/users/:id` | Admin: list accounts; change `role`, `stationIds`, `isPremium` |

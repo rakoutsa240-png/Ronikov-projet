@@ -188,3 +188,18 @@ export const auditLog = pgTable(
   },
   (t) => [index('audit_log_created_idx').on(t.createdAt)],
 );
+
+// Every price a station charged, one row per change: the chart on a station's page reads it.
+export const stationPrices = pgTable(
+  'station_prices',
+  {
+    id: serial('id').primaryKey(),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id, { onDelete: 'cascade' }),
+    fuelType: fuelTypeEnum('fuel_type').notNull(),
+    pricePerLiterXof: integer('price_per_liter_xof').notNull(),
+    effectiveFrom: timestamp('effective_from', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('station_prices_station_effective_idx').on(t.stationId, t.effectiveFrom)],
+);

@@ -16,14 +16,6 @@
   font-family: 'Syne', sans-serif;
 }
 
-.font-outfit {
-  font-family: 'Outfit', sans-serif;
-}
-
-.font-righteous {
-  font-family: 'Righteous', cursive;
-}
-
 @keyframes gradient-flow {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }

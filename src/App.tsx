@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal, AuthUser } from './types';
 import { INITIAL_STATIONS, GLOBAL_FUEL_PRICES } from './data/mockData';
 import { api, ApiError } from './api';
@@ -6,16 +6,24 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
 import { MapView } from './components/MapView';
-import { StationDetailView } from './components/StationDetailView';
-import { HistoryView } from './components/HistoryView';
-import { ProDashboard } from './components/ProDashboard';
-import { AdminDashboard } from './components/AdminDashboard';
-import { PremiumView } from './components/PremiumView';
-import { UserProfileView } from './components/UserProfileView';
 import { ReservationModal } from './components/ReservationModal';
 import { AuthModal } from './components/AuthModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
+
+// Pages other than the home page and the map are downloaded only when opened, so the first visit stays light.
+const named = <K extends string>(load: () => Promise<Record<K, React.ComponentType<any>>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })));
+const StationDetailView = named(() => import('./components/StationDetailView'), 'StationDetailView');
+const HistoryView = named(() => import('./components/HistoryView'), 'HistoryView');
+const ProDashboard = named(() => import('./components/ProDashboard'), 'ProDashboard');
+const AdminDashboard = named(() => import('./components/AdminDashboard'), 'AdminDashboard');
+const PremiumView = named(() => import('./components/PremiumView'), 'PremiumView');
+const UserProfileView = named(() => import('./components/UserProfileView'), 'UserProfileView');
+
+const pageFallback = (
+  <div className="py-24 text-center text-xs font-bold uppercase tracking-widest text-neutral-400">Chargement…</div>
+);
 
 
 export default function App() {
@@ -279,6 +287,7 @@ export default function App() {
 
       {/* Main View Router */}
       <main className="flex-1">
+        <Suspense fallback={pageFallback}>
         {activeTab === 'home' && (
           <HomeView
             stations={stations}
@@ -353,10 +362,12 @@ export default function App() {
             reservations={staffReservations}
             globalPrices={globalPrices}
             onToggleStationPartner={handleToggleStationPartner}
+            onStationAdded={(station) => setStations((prev) => [...prev, station])}
             onUpdateGlobalPrices={handleUpdateGlobalPrices}
             currentUserId={currentUser?.id}
           />
         )}
+        </Suspense>
       </main>
 
       {/* Footer */}

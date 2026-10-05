@@ -1,4 +1,4 @@
-import type { AdminUser, AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, Reservation, Station } from './types';
+import type { AdminUser, AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, PriceChange, Reservation, Station } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -31,6 +31,8 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
 export const api = {
   stations: (signal?: AbortSignal) => request<Station[]>('GET', '/stations', undefined, signal),
   prices: (signal?: AbortSignal) => request<FuelPriceGlobal[]>('GET', '/prices', undefined, signal),
+  priceHistory: (stationId: string, days: number, signal?: AbortSignal) =>
+    request<PriceChange[]>('GET', `/stations/${encodeURIComponent(stationId)}/price-history?days=${days}`, undefined, signal),
 
   // Resolves to null when nobody is signed in.
   me: (signal?: AbortSignal) =>
@@ -67,6 +69,20 @@ export const api = {
     fuelType: FuelType,
     data: { stockLiters?: number; maxCapacityLiters?: number; pricePerLiter?: number },
   ) => request<Station>('PATCH', `/stations/${encodeURIComponent(stationId)}/stock/${fuelType}`, data),
+  createStation: (data: {
+    name: string;
+    brand: string;
+    district: string;
+    city: string;
+    address: string;
+    phone: string;
+    operatingHours: string;
+    lat: number;
+    lng: number;
+    isPartner: boolean;
+    amenities: string[];
+    fuels: Partial<Record<FuelType, { stockLiters?: number; maxCapacityLiters?: number; pricePerLiter?: number }>>;
+  }) => request<Station>('POST', '/stations', data),
   updateStation: (stationId: string, data: { queueTimeMinutes?: number; isPartner?: boolean; isActive?: boolean }) =>
     request<Station | null>('PATCH', `/stations/${encodeURIComponent(stationId)}`, data),
   updatePrices: (prices: { type: FuelType; officialPriceXOF: number }[], applyToAllStations: boolean) =>

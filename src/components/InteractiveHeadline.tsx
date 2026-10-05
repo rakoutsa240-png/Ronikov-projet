@@ -1,27 +1,9 @@
 import React, { useState } from 'react';
-import { Type, Sparkles, Flame, Zap, CheckCircle2 } from 'lucide-react';
-
-type FontStyle = 'syne' | 'outfit' | 'righteous' | 'mono';
+import { Zap } from 'lucide-react';
 
 export const InteractiveHeadline: React.FC = () => {
-  const [selectedFont, setSelectedFont] = useState<FontStyle>('syne');
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const [clickedWord, setClickedWord] = useState<string | null>(null);
-
-  const getFontClass = () => {
-    switch (selectedFont) {
-      case 'syne':
-        return 'font-syne font-black tracking-tight';
-      case 'outfit':
-        return 'font-outfit font-black tracking-normal';
-      case 'righteous':
-        return 'font-righteous font-normal tracking-wide';
-      case 'mono':
-        return 'font-mono-code font-extrabold tracking-tighter';
-      default:
-        return 'font-syne font-black';
-    }
-  };
 
   const handleWordClick = (word: string) => {
     setClickedWord(word);
@@ -30,61 +12,9 @@ export const InteractiveHeadline: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Interactive Font Selector Bar */}
-      <div className="flex flex-wrap items-center gap-2 font-mono-code">
-        <span className="text-[11px] font-bold text-neutral-400 uppercase flex items-center gap-1.5 mr-2">
-          <Type className="w-3.5 h-3.5 text-amber-400" />
-          <span>Style de Police :</span>
-        </span>
-
-        <button
-          onClick={() => setSelectedFont('syne')}
-          className={`px-3 py-1 rounded text-xs font-bold transition-all uppercase border ${
-            selectedFont === 'syne'
-              ? 'bg-amber-400 text-black border-amber-400 font-extrabold scale-105 shadow-lg'
-              : 'bg-black/60 text-neutral-300 border-neutral-700 hover:text-white hover:border-neutral-500'
-          }`}
-        >
-          ✨ Syne Dynamic
-        </button>
-
-        <button
-          onClick={() => setSelectedFont('outfit')}
-          className={`px-3 py-1 rounded text-xs font-bold transition-all uppercase border ${
-            selectedFont === 'outfit'
-              ? 'bg-indigo-500 text-white border-indigo-500 font-extrabold scale-105 shadow-lg'
-              : 'bg-black/60 text-neutral-300 border-neutral-700 hover:text-white hover:border-neutral-500'
-          }`}
-        >
-          ⚡ Outfit Black
-        </button>
-
-        <button
-          onClick={() => setSelectedFont('righteous')}
-          className={`px-3 py-1 rounded text-xs font-bold transition-all uppercase border ${
-            selectedFont === 'righteous'
-              ? 'bg-emerald-500 text-black border-emerald-500 font-extrabold scale-105 shadow-lg'
-              : 'bg-black/60 text-neutral-300 border-neutral-700 hover:text-white hover:border-neutral-500'
-          }`}
-        >
-          🚀 Righteous Neon
-        </button>
-
-        <button
-          onClick={() => setSelectedFont('mono')}
-          className={`px-3 py-1 rounded text-xs font-bold transition-all uppercase border ${
-            selectedFont === 'mono'
-              ? 'bg-white text-black border-white font-extrabold scale-105 shadow-lg'
-              : 'bg-black/60 text-neutral-300 border-neutral-700 hover:text-white hover:border-neutral-500'
-          }`}
-        >
-          💎 Space Mono
-        </button>
-      </div>
-
       {/* Main Interactive Headline Container */}
       <h1
-        className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-white leading-[1.02] uppercase transition-all duration-300 max-w-5xl select-none ${getFontClass()}`}
+        className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-white leading-[1.02] uppercase transition-all duration-300 max-w-5xl select-none font-syne font-black tracking-tight`}
       >
         {/* Line 1: NE FAITES PLUS */}
         <span className="block">

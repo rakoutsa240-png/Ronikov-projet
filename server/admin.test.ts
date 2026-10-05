@@ -139,3 +139,36 @@ describe('Premium requests', () => {
     await request(app).post('/api/premium/request').expect(401);
   });
 });
+
+describe('adding a station', () => {
+  const newStation = {
+    name: 'Station Test Kara',
+    brand: 'Oryx',
+    district: 'Centre',
+    city: 'Kara',
+    address: 'Route Nationale 1',
+    lat: 9.55,
+    lng: 1.19,
+    phone: '+228 26 60 00 00',
+    fuels: { GAZOLE: { stockLiters: 5000, maxCapacityLiters: 10000, pricePerLiter: 760 } },
+  };
+
+  it('lets an admin add a station that clients see right away', async () => {
+    const res = await admin.post('/api/stations').send(newStation).expect(201);
+    expect(res.body.id).toMatch(/^st-/);
+    expect(res.body.stock.GAZOLE).toMatchObject({ availableLiters: 5000, pricePerLiter: 760 });
+    expect(res.body.stock.SUPER.status).toBe('OUT_OF_STOCK');
+
+    const list = (await request(app).get('/api/stations').expect(200)).body as { id: string }[];
+    expect(list.some((s) => s.id === res.body.id)).toBe(true);
+    const history = (await request(app).get(`/api/stations/${res.body.id}/price-history`).expect(200)).body;
+    expect(history).toHaveLength(4);
+  });
+
+  it('refuses managers, clients and positions outside Togo', async () => {
+    await manager.post('/api/stations').send(newStation).expect(403);
+    await client.post('/api/stations').send(newStation).expect(403);
+    const res = await admin.post('/api/stations').send({ ...newStation, lat: 48.85, lng: 2.35 }).expect(400);
+    expect(res.body.error).toBe('Position hors du Togo');
+  });
+});

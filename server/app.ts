@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { FUEL_TYPES } from '../shared/stock';
 import { loadUser } from './auth';
 import type { Db } from './db/client';
-import { listPrices, listStations } from './db/queries';
+import { listPrices, listStationPriceHistory, listStations } from './db/queries';
 import { adminRouter } from './routes/admin';
 import { authRouter } from './routes/auth';
 import { reservationsRouter } from './routes/reservations';
@@ -67,6 +67,20 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
     res.json(station);
   });
 
+  app.get('/api/stations/:id/price-history', async (req, res) => {
+    const days = z.coerce.number().int().min(1).max(365).default(30).safeParse(req.query.days);
+    if (!days.success) {
+      res.status(400).json({ error: 'Période invalide' });
+      return;
+    }
+    const station = (await listStations(db)).find((s) => s.id === req.params.id);
+    if (!station) {
+      res.status(404).json({ error: 'Station introuvable' });
+      return;
+    }
+    res.json(await listStationPriceHistory(db, station.id, days.data));
+  });
+
   app.get('/api/prices', async (_req, res) => {
     res.json(await listPrices(db));
   });
@@ -76,7 +90,17 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
   });
 
   if (staticDir) {
-    app.use(express.static(staticDir, { index: false }));
+    app.use(
+      express.static(staticDir, {
+        index: false,
+        setHeaders: (res, filePath) => {
+          // Built files carry a content hash in their name, so browsers may keep them for a year.
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          // The service worker must be checked on every visit so updates reach phones.
+          else if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
+        },
+      }),
+    );
     // Every other page is the single-page app.
     app.get(/^(?!\/api\/).*/, (_req, res) => {
       res.sendFile(path.join(staticDir, 'index.html'));

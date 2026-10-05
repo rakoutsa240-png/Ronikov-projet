@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { UserRole, Reservation } from '../types';
 import { User, ShieldCheck, Sparkles, Star, MapPin, Fuel, Clock, CheckCircle2, Heart, MessageSquare, Award, QrCode, ExternalLink, ChevronRight } from 'lucide-react';
-import happyStationClientsImg from '../assets/images/happy_station_clients_1785892026094.jpg';
-import happyManagerImg from '../assets/images/station_manager_happy_1785888750849.jpg';
-import happyCustomerRefuelImg from '../assets/images/happy_customer_refuel_1785888766342.jpg';
+import happyStationClientsImg from '../assets/images/happy_station_clients_1785892026094.webp';
+import happyManagerImg from '../assets/images/station_manager_happy_1785888750849.webp';
+import happyCustomerRefuelImg from '../assets/images/happy_customer_refuel_1785888766342.webp';
 
 interface UserProfileViewProps {
   userName: string;
