@@ -1,4 +1,4 @@
-import type { AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, Reservation, Station } from './types';
+import type { AdminUser, AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, Reservation, Station } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -61,6 +61,20 @@ export const api = {
       `/stations/${encodeURIComponent(stationId)}/validate`,
       { code },
     ),
+
+  updateStock: (
+    stationId: string,
+    fuelType: FuelType,
+    data: { stockLiters?: number; maxCapacityLiters?: number; pricePerLiter?: number },
+  ) => request<Station>('PATCH', `/stations/${encodeURIComponent(stationId)}/stock/${fuelType}`, data),
+  updateStation: (stationId: string, data: { queueTimeMinutes?: number; isPartner?: boolean; isActive?: boolean }) =>
+    request<Station | null>('PATCH', `/stations/${encodeURIComponent(stationId)}`, data),
+  updatePrices: (prices: { type: FuelType; officialPriceXOF: number }[], applyToAllStations: boolean) =>
+    request<FuelPriceGlobal[]>('PUT', '/prices', { prices, applyToAllStations }),
+  users: () => request<AdminUser[]>('GET', '/users'),
+  updateUser: (id: string, data: { role?: AdminUser['role']; isPremium?: boolean; stationIds?: string[] }) =>
+    request<AdminUser>('PATCH', `/users/${encodeURIComponent(id)}`, data),
+  requestPremium: () => request<{ message: string }>('POST', '/premium/request'),
 
   notifications: () => request<NotificationItem[]>('GET', '/notifications'),
   markNotificationsRead: () => request<void>('POST', '/notifications/read-all'),

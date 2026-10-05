@@ -1,7 +1,8 @@
 export type FuelType = 'SUPER' | 'GAZOLE' | 'MELANGE' | 'KEROSENE';
 
 export interface FuelStock {
-  availableLiters: number;
+  availableLiters: number; // litres that can still be booked
+  reservedLiters?: number; // held by pending tickets, still in the tank (API only)
   maxCapacityLiters: number;
   pricePerLiter: number; // in XOF (FCFA)
   status: 'AVAILABLE' | 'LOW' | 'OUT_OF_STOCK';
@@ -91,4 +92,9 @@ export interface AuthUser {
   role: UserRole;
   isPremium: boolean;
   managedStationIds: string[];
+}
+
+// An account as the admin console lists it (GET /api/users).
+export interface AdminUser extends AuthUser {
+  createdAt: string;
 }

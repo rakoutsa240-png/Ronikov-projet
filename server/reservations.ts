@@ -6,6 +6,7 @@ import {
 } from '../shared/reservations';
 import { FUEL_LABELS } from '../shared/stock';
 import type { AuthUser, FuelType, NotificationItem, PaymentMethod, Reservation } from '../shared/types';
+import { audit } from './audit';
 import type { Db } from './db/client';
 import { fuelStocks, notifications, reservations, stations, users } from './db/schema';
 import {
@@ -276,6 +277,11 @@ export async function validateTicket(db: Db, keys: TicketKeys, staff: AuthUser, 
         updatedAt: now,
       })
       .where(and(eq(fuelStocks.stationId, row.stationId), eq(fuelStocks.fuelType, row.fuelType)));
+    await audit(tx, staff.id, 'ticket.validate', `reservation:${row.id}`, {
+      stationId: row.stationId,
+      fuelType: row.fuelType,
+      liters: row.liters,
+    });
     await notify(
       tx,
       row.userId,

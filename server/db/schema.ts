@@ -5,6 +5,7 @@ import {
   doublePrecision,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -172,4 +173,18 @@ export const notifications = pgTable(
     readAt: timestamp('read_at', { withTimezone: true }),
   },
   (t) => [index('notifications_user_idx').on(t.userId, t.createdAt)],
+);
+
+// Who changed stock, prices, stations or accounts, and who served which ticket.
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: serial('id').primaryKey(),
+    actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    target: text('target').notNull(),
+    details: jsonb('details').$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('audit_log_created_idx').on(t.createdAt)],
 );

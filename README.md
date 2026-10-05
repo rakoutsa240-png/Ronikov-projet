@@ -2,7 +2,7 @@
 
 RONIKOV is a web app for finding fuel stations in Togo, checking their prices and stock, reserving fuel and paying for it in advance. The interface is in French.
 
-It was generated with Google AI Studio and is a **front-end prototype** moving to a real backend. An API server in `server/` (Express + PostgreSQL) serves stations, stock and official prices, and the app loads them from it through `src/api.ts`. If the API cannot be reached, the app keeps working on the copy saved in the browser. Sign-in is real: accounts live in the database, and the server decides each account's role. Reservations, ticket codes and notifications are handled by the API too. Payments are still simulated (every booking is marked paid), and the stock, queue time, partner and price changes made from the Pro and Admin dashboards are still local, saved in `localStorage` until the next backend step. Mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
+It was generated with Google AI Studio and now runs on its own backend: an API server in `server/` (Express + PostgreSQL) that the app calls through `src/api.ts`. Stations, stock, prices, accounts and roles, reservations, ticket codes, notifications and every change made from the Pro and Admin dashboards live in the database. The demo data in `src/data/mockData.ts` seeds the database and is shown only until the API answers. Payments are still simulated: every booking is marked paid. Mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
 
 ### Tickets
 
@@ -18,8 +18,9 @@ At the pump, a manager can only validate tickets for their own stations (an admi
 - **Stations & Carte**: station list and interactive map, with per-station prices, stock levels and price history.
 - **Réservation**: reserve a fuel volume at a station and get a QR-code ticket.
 - **Mes Réservations**: history of reservations and tickets.
-- **Pass Premium**: subscription offer page.
-- **Pro / Admin dashboards**: shown to accounts with the manager (`STATION_PRO`) or `ADMIN` role, to manage a station or the whole network and official prices.
+- **Pass Premium**: offer page; the button sends an activation request that an admin grants from the console.
+- **Pro dashboard** (`STATION_PRO` and `ADMIN`): validate tickets, set tank levels and the queue time of your own station.
+- **Admin console** (`ADMIN`): official prices, partner stations, and a Comptes tab to change roles, assign managers to stations and grant Premium.
 
 ## Tech stack
 
@@ -53,7 +54,7 @@ bun run db:seed        # load the demo stations and prices (safe to re-run)
 
 ### Accounts and roles
 
-Users sign in with a Togolese phone number and a password. Sign-up always creates a client; only the command line (and, later, an admin) can create managers and admins:
+Users sign in with a Togolese phone number and a password. Sign-up always creates a client. An admin changes roles, managed stations and Premium from the Comptes tab; the first admin is created from the command line:
 
 ```bash
 bun run user:create --name "Nom" --phone 90123456 --password "un-mot-de-passe" --role ADMIN
@@ -82,6 +83,13 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In produc
 | `GET /api/stations/:id/reservations` | Manager or admin: the station's tickets, codes masked |
 | `GET /api/reservations` | Admin: every ticket, codes masked |
 | `GET /api/notifications`, `POST /api/notifications/read-all` | The account's notifications |
+| `PATCH /api/stations/:id/stock/:fuelType` | Manager or admin: tank level `stockLiters` and `maxCapacityLiters`; admin only: `pricePerLiter` |
+| `PATCH /api/stations/:id` | Manager or admin: `queueTimeMinutes`; admin only: `isPartner`, `isActive` |
+| `PUT /api/prices` | Admin: new official prices (kept as history), optionally applied to every station |
+| `GET /api/users`, `PATCH /api/users/:id` | Admin: list accounts; change `role`, `stationIds`, `isPremium` |
+| `POST /api/premium/request` | Ask the admins to activate Premium |
+
+Every stock, station, price, account change and ticket validation is written to the `audit_log` table with who made it.
 
 ## Scripts
 
@@ -103,7 +111,7 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In produc
 
 ```
 src/
-  App.tsx            # Root component: navigation, app state, localStorage persistence
+  App.tsx            # Root component: navigation, app state loaded from the API
   api.ts             # Client for the API server
   main.tsx           # Entry point
   types.ts           # Re-exports shared/types.ts
@@ -123,8 +131,10 @@ server/
   routes/auth.ts     # Sign-up, login, logout, /api/me
   reservations.ts    # Booking, cancelling, validating, expiry, notifications
   routes/reservations.ts # Reservation and notification routes
+  routes/admin.ts    # Stock, station, price, account and Premium routes
+  audit.ts           # Writes to audit_log
   tickets.ts         # Ticket code generation, hashing, encryption, signed QR
-  db/schema.ts       # Drizzle tables (stations, stock, prices, users, managers, sessions, reservations, notifications)
+  db/schema.ts       # Drizzle tables (stations, stock, prices, users, managers, sessions, reservations, notifications, audit_log)
   db/migrations/     # SQL migrations generated by drizzle-kit
   db/seed.ts         # Loads src/data/mockData.ts into the database
   *.test.ts          # API tests
