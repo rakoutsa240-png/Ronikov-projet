@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, ne } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
 import { FUEL_TYPES } from '../../shared/stock';
@@ -7,7 +7,7 @@ import { audit } from '../audit';
 import { rateLimit, requireRole, toAuthUser } from '../auth';
 import type { Db } from '../db/client';
 import { listPrices, listStations } from '../db/queries';
-import { fuelPrices, fuelStocks, notifications, stationManagers, stations, users } from '../db/schema';
+import { fuelPrices, fuelStocks, notifications, stationManagers, stationPrices, stations, users } from '../db/schema';
 import { canManageStation } from './reservations';
 
 // The project's tsconfig is not strict, so zod marks fields optional; handlers check what they need.
@@ -87,6 +87,9 @@ export function adminRouter(db: Db) {
         .update(fuelStocks)
         .set({ ...next, updatedAt: new Date() })
         .where(and(eq(fuelStocks.stationId, stationId), eq(fuelStocks.fuelType, fuel.data)));
+      if (next.pricePerLiterXof !== row.pricePerLiterXof) {
+        await tx.insert(stationPrices).values({ stationId, fuelType: fuel.data, pricePerLiterXof: next.pricePerLiterXof });
+      }
       await audit(tx, req.user!.id, 'stock.update', `station:${stationId}:${fuel.data}`, {
         before: {
           availableLiters: row.availableLiters,
@@ -151,10 +154,16 @@ export function adminRouter(db: Db) {
       await tx.insert(fuelPrices).values(prices.map((p) => ({ fuelType: p.type, officialPriceXof: p.officialPriceXOF, effectiveFrom: now })));
       if (applyToAllStations) {
         for (const p of prices) {
-          await tx
+          const changed = await tx
             .update(fuelStocks)
             .set({ pricePerLiterXof: p.officialPriceXOF, updatedAt: now })
-            .where(eq(fuelStocks.fuelType, p.type));
+            .where(and(eq(fuelStocks.fuelType, p.type), ne(fuelStocks.pricePerLiterXof, p.officialPriceXOF)))
+            .returning({ stationId: fuelStocks.stationId });
+          if (changed.length > 0) {
+            await tx.insert(stationPrices).values(
+              changed.map((c) => ({ stationId: c.stationId, fuelType: p.type, pricePerLiterXof: p.officialPriceXOF, effectiveFrom: now })),
+            );
+          }
         }
       }
       await audit(tx, req.user!.id, 'prices.update', 'prices', { prices, applyToAllStations });

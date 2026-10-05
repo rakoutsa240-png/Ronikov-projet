@@ -98,3 +98,10 @@ export interface AuthUser {
 export interface AdminUser extends AuthUser {
   createdAt: string;
 }
+
+// One price a station started charging (GET /api/stations/:id/price-history).
+export interface PriceChange {
+  fuelType: FuelType;
+  pricePerLiter: number;
+  effectiveFrom: string; // ISO date
+}

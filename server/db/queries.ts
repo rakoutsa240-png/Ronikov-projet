@@ -1,8 +1,8 @@
-import { asc, desc } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
 import { computeStockStatus, FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
-import type { FuelPriceGlobal, FuelStock, FuelType, Station } from '../../shared/types';
+import type { FuelPriceGlobal, FuelStock, FuelType, PriceChange, Station } from '../../shared/types';
 import type { Db } from './client';
-import { fuelPrices, fuelStocks, stations } from './schema';
+import { fuelPrices, fuelStocks, stationPrices, stations } from './schema';
 
 type StockRow = typeof fuelStocks.$inferSelect;
 
@@ -82,4 +82,34 @@ export async function listPrices(db: Db): Promise<FuelPriceGlobal[]> {
 
     return [{ type, label: FUEL_LABELS[type], officialPriceXOF: current.officialPriceXof, avgAvailabilityPercent }];
   });
+}
+
+// The price changes of one station over the last `days` days, oldest first. The last change before
+// the period is included so the chart knows the price on its first day.
+export async function listStationPriceHistory(db: Db, stationId: string, days: number): Promise<PriceChange[]> {
+  const since = new Date(Date.now() - days * 86_400_000);
+  const [inPeriod, before] = await Promise.all([
+    db
+      .select()
+      .from(stationPrices)
+      .where(and(eq(stationPrices.stationId, stationId), gte(stationPrices.effectiveFrom, since)))
+      .orderBy(asc(stationPrices.effectiveFrom), asc(stationPrices.id)),
+    Promise.all(
+      FUEL_TYPES.map((type) =>
+        db
+          .select()
+          .from(stationPrices)
+          .where(
+            and(eq(stationPrices.stationId, stationId), eq(stationPrices.fuelType, type), lt(stationPrices.effectiveFrom, since)),
+          )
+          .orderBy(desc(stationPrices.effectiveFrom), desc(stationPrices.id))
+          .limit(1),
+      ),
+    ),
+  ]);
+  return [...before.flat(), ...inPeriod].map((row) => ({
+    fuelType: row.fuelType,
+    pricePerLiter: row.pricePerLiterXof,
+    effectiveFrom: row.effectiveFrom.toISOString(),
+  }));
 }
