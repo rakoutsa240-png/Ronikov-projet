@@ -90,7 +90,17 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
   });
 
   if (staticDir) {
-    app.use(express.static(staticDir, { index: false }));
+    app.use(
+      express.static(staticDir, {
+        index: false,
+        setHeaders: (res, filePath) => {
+          // Built files carry a content hash in their name, so browsers may keep them for a year.
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          // The service worker must be checked on every visit so updates reach phones.
+          else if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
+        },
+      }),
+    );
     // Every other page is the single-page app.
     app.get(/^(?!\/api\/).*/, (_req, res) => {
       res.sendFile(path.join(staticDir, 'index.html'));

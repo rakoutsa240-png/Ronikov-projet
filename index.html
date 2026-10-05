@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RONIKOV — Localisation, Réservation & Paiement de Carburant au Togo</title>
+    <meta name="description" content="Trouvez une station avec du carburant en stock près de vous, réservez vos litres et payez par mobile money (TMoney, Flooz). Lomé et tout le Togo." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="RONIKOV" />
+
+    <!-- Preview when the link is shared (WhatsApp, Facebook, X...) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RONIKOV" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://ronikov.onrender.com/" />
+    <meta property="og:title" content="RONIKOV — Ne faites plus jamais la queue pour votre carburant" />
+    <meta property="og:description" content="Stocks en direct des stations du Togo, réservation de carburant et paiement mobile." />
+    <meta property="og:image" content="https://ronikov.onrender.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Syne:wght@800&display=swap" rel="stylesheet">
@@ -11,6 +30,12 @@
   <body class="h-full bg-white text-slate-900 selection:bg-black selection:text-white font-sans">
     <div id="root" class="min-h-full"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Makes the site installable on phones ("Ajouter à l'écran d'accueil").
+      if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+        addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+      }
+    </script>
   </body>
 </html>
 
