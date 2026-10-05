@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ronikov
+      POSTGRES_PASSWORD: ronikov
+      POSTGRES_DB: ronikov
+    ports:
+      - '5432:5432'
+    volumes:
+      - ronikov-db:/var/lib/postgresql/data
+
+volumes:
+  ronikov-db:
