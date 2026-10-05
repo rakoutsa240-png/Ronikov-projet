@@ -353,6 +353,7 @@ export default function App() {
             reservations={staffReservations}
             globalPrices={globalPrices}
             onToggleStationPartner={handleToggleStationPartner}
+            onStationAdded={(station) => setStations((prev) => [...prev, station])}
             onUpdateGlobalPrices={handleUpdateGlobalPrices}
             currentUserId={currentUser?.id}
           />

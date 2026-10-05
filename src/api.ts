@@ -69,6 +69,20 @@ export const api = {
     fuelType: FuelType,
     data: { stockLiters?: number; maxCapacityLiters?: number; pricePerLiter?: number },
   ) => request<Station>('PATCH', `/stations/${encodeURIComponent(stationId)}/stock/${fuelType}`, data),
+  createStation: (data: {
+    name: string;
+    brand: string;
+    district: string;
+    city: string;
+    address: string;
+    phone: string;
+    operatingHours: string;
+    lat: number;
+    lng: number;
+    isPartner: boolean;
+    amenities: string[];
+    fuels: Partial<Record<FuelType, { stockLiters?: number; maxCapacityLiters?: number; pricePerLiter?: number }>>;
+  }) => request<Station>('POST', '/stations', data),
   updateStation: (stationId: string, data: { queueTimeMinutes?: number; isPartner?: boolean; isActive?: boolean }) =>
     request<Station | null>('PATCH', `/stations/${encodeURIComponent(stationId)}`, data),
   updatePrices: (prices: { type: FuelType; officialPriceXOF: number }[], applyToAllStations: boolean) =>

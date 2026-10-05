@@ -1,6 +1,8 @@
 import { and, asc, eq, inArray, ne } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
+import { STATION_BRANDS, TOGO_BOUNDS } from '../../shared/stations';
 import { FUEL_TYPES } from '../../shared/stock';
 import type { AdminUser, FuelType, UserRole } from '../../shared/types';
 import { audit } from '../audit';
@@ -28,6 +30,31 @@ const stationBody = z
     isActive: z.boolean().optional(), // admin only
   })
   .strict();
+
+const newStationBody = z.object({
+  name: z.string().trim().min(2, 'Nom trop court').max(120),
+  brand: z.enum(STATION_BRANDS as [string, ...string[]], { message: 'Enseigne inconnue' }),
+  district: z.string().trim().min(2, 'Quartier manquant').max(80),
+  city: z.string().trim().min(2, 'Ville manquante').max(80),
+  address: z.string().trim().min(3, 'Adresse manquante').max(200),
+  lat: z.number().min(TOGO_BOUNDS.minLat, 'Position hors du Togo').max(TOGO_BOUNDS.maxLat, 'Position hors du Togo'),
+  lng: z.number().min(TOGO_BOUNDS.minLng, 'Position hors du Togo').max(TOGO_BOUNDS.maxLng, 'Position hors du Togo'),
+  phone: z.string().trim().min(8, 'Téléphone manquant').max(30),
+  operatingHours: z.string().trim().min(2).max(60).default('06:00 - 22:00'),
+  amenities: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
+  isPartner: z.boolean().default(false),
+  // Tanks start empty with a 20 000 L capacity and today's official price unless given.
+  fuels: z
+    .partialRecord(
+      fuelType,
+      z.object({
+        stockLiters: z.number().int().min(0).max(1_000_000).default(0),
+        maxCapacityLiters: z.number().int().min(1).max(1_000_000).default(20_000),
+        pricePerLiter: z.number().int().min(1).max(100_000).optional(),
+      }),
+    )
+    .default({}),
+});
 
 const pricesBody = z.object({
   prices: z.array(z.object({ type: fuelType, officialPriceXOF: z.number().int().min(1).max(100_000) })).min(1),
@@ -105,6 +132,42 @@ export function adminRouter(db: Db) {
       return;
     }
     res.json((await listStations(db)).find((s) => s.id === stationId));
+  });
+
+  router.post('/stations', adminOnly, async (req, res) => {
+    const parsed = newStationBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: firstIssue(parsed.error) });
+      return;
+    }
+    const { fuels, ...data } = parsed.data as z.output<typeof newStationBody> & {
+      fuels: Partial<Record<FuelType, { stockLiters: number; maxCapacityLiters: number; pricePerLiter?: number }>>;
+    };
+    for (const [type, fuel] of Object.entries(fuels)) {
+      if (fuel && fuel.stockLiters > fuel.maxCapacityLiters) {
+        res.status(400).json({ error: `Le stock de ${type} dépasse la capacité de la cuve` });
+        return;
+      }
+    }
+    const official = new Map((await listPrices(db)).map((p) => [p.type, p.officialPriceXOF]));
+    const stationId = `st-${randomUUID().slice(0, 8)}`;
+
+    await db.transaction(async (tx) => {
+      await tx.insert(stations).values({ id: stationId, ...data, brand: data.brand as string });
+      const tanks = FUEL_TYPES.map((type) => ({
+        stationId,
+        fuelType: type,
+        availableLiters: fuels[type]?.stockLiters ?? 0,
+        maxCapacityLiters: fuels[type]?.maxCapacityLiters ?? 20_000,
+        pricePerLiterXof: fuels[type]?.pricePerLiter ?? official.get(type) ?? 0,
+      }));
+      await tx.insert(fuelStocks).values(tanks);
+      await tx
+        .insert(stationPrices)
+        .values(tanks.map((t) => ({ stationId, fuelType: t.fuelType, pricePerLiterXof: t.pricePerLiterXof })));
+      await audit(tx, req.user!.id, 'station.create', `station:${stationId}`, { ...data, fuels });
+    });
+    res.status(201).json((await listStations(db)).find((s) => s.id === stationId));
   });
 
   router.patch('/stations/:id', staff, async (req, res) => {

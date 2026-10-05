@@ -3,12 +3,14 @@ import { Station, Reservation, FuelPriceGlobal, FuelType } from '../types';
 import { ShieldCheck, Users, Fuel, DollarSign, AlertTriangle, CheckCircle2, XCircle, Plus, Building2, BarChart3, Save, Sparkles, MapPin } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
 import { AdminUsersPanel } from './AdminUsersPanel';
+import { AddStationForm } from './AddStationForm';
 
 interface AdminDashboardProps {
   stations: Station[];
   reservations: Reservation[];
   globalPrices: FuelPriceGlobal[];
   onToggleStationPartner: (stationId: string) => void;
+  onStationAdded: (station: Station) => void;
   // Rejects with a message to show when the API refuses the change.
   onUpdateGlobalPrices: (updatedPrices: FuelPriceGlobal[], updateAllStations: boolean) => Promise<void>;
   currentUserId?: string;
@@ -20,8 +22,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   globalPrices,
   onToggleStationPartner,
   onUpdateGlobalPrices,
+  onStationAdded,
   currentUserId,
 }) => {
+  const [showAddStation, setShowAddStation] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'accounts' | 'incidents'>('overview');
   const [priceError, setPriceError] = useState<string | null>(null);
   const [editingPrices, setEditingPrices] = useState<FuelPriceGlobal[]>(globalPrices);
@@ -293,10 +297,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 Consultez les logos et statuts des enseignes partenaires au Togo.
               </p>
             </div>
-            <span className="text-xs font-bold text-amber-400 border border-amber-400/30 bg-amber-400/10 px-3 py-1 rounded-md">
-              {partnerStationsCount} actives
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-amber-400 border border-amber-400/30 bg-amber-400/10 px-3 py-1 rounded-md">
+                {partnerStationsCount} actives
+              </span>
+              {!showAddStation && (
+                <button
+                  onClick={() => setShowAddStation(true)}
+                  className="px-3 py-1 text-xs font-black uppercase rounded-md bg-amber-400 text-black hover:bg-amber-300"
+                >
+                  + Ajouter une station
+                </button>
+              )}
+            </div>
           </div>
+
+          {showAddStation && <AddStationForm onAdded={onStationAdded} onClose={() => setShowAddStation(false)} />}
 
           <div className="space-y-4">
             {stations.map((st) => (
