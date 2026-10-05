@@ -2,6 +2,7 @@ import request from 'supertest';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { normalizeTogoPhone } from '../shared/phone';
 import { createApp } from './app';
+import { deriveTicketKeys } from './tickets';
 import { hashPassword, verifyPassword } from './auth';
 import type { Db } from './db/client';
 import { DEMO_PASSWORD, DEMO_USERS, upsertUser } from './db/users';
@@ -13,7 +14,7 @@ let app: ReturnType<typeof createApp>;
 beforeAll(async () => {
   db = await createTestDb();
   for (const user of DEMO_USERS) await upsertUser(db, user);
-  app = createApp(db);
+  app = createApp(db, { ticketKeys: deriveTicketKeys('test-secret') });
 });
 
 describe('normalizeTogoPhone', () => {
@@ -76,7 +77,7 @@ describe('auth routes', () => {
   });
 
   it('limits login attempts per number', async () => {
-    const freshApp = createApp(db);
+    const freshApp = createApp(db, { ticketKeys: deriveTicketKeys('test-secret') });
     const tries = [];
     for (let i = 0; i < 11; i++) {
       tries.push(await request(freshApp).post('/api/auth/login').send({ phone: '90 00 00 01', password: 'mauvais' }));

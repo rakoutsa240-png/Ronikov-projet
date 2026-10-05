@@ -3,6 +3,17 @@ import { NotificationItem } from '../types';
 import { X, Bell, CheckCheck, Clock, Fuel, ShieldAlert, Sparkles, CheckCircle2 } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 
+// API notifications carry an ISO date; the demo data already holds a label like "Il y a 5 min".
+function formatNotificationTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(timestamp) || Number.isNaN(date.getTime())) return timestamp;
+  const minutes = Math.round((Date.now() - date.getTime()) / 60_000);
+  if (minutes < 1) return 'À l’instant';
+  if (minutes < 60) return `Il y a ${minutes} min`;
+  if (minutes < 24 * 60) return `Il y a ${Math.round(minutes / 60)} h`;
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
 interface NotificationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -187,7 +198,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                         </div>
 
                         <span className="text-[10px] text-neutral-400 font-sans shrink-0">
-                          {n.timestamp}
+                          {formatNotificationTime(n.timestamp)}
                         </span>
                       </div>
 

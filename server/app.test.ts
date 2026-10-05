@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { computeStockStatus } from '../shared/stock';
 import { INITIAL_STATIONS } from '../src/data/mockData';
 import { createApp } from './app';
+import { deriveTicketKeys } from './tickets';
 import type { Db } from './db/client';
 import * as schema from './db/schema';
 import { seed } from './db/seed';
@@ -15,7 +16,7 @@ let app: ReturnType<typeof createApp>;
 beforeAll(async () => {
   db = await createTestDb();
   await seed(db); // running it a second time must not duplicate anything
-  app = createApp(db);
+  app = createApp(db, { ticketKeys: deriveTicketKeys('test-secret') });
 });
 
 describe('computeStockStatus', () => {

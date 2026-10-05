@@ -17,6 +17,12 @@ import {
 
 export const userRoleEnum = pgEnum('user_role', ['CLIENT', 'STATION_PRO', 'ADMIN']);
 
+export const reservationStatusEnum = pgEnum('reservation_status', ['PENDING', 'VALIDATED', 'EXPIRED', 'CANCELLED']);
+
+export const paymentMethodEnum = pgEnum('payment_method', ['MIXX_BY_YAS', 'MOOV_MONEY', 'CARD', 'TMONEY', 'FLOOZ']);
+
+export const notificationTypeEnum = pgEnum('notification_type', ['RESERVATION', 'STOCK', 'SYSTEM', 'PREMIUM']);
+
 export const fuelTypeEnum = pgEnum('fuel_type', ['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE']);
 
 export const stations = pgTable('stations', {
@@ -110,4 +116,60 @@ export const sessions = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   },
   (t) => [index('sessions_user_idx').on(t.userId)],
+);
+
+// Prices are copied at booking time so a later price change never alters a ticket.
+// The ticket code itself is never stored: only its HMAC (to find it) and an encrypted copy (for its owner).
+export const reservations = pgTable(
+  'reservations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id),
+    fuelType: fuelTypeEnum('fuel_type').notNull(),
+    liters: integer('liters').notNull(),
+    pricePerLiterXof: integer('price_per_liter_xof').notNull(),
+    fuelAmountXof: integer('fuel_amount_xof').notNull(),
+    serviceFeeXof: integer('service_fee_xof').notNull(),
+    totalXof: integer('total_xof').notNull(),
+    paymentMethod: paymentMethodEnum('payment_method').notNull(),
+    paymentPhone: text('payment_phone').notNull(),
+    paymentStatus: text('payment_status').notNull().default('PAID'),
+    codeHash: text('code_hash').notNull(),
+    codeLast4: text('code_last4').notNull(),
+    codeEncrypted: text('code_encrypted').notNull(),
+    status: reservationStatusEnum('status').notNull().default('PENDING'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    validatedAt: timestamp('validated_at', { withTimezone: true }),
+    validatedBy: uuid('validated_by').references(() => users.id),
+  },
+  (t) => [
+    uniqueIndex('reservations_code_hash_idx').on(t.codeHash),
+    index('reservations_user_idx').on(t.userId, t.createdAt),
+    index('reservations_station_idx').on(t.stationId, t.createdAt),
+    index('reservations_pending_expiry_idx').on(t.status, t.expiresAt),
+    check('reservations_liters_check', sql`${t.liters} > 0`),
+  ],
+);
+
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: notificationTypeEnum('type').notNull(),
+    title: text('title').notNull(),
+    message: text('message').notNull(),
+    stationId: text('station_id').references(() => stations.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    readAt: timestamp('read_at', { withTimezone: true }),
+  },
+  (t) => [index('notifications_user_idx').on(t.userId, t.createdAt)],
 );

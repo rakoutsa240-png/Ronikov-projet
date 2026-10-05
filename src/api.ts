@@ -1,4 +1,4 @@
-import type { AuthUser, FuelPriceGlobal, Station } from './types';
+import type { AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, Reservation, Station } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -7,6 +7,7 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    readonly data: Record<string, unknown> | null = null,
   ) {
     super(message);
   }
@@ -22,7 +23,7 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(res.status, data?.error ?? `Erreur ${res.status}`);
+    throw new ApiError(res.status, data?.error ?? `Erreur ${res.status}`, data);
   }
   return res.status === 204 ? (undefined as T) : (res.json() as Promise<T>);
 }
@@ -41,4 +42,26 @@ export const api = {
   register: (data: { name: string; phone: string; password: string; email?: string }) =>
     request<AuthUser>('POST', '/auth/register', data),
   logout: () => request<void>('POST', '/auth/logout'),
+
+  createReservation: (data: {
+    stationId: string;
+    fuelType: FuelType;
+    liters: number;
+    paymentMethod: PaymentMethod;
+    paymentPhone: string;
+  }) => request<Reservation>('POST', '/reservations', data),
+  myReservations: () => request<Reservation[]>('GET', '/reservations/mine'),
+  allReservations: () => request<Reservation[]>('GET', '/reservations'),
+  stationReservations: (stationId: string) =>
+    request<Reservation[]>('GET', `/stations/${encodeURIComponent(stationId)}/reservations`),
+  cancelReservation: (id: string) => request<Reservation>('POST', `/reservations/${encodeURIComponent(id)}/cancel`),
+  validateTicket: (stationId: string, code: string) =>
+    request<{ message: string; reservation: Reservation }>(
+      'POST',
+      `/stations/${encodeURIComponent(stationId)}/validate`,
+      { code },
+    ),
+
+  notifications: () => request<NotificationItem[]>('GET', '/notifications'),
+  markNotificationsRead: () => request<void>('POST', '/notifications/read-all'),
 };

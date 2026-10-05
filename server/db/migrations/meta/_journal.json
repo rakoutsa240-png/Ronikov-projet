@@ -15,6 +15,13 @@
       "when": 1791208051194,
       "tag": "0001_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791208469617,
+      "tag": "0002_reservations",
+      "breakpoints": true
     }
   ]
 }

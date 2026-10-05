@@ -7,7 +7,10 @@ import { StationBrandLogo } from './StationBrandLogo';
 interface ProDashboardProps {
   managedStation: Station;
   reservations: Reservation[];
-  onValidateCode: (code: string) => { success: boolean; message: string; reservation?: Reservation };
+  onValidateCode: (
+    stationId: string,
+    code: string,
+  ) => Promise<{ success: boolean; message: string; reservation?: Reservation }>;
   onUpdateStock: (stationId: string, updatedStock: Station['stock']) => void;
   onUpdateQueueTime: (stationId: string, newQueueTime: number) => void;
 }
@@ -38,12 +41,20 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
     }
   }, [managedStation]);
 
-  const handleVerifyCodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputCode.trim()) return;
+  const [isVerifying, setIsVerifying] = useState(false);
 
-    const res = onValidateCode(inputCode.trim().toUpperCase());
-    setValidationResult(res);
+  // The API checks the code; signed QR contents are sent as scanned, typed codes in capitals.
+  const handleVerifyCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = inputCode.trim();
+    if (!code || isVerifying) return;
+
+    setIsVerifying(true);
+    try {
+      setValidationResult(await onValidateCode(managedStation.id, code.startsWith('RNK1.') ? code : code.toUpperCase()));
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleSaveStock = () => {
@@ -115,21 +126,22 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
             <form onSubmit={handleVerifyCodeSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase block text-neutral-300">
-                  Saisir les 8 caractères du code (ex: RNK-8942-X7)
+                  Saisir le code du ticket (ex: RNK-AB7K-Q3)
                 </label>
                 <div className="flex border border-neutral-700 rounded-xl overflow-hidden bg-black/80 focus-within:border-amber-400 transition-colors">
                   <input
                     type="text"
                     value={inputCode}
-                    onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                    placeholder="RNK-8942-X7"
+                    onChange={(e) => setInputCode(e.target.value)}
+                    placeholder="RNK-AB7K-Q3"
                     className="w-full px-4 py-3.5 text-lg font-black font-mono-code tracking-widest text-amber-300 placeholder-neutral-600 bg-transparent focus:outline-none uppercase"
                   />
                   <button
                     type="submit"
-                    className="px-6 py-3.5 bg-amber-400 text-black font-black text-xs uppercase hover:bg-amber-300 transition-colors shrink-0 shadow-lg"
+                    disabled={isVerifying}
+                    className="px-6 py-3.5 bg-amber-400 text-black font-black text-xs uppercase hover:bg-amber-300 transition-colors shrink-0 shadow-lg disabled:opacity-60"
                   >
-                    VÉRIFIER
+                    {isVerifying ? '...' : 'VÉRIFIER'}
                   </button>
                 </div>
               </div>

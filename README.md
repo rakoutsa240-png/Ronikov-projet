@@ -2,7 +2,15 @@
 
 RONIKOV is a web app for finding fuel stations in Togo, checking their prices and stock, reserving fuel and paying for it in advance. The interface is in French.
 
-It was generated with Google AI Studio and is a **front-end prototype** moving to a real backend. An API server in `server/` (Express + PostgreSQL) serves stations, stock and official prices, and the app loads them from it through `src/api.ts`. If the API cannot be reached, the app keeps working on the copy saved in the browser. Sign-in is real: accounts live in the database, and the server decides each account's role. Reservations, notifications and every change made from the Pro and Admin dashboards are still local: they come from `src/data/mockData.ts` and are saved in `localStorage` until the next backend steps. Mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
+It was generated with Google AI Studio and is a **front-end prototype** moving to a real backend. An API server in `server/` (Express + PostgreSQL) serves stations, stock and official prices, and the app loads them from it through `src/api.ts`. If the API cannot be reached, the app keeps working on the copy saved in the browser. Sign-in is real: accounts live in the database, and the server decides each account's role. Reservations, ticket codes and notifications are handled by the API too. Payments are still simulated (every booking is marked paid), and the stock, queue time, partner and price changes made from the Pro and Admin dashboards are still local, saved in `localStorage` until the next backend step. Mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
+
+### Tickets
+
+Booking needs an account. The API locks the station's tank row, checks that enough litres are free (stock minus litres already held by pending tickets, 100 L at most per ticket), takes the price from the database and adds the 150 FCFA fee (0 for Premium accounts). It then creates a `RNK-XXXX-XX` code from a cryptographic generator, over an alphabet without 0/O or 1/I.
+
+The database never stores the code. It keeps an HMAC of it to find the ticket at the pump, the last 4 characters for staff lists, and an AES-GCM encrypted copy so the owner can see the code again. The QR code holds a signed version of the code, so an edited screenshot is refused.
+
+At the pump, a manager can only validate tickets for their own stations (an admin for any). A ticket is served once, and its litres then leave the tank. Cancelling gives the litres back. Every minute, pending tickets older than 2 hours become `EXPIRED` and free their litres too.
 
 ## Features
 
@@ -56,7 +64,7 @@ For local testing, `bun run db:seed --demo-users` adds three accounts with the p
 
 Sessions are random tokens in an `httpOnly`, `SameSite=Lax` cookie, valid 30 days and `Secure` when `NODE_ENV=production`; the database only stores their SHA-256 hash. Passwords are hashed with scrypt. Login is limited to 10 attempts per minute per number and 30 per IP.
 
-Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In development, Vite forwards `/api` requests from port 3000 to the API. To call an API hosted elsewhere, build the app with `VITE_API_URL` set to its address.
+Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In production, also set `NODE_ENV=production` and a `TICKET_SECRET` of 32 characters or more: it signs and encrypts ticket codes, so changing it makes existing tickets unreadable. In development, Vite forwards `/api` requests from port 3000 to the API. To call an API hosted elsewhere, build the app with `VITE_API_URL` set to its address.
 
 | Endpoint | Returns |
 | --- | --- |
@@ -67,6 +75,13 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In develo
 | `POST /api/auth/login` | Sign in with `phone` and `password` |
 | `POST /api/auth/logout` | Sign out |
 | `GET /api/me` | The signed-in account, its role and managed stations (401 when signed out) |
+| `POST /api/reservations` | Book fuel (`stationId`, `fuelType`, `liters`, `paymentMethod`, `paymentPhone`); returns the ticket with its code |
+| `GET /api/reservations/mine` | The signed-in account's tickets, with their codes |
+| `POST /api/reservations/:id/cancel` | Cancel one of your pending tickets |
+| `POST /api/stations/:id/validate` | Manager or admin: serve a ticket from its typed code or scanned QR (`code`) |
+| `GET /api/stations/:id/reservations` | Manager or admin: the station's tickets, codes masked |
+| `GET /api/reservations` | Admin: every ticket, codes masked |
+| `GET /api/notifications`, `POST /api/notifications/read-all` | The account's notifications |
 
 ## Scripts
 
@@ -100,12 +115,16 @@ shared/
   types.ts           # Types used by both the app and the API
   stock.ts           # Fuel labels and stock-status rule
   phone.ts           # Togolese phone number normalisation
+  reservations.ts    # Booking rules: fee, litre cap, validity
 server/
   index.ts           # API entry point
   app.ts             # Express app and station/price routes
   auth.ts            # Passwords, sessions, role checks, rate limiting
   routes/auth.ts     # Sign-up, login, logout, /api/me
-  db/schema.ts       # Drizzle tables (stations, stock, prices, users, managers, sessions)
+  reservations.ts    # Booking, cancelling, validating, expiry, notifications
+  routes/reservations.ts # Reservation and notification routes
+  tickets.ts         # Ticket code generation, hashing, encryption, signed QR
+  db/schema.ts       # Drizzle tables (stations, stock, prices, users, managers, sessions, reservations, notifications)
   db/migrations/     # SQL migrations generated by drizzle-kit
   db/seed.ts         # Loads src/data/mockData.ts into the database
   *.test.ts          # API tests
