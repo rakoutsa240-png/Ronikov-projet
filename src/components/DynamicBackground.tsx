@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Play, Pause, ChevronRight, ChevronLeft, Sparkles, Heart, Smile, UserCheck, ShieldCheck, Eye } from 'lucide-react';
 
-import bgStation from '../assets/images/gas_station_bg_1785887453945.jpg';
-import bgManager from '../assets/images/station_manager_happy_1785888750849.jpg';
-import bgCustomer from '../assets/images/happy_customer_refuel_1785888766342.jpg';
+import bgStation from '../assets/images/gas_station_bg_1785887453945.webp';
+import bgManager from '../assets/images/station_manager_happy_1785888750849.webp';
+import bgCustomer from '../assets/images/happy_customer_refuel_1785888766342.webp';
 
 export interface BackgroundPhoto {
   id: string;

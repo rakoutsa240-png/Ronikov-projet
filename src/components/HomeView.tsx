@@ -4,9 +4,9 @@ import { StationCard } from './StationCard';
 import { Gauge } from './Gauge';
 import { InteractiveHeadline } from './InteractiveHeadline';
 import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart } from 'lucide-react';
-import heroBg from '../assets/images/gas_station_bg_1785887453945.jpg';
-import managerBg from '../assets/images/station_manager_happy_1785888750849.jpg';
-import customerBg from '../assets/images/happy_customer_refuel_1785888766342.jpg';
+import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
+import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
+import customerBg from '../assets/images/happy_customer_refuel_1785888766342.webp';
 
 interface HomeViewProps {
   stations: Station[];
