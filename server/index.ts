@@ -3,6 +3,7 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { createApp } from './app';
 import { createDb } from './db/client';
 import { seed } from './db/seed';
+import { promoteAdmins } from './db/users';
 import { env } from './env';
 import { expireDueReservations } from './reservations';
 import { deriveTicketKeys } from './tickets';
@@ -13,6 +14,10 @@ const { db, pool } = createDb(env.DATABASE_URL);
 await migrate(db as Parameters<typeof migrate>[0], { migrationsFolder: new URL('./db/migrations', import.meta.url).pathname });
 
 if (env.SEED_DEMO_DATA) await seed(db);
+if (env.ADMIN_PHONES.length > 0) {
+  const count = await promoteAdmins(db, env.ADMIN_PHONES);
+  console.log(`ADMIN_PHONES : ${count} compte(s) admin sur ${env.ADMIN_PHONES.length} numéro(s)`);
+}
 
 const app = createApp(db, {
   ticketKeys: deriveTicketKeys(env.TICKET_SECRET),

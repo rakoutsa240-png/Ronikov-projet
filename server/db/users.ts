@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { normalizeTogoPhone } from '../../shared/phone';
 import type { UserRole } from '../../shared/types';
 import { hashPassword } from '../auth';
@@ -35,6 +35,18 @@ export async function upsertUser(db: Db, input: NewUser) {
     }
     return user;
   });
+}
+
+// Makes the existing accounts with these phones admins. Returns how many were promoted.
+export async function promoteAdmins(db: Db, phones: string[]) {
+  const normalized = phones.map((p) => normalizeTogoPhone(p)).filter((p): p is string => p !== null);
+  if (normalized.length === 0) return 0;
+  const promoted = await db
+    .update(users)
+    .set({ role: 'ADMIN' })
+    .where(inArray(users.phone, normalized))
+    .returning({ id: users.id });
+  return promoted.length;
 }
 
 // Demo accounts for local testing, all with the same password. Never load them in production.
