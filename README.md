@@ -2,7 +2,7 @@
 
 RONIKOV is a web app for finding fuel stations in Togo, checking their prices and stock, reserving fuel and paying for it in advance. The interface is in French.
 
-It was generated with Google AI Studio and is a **front-end prototype** moving to a real backend. An API server in `server/` (Express + PostgreSQL) now serves stations, stock and official prices, but the app does not call it yet: stations, reservations, notifications and prices still come from mock data in `src/data/mockData.ts` and are saved in the browser's `localStorage`. Sign-in, mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
+It was generated with Google AI Studio and is a **front-end prototype** moving to a real backend. An API server in `server/` (Express + PostgreSQL) serves stations, stock and official prices, and the app loads them from it through `src/api.ts`. If the API cannot be reached, the app keeps working on the copy saved in the browser. Reservations, notifications, sign-in and every change made from the Pro and Admin dashboards are still local: they come from `src/data/mockData.ts` and are saved in `localStorage` until the next backend steps. Sign-in, mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
 
 ## Features
 
@@ -43,7 +43,7 @@ bun run dev:api        # API on http://localhost:4000, applies migrations on sta
 bun run db:seed        # load the demo stations and prices (safe to re-run)
 ```
 
-Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In development, Vite forwards `/api` requests from port 3000 to the API.
+Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In development, Vite forwards `/api` requests from port 3000 to the API. To call an API hosted elsewhere, build the app with `VITE_API_URL` set to its address.
 
 | Endpoint | Returns |
 | --- | --- |
@@ -71,6 +71,7 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In develo
 ```
 src/
   App.tsx            # Root component: navigation, app state, localStorage persistence
+  api.ts             # Client for the API server
   main.tsx           # Entry point
   types.ts           # Re-exports shared/types.ts
   data/mockData.ts   # Mock stations, reservations, notifications and prices

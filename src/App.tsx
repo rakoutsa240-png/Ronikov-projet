@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal } from './types';
 import { INITIAL_STATIONS, INITIAL_RESERVATIONS, INITIAL_NOTIFICATIONS, GLOBAL_FUEL_PRICES } from './data/mockData';
+import { api } from './api';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
@@ -61,6 +62,21 @@ export default function App() {
     }
     return GLOBAL_FUEL_PRICES;
   });
+
+  // Stations and official prices come from the API. The saved copy above is only shown
+  // until it answers, or kept as is when the API cannot be reached.
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([api.stations(controller.signal), api.prices(controller.signal)])
+      .then(([apiStations, apiPrices]) => {
+        setStations(apiStations);
+        setGlobalPrices(apiPrices);
+      })
+      .catch((e) => {
+        if (!controller.signal.aborted) console.warn('API unavailable, using local data', e);
+      });
+    return () => controller.abort();
+  }, []);
 
   // Save changes to LocalStorage
   useEffect(() => {
