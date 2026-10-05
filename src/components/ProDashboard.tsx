@@ -11,9 +11,17 @@ interface ProDashboardProps {
     stationId: string,
     code: string,
   ) => Promise<{ success: boolean; message: string; reservation?: Reservation }>;
-  onUpdateStock: (stationId: string, updatedStock: Station['stock']) => void;
-  onUpdateQueueTime: (stationId: string, newQueueTime: number) => void;
+  // Both resolve once the API saved the change, and reject with a message to show otherwise.
+  onUpdateStock: (stationId: string, updatedStock: Station['stock']) => Promise<void>;
+  onUpdateQueueTime: (stationId: string, newQueueTime: number) => Promise<void>;
+  canEditPrice?: boolean; // only admins set prices
 }
+
+// The form edits what is physically in the tank: litres still bookable plus litres held by tickets.
+const toTankLevels = (stock: Station['stock']): Station['stock'] =>
+  Object.fromEntries(
+    Object.entries(stock).map(([fuel, s]) => [fuel, { ...s, availableLiters: s.availableLiters + (s.reservedLiters ?? 0) }]),
+  ) as Station['stock'];
 
 export const ProDashboard: React.FC<ProDashboardProps> = ({
   managedStation,
@@ -21,6 +29,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
   onValidateCode,
   onUpdateStock,
   onUpdateQueueTime,
+  canEditPrice = false,
 }) => {
   const [inputCode, setInputCode] = useState('');
   const [validationResult, setValidationResult] = useState<{
@@ -30,13 +39,15 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
   } | null>(null);
 
   // Station stock local editing state
-  const [stockState, setStockState] = useState<Station['stock']>(managedStation.stock);
+  const [stockState, setStockState] = useState<Station['stock']>(toTankLevels(managedStation.stock));
   const [queueTime, setQueueTime] = useState<number>(managedStation.queueTimeMinutes);
   const [stockSavedMessage, setStockSavedMessage] = useState(false);
+  const [stockError, setStockError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (managedStation) {
-      setStockState(managedStation.stock);
+      setStockState(toTankLevels(managedStation.stock));
       setQueueTime(managedStation.queueTimeMinutes);
     }
   }, [managedStation]);
@@ -57,11 +68,19 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
     }
   };
 
-  const handleSaveStock = () => {
-    onUpdateStock(managedStation.id, stockState);
-    onUpdateQueueTime(managedStation.id, queueTime);
-    setStockSavedMessage(true);
-    setTimeout(() => setStockSavedMessage(false), 3000);
+  const handleSaveStock = async () => {
+    setIsSaving(true);
+    setStockError(null);
+    try {
+      await onUpdateStock(managedStation.id, stockState);
+      await onUpdateQueueTime(managedStation.id, queueTime);
+      setStockSavedMessage(true);
+      setTimeout(() => setStockSavedMessage(false), 3000);
+    } catch (e) {
+      setStockError(e instanceof Error ? e.message : 'Enregistrement impossible, réessayez.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const stationReservations = reservations.filter((r) => r.stationId === managedStation.id);
@@ -244,16 +263,23 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
 
             <button
               onClick={handleSaveStock}
-              className="px-4 py-2.5 bg-amber-400 text-black font-black text-xs uppercase hover:bg-amber-300 transition-all rounded-xl flex items-center gap-1.5 shadow-lg shrink-0"
+              disabled={isSaving}
+              className="px-4 py-2.5 bg-amber-400 text-black font-black text-xs uppercase hover:bg-amber-300 transition-all rounded-xl flex items-center gap-1.5 shadow-lg shrink-0 disabled:opacity-60"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>Enregistrer</span>
+              <span>{isSaving ? 'Enregistrement...' : 'Enregistrer'}</span>
             </button>
           </div>
 
           {stockSavedMessage && (
             <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold uppercase text-center rounded-xl animate-fadeIn">
               STOCKS ET TEMPS D'ATTENTE SYNCHRONISÉS AVEC SUCCÈS SUR LE RÉSEAU TOGO !
+            </div>
+          )}
+
+          {stockError && (
+            <div role="alert" className="p-3.5 bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold uppercase text-center rounded-xl">
+              {stockError}
             </div>
           )}
 
@@ -319,13 +345,15 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                       <input
                         type="number"
                         value={currentFuelStock.pricePerLiter}
+                        readOnly={!canEditPrice}
+                        title={canEditPrice ? undefined : 'Prix fixé par l’administrateur RONIKOV'}
                         onChange={(e) =>
                           setStockState({
                             ...stockState,
                             [f]: { ...currentFuelStock, pricePerLiter: Number(e.target.value) },
                           })
                         }
-                        className="w-full p-2.5 border border-neutral-700 bg-black/80 text-emerald-400 font-extrabold rounded-lg focus:border-amber-400 focus:outline-none"
+                        className="w-full p-2.5 border border-neutral-700 bg-black/80 text-emerald-400 font-extrabold rounded-lg focus:border-amber-400 focus:outline-none read-only:opacity-70 read-only:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -334,7 +362,9 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                     value={(currentFuelStock.availableLiters / currentFuelStock.maxCapacityLiters) * 100}
                     type="bar"
                     showPercent={true}
-                    sublabel={`${currentFuelStock.availableLiters} Litres disponibles`}
+                    sublabel={`${currentFuelStock.availableLiters} Litres en cuve${
+                      currentFuelStock.reservedLiters ? `, dont ${currentFuelStock.reservedLiters} L réservés` : ''
+                    }`}
                   />
                 </div>
               );

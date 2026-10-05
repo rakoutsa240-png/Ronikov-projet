@@ -11,6 +11,7 @@ function toFuelStock(row: StockRow): FuelStock {
   const free = Math.max(0, row.availableLiters - row.reservedLiters);
   return {
     availableLiters: free,
+    reservedLiters: row.reservedLiters,
     maxCapacityLiters: row.maxCapacityLiters,
     pricePerLiter: row.pricePerLiterXof,
     status: computeStockStatus(free, row.maxCapacityLiters),

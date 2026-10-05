@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { Station, Reservation, FuelPriceGlobal, FuelType } from '../types';
 import { ShieldCheck, Users, Fuel, DollarSign, AlertTriangle, CheckCircle2, XCircle, Plus, Building2, BarChart3, Save, Sparkles, MapPin } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
+import { AdminUsersPanel } from './AdminUsersPanel';
 
 interface AdminDashboardProps {
   stations: Station[];
   reservations: Reservation[];
   globalPrices: FuelPriceGlobal[];
   onToggleStationPartner: (stationId: string) => void;
-  onUpdateGlobalPrices: (updatedPrices: FuelPriceGlobal[], updateAllStations: boolean) => void;
+  // Rejects with a message to show when the API refuses the change.
+  onUpdateGlobalPrices: (updatedPrices: FuelPriceGlobal[], updateAllStations: boolean) => Promise<void>;
+  currentUserId?: string;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -17,8 +20,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   globalPrices,
   onToggleStationPartner,
   onUpdateGlobalPrices,
+  currentUserId,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'incidents'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'accounts' | 'incidents'>('overview');
+  const [priceError, setPriceError] = useState<string | null>(null);
   const [editingPrices, setEditingPrices] = useState<FuelPriceGlobal[]>(globalPrices);
   const [applyToAllStations, setApplyToAllStations] = useState<boolean>(true);
   const [priceSaveSuccess, setPriceSaveSuccess] = useState<boolean>(false);
@@ -33,10 +38,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     );
   };
 
-  const handleSavePrices = () => {
-    onUpdateGlobalPrices(editingPrices, applyToAllStations);
-    setPriceSaveSuccess(true);
-    setTimeout(() => setPriceSaveSuccess(false), 3000);
+  const handleSavePrices = async () => {
+    setPriceError(null);
+    try {
+      await onUpdateGlobalPrices(editingPrices, applyToAllStations);
+      setPriceSaveSuccess(true);
+      setTimeout(() => setPriceSaveSuccess(false), 3000);
+    } catch (e) {
+      setPriceError(e instanceof Error ? e.message : 'Enregistrement impossible, réessayez.');
+    }
   };
 
   const totalVolumeFCFA = reservations.reduce((acc, r) => acc + r.totalAmountXOF, 0);
@@ -90,6 +100,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             }`}
           >
             Stations ({stations.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('accounts')}
+            className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
+              activeTab === 'accounts' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
+            }`}
+          >
+            Comptes
           </button>
           <button
             onClick={() => setActiveTab('incidents')}
@@ -216,6 +234,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           )}
 
+          {priceError && (
+            <div role="alert" className="p-3.5 bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold uppercase text-center rounded-xl">
+              {priceError}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {editingPrices.map((gp) => (
               <div key={gp.type} className="p-5 border border-neutral-800 bg-black/60 rounded-xl space-y-3">
@@ -328,6 +352,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* ACCOUNTS TAB */}
+      {activeTab === 'accounts' && <AdminUsersPanel stations={stations} currentUserId={currentUserId} />}
 
       {/* INCIDENTS TAB */}
       {activeTab === 'incidents' && (

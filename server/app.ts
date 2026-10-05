@@ -4,6 +4,7 @@ import { FUEL_TYPES } from '../shared/stock';
 import { loadUser } from './auth';
 import type { Db } from './db/client';
 import { listPrices, listStations } from './db/queries';
+import { adminRouter } from './routes/admin';
 import { authRouter } from './routes/auth';
 import { reservationsRouter } from './routes/reservations';
 import type { TicketKeys } from './tickets';
@@ -26,6 +27,7 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false }: AppOpti
   app.use('/api', loadUser(db));
   app.use('/api', authRouter(db, { secureCookies }));
   app.use('/api', reservationsRouter(db, ticketKeys));
+  app.use('/api', adminRouter(db));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });

@@ -4,20 +4,22 @@ import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 
 interface PremiumViewProps {
   isPremium: boolean;
-  onActivatePremium: () => void;
+  // Sends an activation request to the admins; resolves to the message to show (null when sign-in opened instead).
+  onRequestPremium: () => Promise<string | null>;
 }
 
 export const PremiumView: React.FC<PremiumViewProps> = ({
   isPremium,
-  onActivatePremium,
+  onRequestPremium,
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [subscribedMessage, setSubscribedMessage] = useState(false);
+  const [subscribedMessage, setSubscribedMessage] = useState<string | null>(null);
 
-  const handleSubscribe = () => {
-    onActivatePremium();
-    setSubscribedMessage(true);
-    setTimeout(() => setSubscribedMessage(false), 4000);
+  const handleSubscribe = async () => {
+    const message = await onRequestPremium();
+    if (!message) return;
+    setSubscribedMessage(message);
+    setTimeout(() => setSubscribedMessage(null), 6000);
   };
 
   const partnerBrands: StationBrandType[] = ['TotalEnergies', 'Shell', 'Sanol', 'Cap', 'Somayaf'];
@@ -177,7 +179,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
 
       {subscribedMessage && (
         <div className="p-4 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold uppercase text-center rounded-xl animate-fadeIn">
-          FÉLICITATIONS ! VOTRE PASS PRIORITAIRE RONIKOV EST ACTIF. VOS PROCHAINES RÉSERVATIONS SONT SANS FRAIS.
+          {subscribedMessage}
         </div>
       )}
 

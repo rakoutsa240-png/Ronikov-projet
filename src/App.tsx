@@ -17,37 +17,18 @@ import { AuthModal } from './components/AuthModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
 
-const STATIONS_KEY = 'ronikov_stations_v2';
-const GLOBAL_PRICES_KEY = 'ronikov_global_prices_v2';
 
 export default function App() {
-  const [stations, setStations] = useState<Station[]>(() => {
-    try {
-      const saved = localStorage.getItem(STATIONS_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Failed to parse saved stations', e);
-    }
-    return INITIAL_STATIONS;
-  });
-
+  // Everything comes from the API; the demo data is only shown until it answers.
+  const [stations, setStations] = useState<Station[]>(INITIAL_STATIONS);
   // Tickets and notifications belong to the signed-in account and only come from the API.
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [staffReservations, setStaffReservations] = useState<Reservation[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  const [globalPrices, setGlobalPrices] = useState<FuelPriceGlobal[]>(() => {
-    try {
-      const saved = localStorage.getItem(GLOBAL_PRICES_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Failed to parse saved global prices', e);
-    }
-    return GLOBAL_FUEL_PRICES;
-  });
+  const [globalPrices, setGlobalPrices] = useState<FuelPriceGlobal[]>(GLOBAL_FUEL_PRICES);
 
-  // Stations and official prices come from the API. The saved copy above is only shown
-  // until it answers, or kept as is when the API cannot be reached.
+  // Load stations and official prices.
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([api.stations(controller.signal), api.prices(controller.signal)])
@@ -69,31 +50,13 @@ export default function App() {
       .catch((e) => console.warn('Could not refresh stations', e));
   };
 
-  // Save changes to LocalStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(STATIONS_KEY, JSON.stringify(stations));
-    } catch (e) {
-      console.error('Failed to save stations', e);
-    }
-  }, [stations]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(GLOBAL_PRICES_KEY, JSON.stringify(globalPrices));
-    } catch (e) {
-      console.error('Failed to save global prices', e);
-    }
-  }, [globalPrices]);
-
   const [activeTab, setActiveTab] = useState<string>('home');
   const [selectedStation, setSelectedStation] = useState<Station | null>(stations[0] || null);
   // The signed-in account comes from the API, which alone decides the role.
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [isDemoPremium, setIsDemoPremium] = useState<boolean>(false);
   const userRole: UserRole = currentUser?.role ?? 'CLIENT';
   const userName = currentUser?.name ?? '';
-  const isUserPremium = Boolean(currentUser?.isPremium) || isDemoPremium;
+  const isUserPremium = Boolean(currentUser?.isPremium);
   const canUsePro = userRole === 'STATION_PRO' || userRole === 'ADMIN';
 
   useEffect(() => {
@@ -216,45 +179,76 @@ export default function App() {
     }
   };
 
-  // Update Station Stock in Pro Dashboard
-  const handleUpdateStockPro = (stationId: string, updatedStock: Station['stock']) => {
+  const replaceStation = (updated: Station | null, stationId: string) =>
     setStations((prev) =>
-      prev.map((s) => (s.id === stationId ? { ...s, stock: updatedStock } : s))
+      updated ? prev.map((s) => (s.id === stationId ? updated : s)) : prev.filter((s) => s.id !== stationId),
     );
+
+  // Save the tank levels (and, for an admin, the prices) that changed in the Pro dashboard.
+  const handleUpdateStockPro = async (stationId: string, updatedStock: Station['stock']) => {
+    const current = stations.find((s) => s.id === stationId);
+    if (!current) return;
+    try {
+      for (const fuel of Object.keys(updatedStock) as (keyof Station['stock'])[]) {
+        const before = current.stock[fuel];
+        const after = updatedStock[fuel];
+        const tankBefore = before.availableLiters + (before.reservedLiters ?? 0);
+        const changes = {
+          ...(after.availableLiters !== tankBefore ? { stockLiters: after.availableLiters } : {}),
+          ...(userRole === 'ADMIN' && after.pricePerLiter !== before.pricePerLiter ? { pricePerLiter: after.pricePerLiter } : {}),
+        };
+        if (Object.keys(changes).length > 0) replaceStation(await api.updateStock(stationId, fuel, changes), stationId);
+      }
+    } catch (e) {
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+    }
   };
 
-  // Update Station Queue Time in Pro Dashboard
-  const handleUpdateQueueTimePro = (stationId: string, newQueueTime: number) => {
-    setStations((prev) =>
-      prev.map((s) => (s.id === stationId ? { ...s, queueTimeMinutes: newQueueTime } : s))
-    );
+  const handleUpdateQueueTimePro = async (stationId: string, newQueueTime: number) => {
+    if (stations.find((s) => s.id === stationId)?.queueTimeMinutes === newQueueTime) return;
+    try {
+      replaceStation(await api.updateStation(stationId, { queueTimeMinutes: newQueueTime }), stationId);
+    } catch (e) {
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+    }
   };
 
   // Toggle Partner Status in Admin Dashboard
-  const handleToggleStationPartner = (stationId: string) => {
-    setStations((prev) =>
-      prev.map((s) => (s.id === stationId ? { ...s, isPartner: !s.isPartner } : s))
-    );
+  const handleToggleStationPartner = async (stationId: string) => {
+    const station = stations.find((s) => s.id === stationId);
+    if (!station) return;
+    try {
+      replaceStation(await api.updateStation(stationId, { isPartner: !station.isPartner }), stationId);
+    } catch (e) {
+      window.alert(e instanceof ApiError ? e.message : 'Modification impossible, réessayez.');
+    }
   };
 
-  // Update National/Global Fuel Price
-  const handleUpdateGlobalPrices = (updatedPrices: FuelPriceGlobal[], updateAllStations: boolean = true) => {
-    setGlobalPrices(updatedPrices);
-    if (updateAllStations) {
-      setStations((prev) =>
-        prev.map((station) => {
-          const newStock = { ...station.stock };
-          updatedPrices.forEach((gp) => {
-            if (newStock[gp.type]) {
-              newStock[gp.type] = {
-                ...newStock[gp.type],
-                pricePerLiter: gp.officialPriceXOF,
-              };
-            }
-          });
-          return { ...station, stock: newStock };
-        })
+  // Set the official prices, and optionally every station's price, from the Admin dashboard.
+  const handleUpdateGlobalPrices = async (updatedPrices: FuelPriceGlobal[], updateAllStations: boolean = true) => {
+    try {
+      setGlobalPrices(
+        await api.updatePrices(
+          updatedPrices.map(({ type, officialPriceXOF }) => ({ type, officialPriceXOF })),
+          updateAllStations,
+        ),
       );
+      if (updateAllStations) refreshStations();
+    } catch (e) {
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+    }
+  };
+
+  // Premium is granted by an admin: the button sends a request.
+  const handleRequestPremium = async (): Promise<string | null> => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return null;
+    }
+    try {
+      return (await api.requestPremium()).message;
+    } catch (e) {
+      return e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.';
     }
   };
 
@@ -327,7 +321,7 @@ export default function App() {
         {activeTab === 'premium' && (
           <PremiumView
             isPremium={isUserPremium}
-            onActivatePremium={() => setIsDemoPremium(true)}
+            onRequestPremium={handleRequestPremium}
           />
         )}
 
@@ -349,6 +343,7 @@ export default function App() {
             onValidateCode={handleValidateCodePro}
             onUpdateStock={handleUpdateStockPro}
             onUpdateQueueTime={handleUpdateQueueTimePro}
+            canEditPrice={userRole === 'ADMIN'}
           />
         )}
 
@@ -359,6 +354,7 @@ export default function App() {
             globalPrices={globalPrices}
             onToggleStationPartner={handleToggleStationPartner}
             onUpdateGlobalPrices={handleUpdateGlobalPrices}
+            currentUserId={currentUser?.id}
           />
         )}
       </main>

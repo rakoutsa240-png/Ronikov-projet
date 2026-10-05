@@ -34,7 +34,13 @@ describe('GET /api/stations', () => {
     const res = await request(app).get('/api/stations').expect(200);
     expect(res.body).toHaveLength(INITIAL_STATIONS.length);
     const first = res.body.find((s: { id: string }) => s.id === 'st-01');
-    expect(first).toEqual(INITIAL_STATIONS.find((s) => s.id === 'st-01'));
+    const expected = INITIAL_STATIONS.find((s) => s.id === 'st-01')!;
+    expect(first).toEqual({
+      ...expected,
+      stock: Object.fromEntries(
+        Object.entries(expected.stock).map(([fuel, stock]) => [fuel, { ...stock, reservedLiters: 0 }]),
+      ),
+    });
   });
 
   it('filters by city and by available fuel', async () => {
