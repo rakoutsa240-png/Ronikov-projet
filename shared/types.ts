@@ -80,3 +80,14 @@ export interface FuelPriceGlobal {
   officialPriceXOF: number;
   avgAvailabilityPercent: number;
 }
+
+// The signed-in user as returned by GET /api/me.
+export interface AuthUser {
+  id: string;
+  name: string;
+  phone: string; // +228XXXXXXXX
+  email: string | null;
+  role: UserRole;
+  isPremium: boolean;
+  managedStationIds: string[];
+}

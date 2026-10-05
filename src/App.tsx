@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal } from './types';
+import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal, AuthUser } from './types';
 import { INITIAL_STATIONS, INITIAL_RESERVATIONS, INITIAL_NOTIFICATIONS, GLOBAL_FUEL_PRICES } from './data/mockData';
 import { api } from './api';
 import { Header } from './components/Header';
@@ -113,9 +113,48 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<string>('home');
   const [selectedStation, setSelectedStation] = useState<Station | null>(stations[0] || null);
-  const [userRole, setUserRole] = useState<UserRole>('CLIENT');
-  const [userName, setUserName] = useState<string>('Kofi Mensah');
-  const [isUserPremium, setIsUserPremium] = useState<boolean>(false);
+  // The signed-in account comes from the API, which alone decides the role.
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [isDemoPremium, setIsDemoPremium] = useState<boolean>(false);
+  const userRole: UserRole = currentUser?.role ?? 'CLIENT';
+  const userName = currentUser?.name ?? '';
+  const isUserPremium = Boolean(currentUser?.isPremium) || isDemoPremium;
+  const canUsePro = userRole === 'STATION_PRO' || userRole === 'ADMIN';
+
+  useEffect(() => {
+    const controller = new AbortController();
+    api
+      .me(controller.signal)
+      // A sign-in that finished first wins over a slower "nobody signed in" answer.
+      .then((user) => setCurrentUser((prev) => prev ?? user))
+      .catch((e) => {
+        if (!controller.signal.aborted) console.warn('Could not load the signed-in user', e);
+      });
+    return () => controller.abort();
+  }, []);
+
+  const handleAuthenticated = (user: AuthUser) => {
+    setCurrentUser(user);
+    if (user.role === 'STATION_PRO') setActiveTab('pro');
+    if (user.role === 'ADMIN') setActiveTab('admin');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (e) {
+      console.warn('Logout request failed', e);
+    }
+    setCurrentUser(null);
+    setActiveTab('home');
+  };
+
+  // Leave the Pro or Admin space when the account may not see it (signed out, or another role).
+  useEffect(() => {
+    if ((activeTab === 'pro' && !canUsePro) || (activeTab === 'admin' && userRole !== 'ADMIN')) {
+      setActiveTab('home');
+    }
+  }, [activeTab, canUsePro, userRole]);
 
   // Keep selectedStation synchronized with stations state
   useEffect(() => {
@@ -289,7 +328,8 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         userRole={userRole}
-        setUserRole={setUserRole}
+        isSignedIn={currentUser !== null}
+        onLogout={handleLogout}
         unreadNotifsCount={unreadCount}
         onOpenNotifications={() => setIsNotifDrawerOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
@@ -306,8 +346,8 @@ export default function App() {
             onBookStation={handleOpenBooking}
             onViewStation={handleViewStationDetails}
             onNavigatePro={() => {
-              setUserRole('STATION_PRO');
-              setActiveTab('pro');
+              if (canUsePro) setActiveTab('pro');
+              else setIsAuthModalOpen(true);
             }}
             onNavigateProfile={() => setActiveTab('profile')}
           />
@@ -341,7 +381,7 @@ export default function App() {
         {activeTab === 'premium' && (
           <PremiumView
             isPremium={isUserPremium}
-            onActivatePremium={() => setIsUserPremium(true)}
+            onActivatePremium={() => setIsDemoPremium(true)}
           />
         )}
 
@@ -358,7 +398,7 @@ export default function App() {
 
         {activeTab === 'pro' && (
           <ProDashboard
-            managedStation={stations[0]}
+            managedStation={stations.find((s) => s.id === currentUser?.managedStationIds[0]) ?? stations[0]}
             reservations={reservations}
             onValidateCode={handleValidateCodePro}
             onUpdateStock={handleUpdateStockPro}
@@ -393,12 +433,7 @@ export default function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onLoginSuccess={(name, role) => {
-          setUserName(name);
-          setUserRole(role);
-          if (role === 'STATION_PRO') setActiveTab('pro');
-          if (role === 'ADMIN') setActiveTab('admin');
-        }}
+        onAuthenticated={handleAuthenticated}
       />
 
       {/* Notification Drawer */}

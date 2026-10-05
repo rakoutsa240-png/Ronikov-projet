@@ -8,7 +8,7 @@ const { db, pool } = createDb(env.DATABASE_URL);
 // Apply pending migrations on boot so a fresh database is usable right away.
 await migrate(db as Parameters<typeof migrate>[0], { migrationsFolder: new URL('./db/migrations', import.meta.url).pathname });
 
-const server = createApp(db).listen(env.PORT, () => {
+const server = createApp(db, { secureCookies: env.NODE_ENV === 'production' }).listen(env.PORT, () => {
   console.log(`API RONIKOV sur http://localhost:${env.PORT}`);
 });
 

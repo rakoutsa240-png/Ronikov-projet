@@ -1,8 +1,10 @@
 import express, { type ErrorRequestHandler } from 'express';
 import { z } from 'zod';
 import { FUEL_TYPES } from '../shared/stock';
+import { loadUser } from './auth';
 import type { Db } from './db/client';
 import { listPrices, listStations } from './db/queries';
+import { authRouter } from './routes/auth';
 
 const stationsQuery = z.object({
   city: z.string().trim().min(1).optional(),
@@ -10,9 +12,12 @@ const stationsQuery = z.object({
   available: z.enum(['true', 'false']).optional(),
 });
 
-export function createApp(db: Db) {
+export function createApp(db: Db, { secureCookies = false }: { secureCookies?: boolean } = {}) {
   const app = express();
-  app.use(express.json());
+  app.set('trust proxy', 'loopback');
+  app.use(express.json({ limit: '20kb' }));
+  app.use('/api', loadUser(db));
+  app.use('/api', authRouter(db, { secureCookies }));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
