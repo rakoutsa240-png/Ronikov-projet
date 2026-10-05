@@ -4,6 +4,7 @@ import { Gauge } from './Gauge';
 import { ShieldCheck, MapPin, Phone, Clock, ArrowLeft, Navigation, Fuel, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
 import { PriceHistoryChart } from './PriceHistoryChart';
+import { directionsUrl } from '../geo';
 
 interface StationDetailViewProps {
   station: Station | null;
@@ -111,8 +112,15 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[10px] font-bold">Distance Estimée</div>
-            <div className="text-sm font-bold text-white">2.8 km de votre position</div>
+            <div className="text-neutral-400 uppercase text-[10px] font-bold">Itinéraire</div>
+            <a
+              href={directionsUrl(station)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-amber-400 hover:underline"
+            >
+              Ouvrir dans Google Maps
+            </a>
           </div>
         </div>
       </div>

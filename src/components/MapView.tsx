@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Station, FuelType } from '../types';
-import { InteractiveMap } from './InteractiveMap';
 import { StationCard } from './StationCard';
+import { distanceKm, LatLng, locateUser } from '../geo';
+
+// The map library is heavy, so it only loads when this page opens.
+const InteractiveMap = lazy(() => import('./InteractiveMap'));
+
+const mapFallback = (
+  <div className="h-[420px] sm:h-[520px] border-2 border-black bg-neutral-900 text-neutral-400 flex items-center justify-center text-xs font-mono-code uppercase">
+    Chargement de la carte…
+  </div>
+);
 import { Search, Filter, SlidersHorizontal, MapPin, Grid, ListFilter } from 'lucide-react';
 
 interface MapViewProps {
@@ -24,6 +33,25 @@ export const MapView: React.FC<MapViewProps> = ({
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortBy, setSortBy] = useState<'queue' | 'distance' | 'stock'>('queue');
   const [viewLayout, setViewLayout] = useState<'split' | 'mapOnly' | 'listOnly'>('split');
+  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
+
+  const locate = async () => {
+    setLocating(true);
+    setLocateError(null);
+    try {
+      setUserLocation(await locateUser());
+      return true;
+    } catch (e) {
+      setLocateError((e as Error).message);
+      return false;
+    } finally {
+      setLocating(false);
+    }
+  };
+
+  const distanceTo = (s: Station) => (userLocation ? distanceKm(userLocation, s) : undefined);
 
   // Filter logic
   let filtered = stations.filter((s) => {
@@ -62,7 +90,8 @@ export const MapView: React.FC<MapViewProps> = ({
       const stockB = selectedFuel === 'ALL' ? b.stock.SUPER.availableLiters : b.stock[selectedFuel].availableLiters;
       return stockB - stockA;
     }
-    return 0; // Default distance
+    if (userLocation) return distanceKm(userLocation, a) - distanceKm(userLocation, b);
+    return 0;
   });
 
   return (
@@ -173,7 +202,12 @@ export const MapView: React.FC<MapViewProps> = ({
             <span className="text-neutral-400 uppercase text-[10px]">Trier:</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => {
+                const value = e.target.value as typeof sortBy;
+                setSortBy(value);
+                // Sorting by distance needs the visitor's position.
+                if (value === 'distance' && !userLocation) void locate();
+              }}
               className="bg-black text-white border border-neutral-700 px-3 py-1.5 text-xs font-mono-code focus:outline-none"
             >
               <option value="queue">Attente la plus courte</option>
@@ -199,17 +233,23 @@ export const MapView: React.FC<MapViewProps> = ({
             {filtered.length} station(s) trouvée(s) sur {stations.length}
           </span>
         </div>
+        {locateError && <p role="alert" className="text-amber-300 font-bold">{locateError}</p>}
       </div>
 
       {/* Main Content Area */}
       {viewLayout === 'mapOnly' && (
-        <InteractiveMap
-          stations={filtered}
-          selectedStation={selectedStation}
-          onSelectStation={onSelectStation}
-          onBookStation={onBookStation}
-          selectedFuelFilter={selectedFuel}
-        />
+        <Suspense fallback={mapFallback}>
+          <InteractiveMap
+            stations={filtered}
+            selectedStation={selectedStation}
+            onSelectStation={onSelectStation}
+            onBookStation={onBookStation}
+            selectedFuelFilter={selectedFuel}
+            userLocation={userLocation}
+            locating={locating}
+            onLocate={locate}
+          />
+        </Suspense>
       )}
 
       {viewLayout === 'listOnly' && (
@@ -221,6 +261,7 @@ export const MapView: React.FC<MapViewProps> = ({
               onBook={onBookStation}
               onViewDetails={onViewStationDetails}
               selectedFuelFilter={selectedFuel}
+              distanceKm={distanceTo(st)}
             />
           ))}
         </div>
@@ -230,13 +271,18 @@ export const MapView: React.FC<MapViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Interactive Map Column */}
           <div className="lg:col-span-7 sticky top-20">
-            <InteractiveMap
-              stations={filtered}
-              selectedStation={selectedStation}
-              onSelectStation={onSelectStation}
-              onBookStation={onBookStation}
-              selectedFuelFilter={selectedFuel}
-            />
+            <Suspense fallback={mapFallback}>
+              <InteractiveMap
+                stations={filtered}
+                selectedStation={selectedStation}
+                onSelectStation={onSelectStation}
+                onBookStation={onBookStation}
+                selectedFuelFilter={selectedFuel}
+                userLocation={userLocation}
+                locating={locating}
+                onLocate={locate}
+              />
+            </Suspense>
           </div>
 
           {/* List Column */}
@@ -254,6 +300,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   onBook={onBookStation}
                   onViewDetails={onViewStationDetails}
                   selectedFuelFilter={selectedFuel}
+                  distanceKm={distanceTo(st)}
                 />
               ))
             )}

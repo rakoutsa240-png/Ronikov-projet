@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Crosshair, Plus, X } from 'lucide-react';
 import { api, ApiError } from '../api';
+import { locateUser } from '../geo';
 import { STATION_BRANDS } from '../../shared/stations';
 import { FuelType, Station } from '../types';
 
@@ -44,23 +45,17 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }));
 
-  const useMyPosition = () => {
-    if (!navigator.geolocation) {
-      setError('Votre navigateur ne donne pas la position.');
-      return;
-    }
+  const useMyPosition = async () => {
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setForm((f) => ({ ...f, lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5) }));
-        setLocating(false);
-      },
-      () => {
-        setError('Position refusée ou indisponible. Saisissez-la à la main (clic droit sur Google Maps).');
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10_000 },
-    );
+    setError(null);
+    try {
+      const pos = await locateUser();
+      setForm((f) => ({ ...f, lat: pos.lat.toFixed(5), lng: pos.lng.toFixed(5) }));
+    } catch (e) {
+      setError(`${(e as Error).message} Vous pouvez aussi la copier depuis Google Maps (appui long sur la station).`);
+    } finally {
+      setLocating(false);
+    }
   };
 
   const submit = async (e: React.FormEvent) => {

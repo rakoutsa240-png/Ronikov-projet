@@ -1,6 +1,7 @@
 import React from 'react';
 import { Station, FuelType } from '../types';
 import { Gauge } from './Gauge';
+import { formatDistance } from '../geo';
 import { ShieldCheck, MapPin, Clock, Phone, ChevronRight, Zap } from 'lucide-react';
 
 interface StationCardProps {
@@ -8,6 +9,7 @@ interface StationCardProps {
   onBook: (station: Station) => void;
   onViewDetails: (station: Station) => void;
   selectedFuelFilter?: FuelType | 'ALL';
+  distanceKm?: number; // from the visitor, once they shared their position
 }
 
 export const StationCard: React.FC<StationCardProps> = ({
@@ -15,6 +17,7 @@ export const StationCard: React.FC<StationCardProps> = ({
   onBook,
   onViewDetails,
   selectedFuelFilter = 'ALL',
+  distanceKm,
 }) => {
   const fuels: { type: FuelType; label: string }[] = [
     { type: 'SUPER', label: 'Super' },
@@ -91,10 +94,12 @@ export const StationCard: React.FC<StationCardProps> = ({
             <Clock className="w-3.5 h-3.5" />
             <span>Attente: {station.queueTimeMinutes} min</span>
           </div>
-          <div className="flex items-center gap-1 text-neutral-400">
-            <MapPin className="w-3.5 h-3.5" />
-            <span>2.5 km</span>
-          </div>
+          {distanceKm !== undefined && (
+            <div className="flex items-center gap-1 text-neutral-400">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{formatDistance(distanceKm)}</span>
+            </div>
+          )}
         </div>
       </div>
 
