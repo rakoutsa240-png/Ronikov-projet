@@ -1,0 +1,36 @@
+# Render Blueprint: one web service (site + API) and one PostgreSQL database, both in Frankfurt.
+# On render.com: New > Blueprint, pick this repository, then Apply.
+services:
+  - type: web
+    name: ronikov
+    runtime: node
+    region: frankfurt
+    plan: free
+    branch: main
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start:api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: STATIC_DIR
+        value: dist
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: TRUST_PROXY
+        value: "true"
+      - key: TICKET_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ronikov-db
+          property: connectionString
+
+databases:
+  - name: ronikov-db
+    region: frankfurt
+    plan: free
+    databaseName: ronikov
+    user: ronikov

@@ -1,4 +1,5 @@
 import express, { type ErrorRequestHandler } from 'express';
+import path from 'node:path';
 import { z } from 'zod';
 import { FUEL_TYPES } from '../shared/stock';
 import { loadUser } from './auth';
@@ -18,11 +19,15 @@ const stationsQuery = z.object({
 export interface AppOptions {
   ticketKeys: TicketKeys;
   secureCookies?: boolean;
+  // Express "trust proxy" setting; behind a hosting proxy it makes req.ip the visitor's address.
+  trustProxy?: boolean | number | string;
+  // Built front-end (dist/) to serve next to the API, so both share one address.
+  staticDir?: string;
 }
 
-export function createApp(db: Db, { ticketKeys, secureCookies = false }: AppOptions) {
+export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProxy = 'loopback', staticDir }: AppOptions) {
   const app = express();
-  app.set('trust proxy', 'loopback');
+  app.set('trust proxy', trustProxy);
   app.use(express.json({ limit: '20kb' }));
   app.use('/api', loadUser(db));
   app.use('/api', authRouter(db, { secureCookies }));
@@ -69,6 +74,14 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false }: AppOpti
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Route inconnue' });
   });
+
+  if (staticDir) {
+    app.use(express.static(staticDir, { index: false }));
+    // Every other page is the single-page app.
+    app.get(/^(?!\/api\/).*/, (_req, res) => {
+      res.sendFile(path.join(staticDir, 'index.html'));
+    });
+  }
 
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
     console.error(err);
