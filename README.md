@@ -91,6 +91,18 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In produc
 
 Every stock, station, price, account change and ticket validation is written to the `audit_log` table with who made it.
 
+## Deployment (Render)
+
+`render.yaml` describes the whole setup for [Render](https://render.com): one web service that serves both the site and the API, plus a PostgreSQL database, both in the Frankfurt region (the closest Render region to Togo).
+
+1. Sign in to render.com with GitHub and give Render access to this repository.
+2. Choose **New > Blueprint**, pick the repository, then **Apply**.
+3. Once the service is live, open its **Shell** tab and create the first admin with `npm run user:create -- --name "Nom" --phone 90123456 --password "..." --role ADMIN`.
+
+Render generates `TICKET_SECRET` once; do not change it afterwards or existing tickets stop working. Both resources start on the free plan: the service sleeps after 15 minutes without visits and the free database is deleted after 30 days, so switch both to a paid plan before real use.
+
+Production settings read by `server/env.ts`: `STATIC_DIR` (folder with the built site, `dist`), `SEED_DEMO_DATA` (`true` loads the demo stations and prices on start, keeping existing rows) and `TRUST_PROXY` (Express "trust proxy", `true` behind Render's proxy).
+
 ## Scripts
 
 | Command | What it does |
