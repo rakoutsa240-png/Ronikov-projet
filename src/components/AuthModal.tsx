@@ -13,8 +13,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onLoginSuccess,
 }) => {
-  if (!isOpen) return null;
-
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<UserRole>('CLIENT');
   const [phone, setPhone] = useState('90 12 34 56');
@@ -26,6 +24,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     onLoginSuccess(name || 'Utilisateur RONIKOV', role);
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
