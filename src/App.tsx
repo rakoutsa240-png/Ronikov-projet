@@ -8,6 +8,7 @@ import { HomeView } from './components/HomeView';
 import { MapView } from './components/MapView';
 import { ReservationModal } from './components/ReservationModal';
 import { AuthModal } from './components/AuthModal';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
 import { BottomNav } from './components/BottomNav';
@@ -137,9 +138,10 @@ export default function App() {
     return () => controller.abort();
   }, []);
 
-  const handleAuthenticated = (user: AuthUser) => {
+  const handleAuthenticated = (user: AuthUser, password?: string) => {
     setCurrentUser(user);
     setAuthChecked(true);
+    if (user.mustChangePassword) setPasswordModal({ forced: true, currentPassword: password });
     // Signing in to book goes straight on to the booking.
     if (pendingBooking) {
       setPendingBooking(false);
@@ -150,7 +152,14 @@ export default function App() {
     if (user.role === 'ADMIN') setActiveTab('admin');
   };
 
+  // Open while the user changes their password; forced after signing in with a temporary one.
+  const [passwordModal, setPasswordModal] = useState<{ forced: boolean; currentPassword?: string } | null>(null);
+  useEffect(() => {
+    if (currentUser?.mustChangePassword) setPasswordModal((open) => open ?? { forced: true });
+  }, [currentUser?.id, currentUser?.mustChangePassword]);
+
   const handleLogout = async () => {
+    setPasswordModal(null);
     try {
       await api.logout();
     } catch (e) {
@@ -467,6 +476,7 @@ export default function App() {
             onOpenAuth={() => setIsAuthModalOpen(true)}
             onNavigate={setActiveTab}
             onLogout={handleLogout}
+            onChangePassword={() => setPasswordModal({ forced: false })}
           />
         )}
 
@@ -521,6 +531,15 @@ export default function App() {
           setPendingBooking(false);
         }}
         onAuthenticated={handleAuthenticated}
+      />
+
+      <ChangePasswordModal
+        isOpen={passwordModal !== null}
+        forced={passwordModal?.forced ?? false}
+        currentPassword={passwordModal?.currentPassword}
+        onClose={() => setPasswordModal(null)}
+        onLogout={handleLogout}
+        onChanged={setCurrentUser}
       />
 
       {/* Notification Drawer */}

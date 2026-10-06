@@ -1,6 +1,6 @@
 import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { and, eq, gt } from 'drizzle-orm';
+import { and, eq, gt, ne } from 'drizzle-orm';
 import type { CookieOptions, NextFunction, Request, RequestHandler, Response } from 'express';
 import type { AuthUser, UserRole } from '../shared/types';
 import type { Db } from './db/client';
@@ -26,6 +26,20 @@ export async function verifyPassword(password: string, stored: string): Promise<
   return timingSafeEqual(actual, expected);
 }
 
+// No 0/o, 1/l/i: easy to read out over the phone.
+const TEMP_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
+
+export function temporaryPassword(): string {
+  // 31 letters, so drop the bytes that would bias the first ones.
+  const out: string[] = [];
+  while (out.length < 8) {
+    for (const byte of randomBytes(16)) {
+      if (byte < 248 && out.length < 8) out.push(TEMP_ALPHABET[byte % TEMP_ALPHABET.length]);
+    }
+  }
+  return out.join('');
+}
+
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
 
 export function sessionCookieOptions(secure: boolean): CookieOptions {
@@ -44,6 +58,10 @@ export async function createSession(db: Db, userId: string): Promise<string> {
 
 export async function deleteSession(db: Db, token: string) {
   await db.delete(sessions).where(eq(sessions.tokenHash, hashToken(token)));
+}
+
+export async function deleteOtherSessions(db: Db, userId: string, keepToken: string) {
+  await db.delete(sessions).where(and(eq(sessions.userId, userId), ne(sessions.tokenHash, hashToken(keepToken))));
 }
 
 export function readCookie(req: Request, name: string): string | undefined {
@@ -67,6 +85,7 @@ export async function toAuthUser(db: Db, user: typeof users.$inferSelect): Promi
     role: user.role,
     isPremium: user.isPremium,
     managedStationIds: managed.map((m) => m.stationId).sort(),
+    mustChangePassword: user.mustChangePassword,
   };
 }
 

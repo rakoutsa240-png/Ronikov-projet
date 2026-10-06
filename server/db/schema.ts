@@ -86,6 +86,8 @@ export const users = pgTable(
     passwordHash: text('password_hash').notNull(),
     role: userRoleEnum('role').notNull().default('CLIENT'),
     isPremium: boolean('is_premium').notNull().default(false),
+    // Set when an admin gives a temporary password; cleared once the user picks their own.
+    mustChangePassword: boolean('must_change_password').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('users_phone_idx').on(t.phone)],

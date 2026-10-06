@@ -22,7 +22,7 @@ export async function upsertUser(db: Db, input: NewUser) {
   const passwordHash = await hashPassword(input.password);
 
   return db.transaction(async (tx) => {
-    const values = { name: input.name, phone, email: input.email ?? null, passwordHash, role: input.role };
+    const values = { name: input.name, phone, email: input.email ?? null, passwordHash, role: input.role, mustChangePassword: false };
     const [user] = await tx
       .insert(users)
       .values(values)

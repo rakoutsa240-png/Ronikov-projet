@@ -92,6 +92,7 @@ export interface AuthUser {
   role: UserRole;
   isPremium: boolean;
   managedStationIds: string[];
+  mustChangePassword: boolean; // signed in with a temporary password from an admin
 }
 
 // An account as the admin console lists it (GET /api/users).

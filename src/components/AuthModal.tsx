@@ -7,7 +7,7 @@ import { useModal } from '../useModal';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAuthenticated: (user: AuthUser) => void;
+  onAuthenticated: (user: AuthUser, password: string) => void; // password: to replace a temporary one without retyping
   reason?: string; // why sign-in is asked, e.g. to book
 }
 
@@ -26,6 +26,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForgotHelp, setShowForgotHelp] = useState(false);
 
   // The role comes from the server: sign-up always creates a client account.
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +39,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           ? await api.login(phone, password)
           : await api.register({ name, phone, password, email: email || undefined });
       setPassword('');
-      onAuthenticated(user);
+      onAuthenticated(user, password);
       onClose();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Serveur RONIKOV injoignable. Réessayez plus tard.');
@@ -146,6 +147,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
             </div>
             {mode === 'register' && <p className="text-[11px] text-neutral-500 font-sans">8 caractères minimum.</p>}
+            {mode === 'login' && (
+              <button
+                type="button"
+                onClick={() => setShowForgotHelp((v) => !v)}
+                aria-expanded={showForgotHelp}
+                className="text-[11px] text-neutral-600 font-sans font-bold underline hover:text-black"
+              >
+                Mot de passe oublié ?
+              </button>
+            )}
+            {mode === 'login' && showForgotHelp && (
+              <p className="text-[11px] text-neutral-700 font-sans bg-neutral-100 border border-neutral-300 p-2.5">
+                Contactez l'équipe RONIKOV depuis le numéro de votre compte. Un administrateur vous donnera un mot de
+                passe temporaire ; à la connexion suivante, vous choisirez le vôtre.
+              </p>
+            )}
           </div>
 
           {error && (
@@ -169,6 +186,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onClick={() => {
               setMode(mode === 'login' ? 'register' : 'login');
               setError(null);
+              setShowForgotHelp(false);
             }}
             className="text-neutral-600 font-bold hover:text-black underline"
           >
