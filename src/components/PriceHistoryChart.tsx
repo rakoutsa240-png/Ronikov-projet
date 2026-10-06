@@ -28,7 +28,7 @@ const FUEL_CONFIG: Record<
     gradientId: 'colorSuper',
   },
   GAZOLE: {
-    label: 'Gazole (Désel)',
+    label: 'Gazole (Diesel)',
     color: '#3b82f6', // Blue
     gradientId: 'colorGazole',
   },

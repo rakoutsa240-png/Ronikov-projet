@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal, AuthUser } from './types';
 import { INITIAL_STATIONS, GLOBAL_FUEL_PRICES } from './data/mockData';
 import { api, ApiError } from './api';
@@ -10,6 +10,7 @@ import { ReservationModal } from './components/ReservationModal';
 import { AuthModal } from './components/AuthModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
+import { parseHash, routeToHash, Route, Tab } from './routes';
 
 // Pages other than the home page and the map are downloaded only when opened, so the first visit stays light.
 const named = <K extends string>(load: () => Promise<Record<K, React.ComponentType<any>>>, name: K) =>
@@ -58,10 +59,30 @@ export default function App() {
       .catch((e) => console.warn('Could not refresh stations', e));
   };
 
-  const [activeTab, setActiveTab] = useState<string>('home');
+  const [route, setRoute] = useState<Route>(() => parseHash(window.location.hash));
+  const activeTab = route.tab;
+  // Opens a page: a new browser history entry, so the back button returns to the previous page.
+  const navigate = useCallback((tab: Tab, stationId?: string) => {
+    const next = { tab, stationId };
+    const hash = routeToHash(next);
+    if (window.location.hash !== hash) window.history.pushState(null, '', hash);
+    setRoute(next);
+    window.scrollTo(0, 0);
+  }, []);
+  const setActiveTab = (tab: string) => navigate(tab as Tab);
+  useEffect(() => {
+    const onPopState = () => {
+      setRoute(parseHash(window.location.hash));
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
   const [selectedStation, setSelectedStation] = useState<Station | null>(stations[0] || null);
   // The signed-in account comes from the API, which alone decides the role.
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  // False until the server said who is signed in, so a refresh on #/admin does not bounce to the home page.
+  const [authChecked, setAuthChecked] = useState(false);
   const userRole: UserRole = currentUser?.role ?? 'CLIENT';
   const userName = currentUser?.name ?? '';
   const isUserPremium = Boolean(currentUser?.isPremium);
@@ -75,12 +96,22 @@ export default function App() {
       .then((user) => setCurrentUser((prev) => prev ?? user))
       .catch((e) => {
         if (!controller.signal.aborted) console.warn('Could not load the signed-in user', e);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setAuthChecked(true);
       });
     return () => controller.abort();
   }, []);
 
   const handleAuthenticated = (user: AuthUser) => {
     setCurrentUser(user);
+    setAuthChecked(true);
+    // Signing in to book goes straight on to the booking.
+    if (pendingBooking) {
+      setPendingBooking(false);
+      setIsBookingModalOpen(true);
+      return;
+    }
     if (user.role === 'STATION_PRO') setActiveTab('pro');
     if (user.role === 'ADMIN') setActiveTab('admin');
   };
@@ -92,11 +123,15 @@ export default function App() {
       console.warn('Logout request failed', e);
     }
     setCurrentUser(null);
+    setProStationId(undefined);
     setActiveTab('home');
   };
 
   // Load the account's tickets and notifications, and the tickets staff can see.
   const managedStationId = currentUser?.managedStationIds[0];
+  // The station shown in the Pro space: an admin (or a manager of several stations) can switch.
+  const [chosenProStationId, setProStationId] = useState<string | undefined>();
+  const proStationId = chosenProStationId ?? managedStationId ?? stations[0]?.id;
   const loadAccountData = () => {
     if (!currentUser) {
       setReservations([]);
@@ -109,19 +144,21 @@ export default function App() {
     const staffRequest =
       currentUser.role === 'ADMIN'
         ? api.allReservations()
-        : currentUser.role === 'STATION_PRO' && managedStationId
-          ? api.stationReservations(managedStationId)
+        : currentUser.role === 'STATION_PRO' && proStationId && currentUser.managedStationIds.includes(proStationId)
+          ? api.stationReservations(proStationId)
           : Promise.resolve([]);
     staffRequest.then(setStaffReservations).catch((e) => console.warn('Could not load station reservations', e));
   };
-  useEffect(loadAccountData, [currentUser?.id, currentUser?.role, managedStationId]);
+  useEffect(loadAccountData, [currentUser?.id, currentUser?.role, currentUser?.role === 'STATION_PRO' ? proStationId : undefined]);
 
   // Leave the Pro or Admin space when the account may not see it (signed out, or another role).
   useEffect(() => {
+    if (!authChecked) return;
     if ((activeTab === 'pro' && !canUsePro) || (activeTab === 'admin' && userRole !== 'ADMIN')) {
-      setActiveTab('home');
+      window.history.replaceState(null, '', routeToHash({ tab: 'home' }));
+      setRoute({ tab: 'home' });
     }
-  }, [activeTab, canUsePro, userRole]);
+  }, [activeTab, canUsePro, userRole, authChecked]);
 
   // Keep selectedStation synchronized with stations state
   useEffect(() => {
@@ -137,19 +174,24 @@ export default function App() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState<boolean>(false);
+  // The visitor clicked "Réserver" while signed out: the booking opens once they sign in.
+  const [pendingBooking, setPendingBooking] = useState(false);
 
   // Open booking modal for a station
   // Booking needs an account: the ticket is tied to it.
   const handleOpenBooking = (station: Station) => {
     setSelectedStation(station);
     if (currentUser) setIsBookingModalOpen(true);
-    else setIsAuthModalOpen(true);
+    else {
+      setPendingBooking(true);
+      setIsAuthModalOpen(true);
+    }
   };
 
   // Open detail view for a station
   const handleViewStationDetails = (station: Station) => {
     setSelectedStation(station);
-    setActiveTab('station-detail');
+    navigate('station-detail', station.id);
   };
 
   // The API created the ticket: show it, then refresh stock and notifications.
@@ -225,6 +267,7 @@ export default function App() {
   const handleToggleStationPartner = async (stationId: string) => {
     const station = stations.find((s) => s.id === stationId);
     if (!station) return;
+    if (station.isPartner && !window.confirm(`Suspendre ${station.name} ? Elle ne sera plus présentée comme partenaire.`)) return;
     try {
       replaceStation(await api.updateStation(stationId, { isPartner: !station.isPartner }), stationId);
     } catch (e) {
@@ -248,15 +291,15 @@ export default function App() {
   };
 
   // Premium is granted by an admin: the button sends a request.
-  const handleRequestPremium = async (): Promise<string | null> => {
+  const handleRequestPremium = async (): Promise<{ ok: boolean; message: string } | null> => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
       return null;
     }
     try {
-      return (await api.requestPremium()).message;
+      return { ok: true, message: (await api.requestPremium()).message };
     } catch (e) {
-      return e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.';
+      return { ok: false, message: e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.' };
     }
   };
 
@@ -283,6 +326,7 @@ export default function App() {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         userName={userName}
         globalPrices={globalPrices}
+        stationCount={stations.length}
       />
 
       {/* Main View Router */}
@@ -298,7 +342,6 @@ export default function App() {
               if (canUsePro) setActiveTab('pro');
               else setIsAuthModalOpen(true);
             }}
-            onNavigateProfile={() => setActiveTab('profile')}
           />
         )}
 
@@ -314,8 +357,8 @@ export default function App() {
 
         {activeTab === 'station-detail' && (
           <StationDetailView
-            station={selectedStation}
-            onBack={() => setActiveTab('map')}
+            station={stations.find((s) => s.id === route.stationId) ?? null}
+            onBack={() => (window.history.length > 1 ? window.history.back() : setActiveTab('map'))}
             onBook={handleOpenBooking}
           />
         )}
@@ -324,6 +367,9 @@ export default function App() {
           <HistoryView
             reservations={reservations}
             onCancelReservation={handleCancelReservation}
+            isSignedIn={currentUser !== null}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onNavigateToMap={() => setActiveTab('map')}
           />
         )}
 
@@ -336,19 +382,20 @@ export default function App() {
 
         {activeTab === 'profile' && (
           <UserProfileView
-            userName={userName}
-            userRole={userRole}
-            isPremium={isUserPremium}
+            user={currentUser}
             reservations={reservations}
             onOpenAuth={() => setIsAuthModalOpen(true)}
-            onNavigateToMap={() => setActiveTab('map')}
+            onNavigate={setActiveTab}
+            onLogout={handleLogout}
           />
         )}
 
         {activeTab === 'pro' && (
           <ProDashboard
-            managedStation={stations.find((s) => s.id === managedStationId) ?? stations[0]}
-            reservations={staffReservations}
+            managedStation={stations.find((s) => s.id === proStationId) ?? stations[0]}
+            stationChoices={userRole === 'ADMIN' ? stations : stations.filter((s) => currentUser?.managedStationIds.includes(s.id))}
+            onChangeStation={setProStationId}
+            reservations={staffReservations.filter((r) => r.stationId === proStationId)}
             onValidateCode={handleValidateCodePro}
             onUpdateStock={handleUpdateStockPro}
             onUpdateQueueTime={handleUpdateQueueTimePro}
@@ -386,7 +433,11 @@ export default function App() {
       {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        reason={pendingBooking ? 'Connectez-vous ou créez un compte gratuit pour réserver : votre ticket sera lié à votre compte.' : undefined}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setPendingBooking(false);
+        }}
         onAuthenticated={handleAuthenticated}
       />
 

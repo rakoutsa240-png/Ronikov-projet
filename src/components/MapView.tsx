@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useState } from 'react';
 import { Station, FuelType } from '../types';
 import { StationCard } from './StationCard';
 import { distanceKm, LatLng, locateUser } from '../geo';
+import { FUEL_TYPES } from '../../shared/stock';
 
 // The map library is heavy, so it only loads when this page opens.
 const InteractiveMap = lazy(() => import('./InteractiveMap'));
@@ -72,9 +73,10 @@ export const MapView: React.FC<MapViewProps> = ({
     }
 
     // Only in stock match
+    // "Real stock": more than 100 L left of the chosen fuel, or of any fuel when none is chosen.
     if (onlyInStock) {
-      const primaryStock = selectedFuel === 'ALL' ? s.stock.SUPER : s.stock[selectedFuel];
-      if (!primaryStock || primaryStock.availableLiters <= 100) return false;
+      const fuels = selectedFuel === 'ALL' ? FUEL_TYPES : [selectedFuel];
+      if (!fuels.some((f) => (s.stock[f]?.availableLiters ?? 0) > 100)) return false;
     }
 
     return true;
@@ -94,15 +96,31 @@ export const MapView: React.FC<MapViewProps> = ({
     return 0;
   });
 
+  const noResults = (
+    <div className="p-8 border border-neutral-800 rounded-xl text-center font-mono-code space-y-3 bg-black/85">
+      <p className="text-sm font-bold uppercase text-white">Aucune station ne correspond à vos critères</p>
+      <button
+        onClick={() => {
+          setSearchTerm('');
+          setSelectedFuel('ALL');
+          setOnlyInStock(false);
+        }}
+        className="px-4 py-2 bg-amber-400 text-black text-xs font-black uppercase rounded-lg hover:bg-amber-300"
+      >
+        Effacer les filtres
+      </button>
+    </div>
+  );
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Page Title Header */}
-      <div className="border-b-2 border-black pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 font-mono-code">
+      <div className="border-b-2 border-neutral-700/80 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 font-mono-code">
         <div>
-          <div className="text-xs text-neutral-500 font-bold uppercase tracking-widest">
+          <div className="text-xs text-amber-400 font-bold uppercase tracking-widest">
             RÉSEAU DE CARBURANT EN TEMPS RÉEL
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-black">
+          <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
             CARTE & RECHERCHE DES STATIONS
           </h1>
         </div>
@@ -146,7 +164,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
             <input
               type="text"
-              placeholder="Rechercher par quartier (Agoè, Tokoin, Hedzranawoé...) ou enseigne (Total, Shell...)"
+              placeholder="Quartier, ville ou enseigne (Agoè, Kara, Shell…)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-black border border-neutral-700 text-white pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-white font-mono-code"
@@ -195,10 +213,20 @@ export const MapView: React.FC<MapViewProps> = ({
             >
               Mélange
             </button>
+            <button
+              onClick={() => setSelectedFuel('KEROSENE')}
+              className={`px-2.5 py-1.5 font-bold uppercase whitespace-nowrap ${
+                selectedFuel === 'KEROSENE'
+                  ? 'bg-white text-black border border-white'
+                  : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
+              }`}
+            >
+              Kérosène
+            </button>
           </div>
 
           {/* Sort Dropdown */}
-          <div className="md:col-span-3 flex items-center justify-end gap-2">
+          <div className="md:col-span-3 flex items-center md:justify-end gap-2">
             <span className="text-neutral-400 uppercase text-[10px]">Trier:</span>
             <select
               value={sortBy}
@@ -218,7 +246,7 @@ export const MapView: React.FC<MapViewProps> = ({
         </div>
 
         {/* Sub-row: Availability toggle & counter */}
-        <div className="flex justify-between items-center pt-2 border-t border-neutral-800 text-[11px] text-neutral-400">
+        <div className="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-neutral-800 text-[11px] text-neutral-400">
           <label className="flex items-center gap-2 cursor-pointer hover:text-white">
             <input
               type="checkbox"
@@ -252,6 +280,8 @@ export const MapView: React.FC<MapViewProps> = ({
         </Suspense>
       )}
 
+      {viewLayout === 'listOnly' && filtered.length === 0 && noResults}
+
       {viewLayout === 'listOnly' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((st) => (
@@ -270,7 +300,7 @@ export const MapView: React.FC<MapViewProps> = ({
       {viewLayout === 'split' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Interactive Map Column */}
-          <div className="lg:col-span-7 sticky top-20">
+          <div className="lg:col-span-7 lg:sticky lg:top-20">
             <Suspense fallback={mapFallback}>
               <InteractiveMap
                 stations={filtered}
@@ -286,12 +316,10 @@ export const MapView: React.FC<MapViewProps> = ({
           </div>
 
           {/* List Column */}
-          <div className="lg:col-span-5 space-y-4 max-h-[720px] overflow-y-auto pr-1">
+          {/* On a computer the list scrolls beside the map; on a phone it simply follows the map. */}
+          <div className="lg:col-span-5 space-y-4 lg:max-h-[720px] lg:overflow-y-auto pr-1">
             {filtered.length === 0 ? (
-              <div className="p-8 border border-neutral-300 text-center font-mono-code space-y-2 bg-white">
-                <p className="text-sm font-bold uppercase text-black">Aucune station ne correspond à vos critères</p>
-                <p className="text-xs text-neutral-500">Essayez de modifier votre recherche ou d'effacer les filtres.</p>
-              </div>
+              noResults
             ) : (
               filtered.map((st) => (
                 <StationCard

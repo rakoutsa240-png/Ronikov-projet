@@ -35,7 +35,7 @@ export const StationCard: React.FC<StationCardProps> = ({
         return 'bg-amber-400 text-black font-extrabold border-amber-300 shadow-amber-500/20';
       case 'Sanol':
         return 'bg-emerald-500 text-black font-extrabold border-emerald-400 shadow-emerald-500/20';
-      case 'CAP':
+      case 'Cap':
         return 'bg-blue-600 text-white font-extrabold border-blue-400';
       case 'Somayaf':
         return 'bg-purple-600 text-white font-extrabold border-purple-400';
@@ -56,6 +56,8 @@ export const StationCard: React.FC<StationCardProps> = ({
         return 'hover:border-amber-400 hover:shadow-amber-900/30';
     }
   };
+
+  const canBook = fuels.some((f) => (station.stock[f.type]?.availableLiters ?? 0) >= 2);
 
   return (
     <div className={`bg-black/85 backdrop-blur-xl border border-neutral-800 transition-all duration-300 p-5 rounded-xl flex flex-col justify-between space-y-4 text-white shadow-2xl hover:scale-[1.01] ${getBrandBorderGlow(station.brand)}`}>
@@ -104,7 +106,7 @@ export const StationCard: React.FC<StationCardProps> = ({
       </div>
 
       {/* Fuel Stock Gauges Grid */}
-      <div className="border-t border-b border-neutral-800/80 py-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="border-t border-b border-neutral-800/80 py-3 grid grid-cols-2 gap-2">
         {fuels.map((f) => {
           const stStock = station.stock[f.type];
           const isSelected = selectedFuelFilter === f.type;
@@ -125,7 +127,7 @@ export const StationCard: React.FC<StationCardProps> = ({
                 value={percent}
                 type="bar"
                 showPercent={true}
-                sublabel={`${stStock.availableLiters}L`}
+                sublabel={stStock.availableLiters <= 0 ? 'Rupture' : `${stStock.availableLiters.toLocaleString('fr-FR')} L`}
               />
             </div>
           );
@@ -151,9 +153,10 @@ export const StationCard: React.FC<StationCardProps> = ({
         </button>
         <button
           onClick={() => onBook(station)}
-          className="flex-1 py-2 px-3 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs font-mono-code uppercase rounded transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-amber-400/20"
+          disabled={!canBook}
+          className="flex-1 py-2 px-3 disabled:opacity-40 disabled:cursor-not-allowed bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs font-mono-code uppercase rounded transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-amber-400/20"
         >
-          <span>Réserver</span>
+          <span>{canBook ? 'Réserver' : 'Rupture'}</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>

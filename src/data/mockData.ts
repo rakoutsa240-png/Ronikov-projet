@@ -2,7 +2,7 @@ import { Station, Reservation, FuelPriceGlobal, NotificationItem } from '../type
 
 export const GLOBAL_FUEL_PRICES: FuelPriceGlobal[] = [
   { type: 'SUPER', label: 'Super Sans Plomb', officialPriceXOF: 725, avgAvailabilityPercent: 78 },
-  { type: 'GAZOLE', label: 'Gazole (Désel)', officialPriceXOF: 750, avgAvailabilityPercent: 85 },
+  { type: 'GAZOLE', label: 'Gazole (Diesel)', officialPriceXOF: 750, avgAvailabilityPercent: 85 },
   { type: 'MELANGE', label: 'Mélange 2 Temps', officialPriceXOF: 811, avgAvailabilityPercent: 62 },
   { type: 'KEROSENE', label: 'Pétrole / Kérosène', officialPriceXOF: 1040, avgAvailabilityPercent: 90 },
 ];
@@ -208,7 +208,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
     stationBrand: 'Sanol',
     stationAddress: 'Bd du 30 Août, face Marché Hedzranawoé',
     fuelType: 'GAZOLE',
-    fuelLabel: 'Gazole (Désel)',
+    fuelLabel: 'Gazole (Diesel)',
     liters: 30,
     pricePerLiter: 700,
     totalAmountXOF: 21000,

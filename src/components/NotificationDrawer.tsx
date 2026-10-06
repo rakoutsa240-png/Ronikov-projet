@@ -2,6 +2,7 @@ import React from 'react';
 import { NotificationItem } from '../types';
 import { X, Bell, CheckCheck, Clock, Fuel, ShieldAlert, Sparkles, CheckCircle2 } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
+import { useModal } from '../useModal';
 
 // API notifications carry an ISO date; the demo data already holds a label like "Il y a 5 min".
 function formatNotificationTime(timestamp: string): string {
@@ -27,6 +28,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   notifications,
   onMarkAllRead,
 }) => {
+  useModal(isOpen, onClose);
   if (!isOpen) return null;
 
   // Detect station brand from notification props or text content

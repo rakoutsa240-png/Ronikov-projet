@@ -6,7 +6,8 @@ import { TicketCard } from './TicketCard';
 import { X, Check, ShieldCheck, ArrowRight, Printer, Copy, Clock, AlertTriangle, Phone, Smartphone, CreditCard } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { MAX_LITERS_PER_RESERVATION, SERVICE_FEE_XOF } from '../../shared/reservations';
-import { FUEL_LABELS } from '../../shared/stock';
+import { FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
+import { useModal } from '../useModal';
 
 interface ReservationModalProps {
   station: Station | null;
@@ -16,6 +17,8 @@ interface ReservationModalProps {
   isUserPremium?: boolean;
   defaultPaymentPhone?: string; // +228XXXXXXXX
 }
+
+const MIN_LITERS = 2;
 
 // "+22890123456" -> "90 12 34 56"
 const formatLocalPhone = (phone?: string) =>
@@ -41,26 +44,39 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   const [generatedReservation, setGeneratedReservation] = useState<Reservation | null>(null);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
 
-  // Each opening starts a fresh booking.
+  useModal(isOpen, onClose);
+
+  // Each opening starts a fresh booking, on the first fuel the station still has.
   useEffect(() => {
     if (!isOpen) return;
     setStep(1);
     setPaymentError(null);
     setGeneratedReservation(null);
     setPhoneNumber(formatLocalPhone(defaultPaymentPhone));
+    setInputMode('liters');
+    setLiters(10);
+    const firstAvailable = FUEL_TYPES.find((f) => (station?.stock[f]?.availableLiters ?? 0) >= MIN_LITERS);
+    if (firstAvailable) setSelectedFuel(firstAvailable);
   }, [isOpen, station?.id, defaultPaymentPhone]);
 
   const fuelStock = station?.stock[selectedFuel];
   const pricePerLiter = fuelStock?.pricePerLiter || 700;
+  // A ticket holds at most 100 L, and never more than the station can still book.
+  const maxLiters = Math.min(MAX_LITERS_PER_RESERVATION, Math.floor(fuelStock?.availableLiters ?? 0));
+  const canBook = maxLiters >= MIN_LITERS;
+  useEffect(() => {
+    if (canBook && liters > maxLiters) setLiters(maxLiters);
+    if (canBook && liters < MIN_LITERS) setLiters(MIN_LITERS);
+  }, [liters, maxLiters, canBook]);
 
   // Sync FCFA / Liters
   useEffect(() => {
     if (inputMode === 'liters') {
       setFcfaAmount(liters * pricePerLiter);
     } else {
-      setLiters(Math.round(fcfaAmount / pricePerLiter));
+      setLiters(Math.min(Math.max(Math.round(fcfaAmount / pricePerLiter), MIN_LITERS), Math.max(MIN_LITERS, maxLiters)));
     }
-  }, [liters, fcfaAmount, selectedFuel, inputMode, pricePerLiter]);
+  }, [liters, fcfaAmount, selectedFuel, inputMode, pricePerLiter, maxLiters]);
 
   const fuelLabels = FUEL_LABELS;
 
@@ -101,22 +117,23 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   if (!isOpen || !station) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-neutral-950/95 backdrop-blur-2xl border border-neutral-800 rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 text-white relative my-8 shadow-2xl shadow-black/90 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div role="dialog" aria-modal="true" className="bg-neutral-950/95 backdrop-blur-2xl border border-neutral-800 rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 text-white relative my-8 shadow-2xl shadow-black/90 overflow-hidden">
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close Button */}
         <button
           onClick={onClose}
+          aria-label="Fermer"
           className="absolute top-4 right-4 p-2 border border-neutral-700 hover:border-amber-400 bg-neutral-900/90 text-neutral-300 hover:text-white rounded-xl transition-all z-20"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header & Step Indicator */}
-        <div className="border-b border-neutral-800 pb-4 space-y-3 relative z-10">
-          <div className="flex items-center gap-2">
+        <div className="border-b border-neutral-800 pb-4 space-y-3 relative z-10 pr-12">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-1 bg-amber-400 text-black text-[10px] font-mono-code font-black uppercase rounded shadow">
               RÉSERVATION RONIKOV
             </span>
@@ -151,7 +168,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               <div className="grid grid-cols-2 gap-2.5">
                 {(['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE'] as FuelType[]).map((f) => {
                   const stock = station.stock[f];
-                  const isAvailable = stock && stock.availableLiters > 0;
+                  const isAvailable = stock && stock.availableLiters >= MIN_LITERS;
                   const isSelected = selectedFuel === f;
 
                   return (
@@ -216,8 +233,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
 
                   <input
                     type="range"
-                    min="2"
-                    max={Math.min(MAX_LITERS_PER_RESERVATION, fuelStock?.availableLiters || 50)}
+                    min={MIN_LITERS}
+                    max={Math.max(MIN_LITERS, maxLiters)}
                     value={liters}
                     onChange={(e) => setLiters(Number(e.target.value))}
                     className="w-full accent-amber-400 cursor-pointer"
@@ -228,8 +245,9 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                     {[5, 10, 20, 50].map((preset) => (
                       <button
                         key={preset}
+                        disabled={preset > maxLiters}
                         onClick={() => setLiters(preset)}
-                        className={`py-2 border font-bold rounded-lg transition-all ${
+                        className={`py-2 border font-bold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
                           liters === preset ? 'border-amber-400 bg-amber-400 text-black shadow' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
@@ -247,9 +265,9 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
 
                   <input
                     type="range"
-                    min="1400"
-                    max="50000"
-                    step="700"
+                    min={MIN_LITERS * pricePerLiter}
+                    max={Math.max(MIN_LITERS, maxLiters) * pricePerLiter}
+                    step="500"
                     value={fcfaAmount}
                     onChange={(e) => setFcfaAmount(Number(e.target.value))}
                     className="w-full accent-amber-400 cursor-pointer"
@@ -260,8 +278,9 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                     {[3500, 7000, 14000, 35000].map((preset) => (
                       <button
                         key={preset}
+                        disabled={preset > maxLiters * pricePerLiter}
                         onClick={() => setFcfaAmount(preset)}
-                        className={`py-2 border font-bold rounded-lg transition-all ${
+                        className={`py-2 border font-bold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
                           fcfaAmount === preset ? 'border-amber-400 bg-amber-400 text-black shadow' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
@@ -273,10 +292,23 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               )}
             </div>
 
+            {inputMode === 'fcfa' && (
+              <p className="text-[11px] font-mono-code text-neutral-400">
+                Soit {liters} litres, arrondi au litre : {(liters * pricePerLiter).toLocaleString('fr-FR')} FCFA de carburant.
+              </p>
+            )}
+
+            {!canBook && (
+              <p role="alert" className="text-xs font-mono-code font-bold text-red-300 border border-red-500/60 bg-red-500/10 p-3 rounded-xl">
+                Cette station n'a plus de carburant à réserver pour le moment.
+              </p>
+            )}
+
             <div className="pt-4 border-t border-neutral-800 flex justify-end">
               <button
+                disabled={!canBook}
                 onClick={() => setStep(2)}
-                className="px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs uppercase tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2"
+                className="px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs uppercase tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span>Continuer vers le récapitulatif</span>
                 <ArrowRight className="w-4 h-4" />
@@ -343,7 +375,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs uppercase tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2"
+                className="px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs uppercase tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span>Procéder au Paiement</span>
                 <ArrowRight className="w-4 h-4" />
@@ -410,7 +442,9 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                     +228
                   </span>
                   <input
-                    type="text"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="90 00 00 00"
@@ -452,7 +486,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               <button
                 disabled={isProcessing}
                 onClick={handleProcessPayment}
-                className="px-8 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs uppercase tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2"
+                className="px-8 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs uppercase tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
                   <>

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, Check, Star, Zap, Clock, Smartphone, Sparkles, ArrowRight, CheckCircle2, ShieldAlert, Award } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
+import { SERVICE_FEE_XOF } from '../../shared/reservations';
 
 interface PremiumViewProps {
   isPremium: boolean;
   // Sends an activation request to the admins; resolves to the message to show (null when sign-in opened instead).
-  onRequestPremium: () => Promise<string | null>;
+  onRequestPremium: () => Promise<{ ok: boolean; message: string } | null>;
 }
 
 export const PremiumView: React.FC<PremiumViewProps> = ({
@@ -13,13 +14,23 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
   onRequestPremium,
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [subscribedMessage, setSubscribedMessage] = useState<string | null>(null);
+  const [subscribedMessage, setSubscribedMessage] = useState<{ ok: boolean; message: string } | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  // On a phone the answer appears below the plans: bring it into view.
+  const messageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (subscribedMessage) messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [subscribedMessage]);
 
   const handleSubscribe = async () => {
-    const message = await onRequestPremium();
-    if (!message) return;
-    setSubscribedMessage(message);
-    setTimeout(() => setSubscribedMessage(null), 6000);
+    if (isSending) return;
+    setIsSending(true);
+    try {
+      const result = await onRequestPremium();
+      if (result) setSubscribedMessage(result);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const partnerBrands: StationBrandType[] = ['TotalEnergies', 'Shell', 'Sanol', 'Cap', 'Somayaf'];
@@ -42,7 +53,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             </h1>
 
             <p className="text-xs sm:text-sm text-neutral-300 font-sans max-w-3xl leading-relaxed">
-              Garantissez votre accès au carburant même en période de forte tension ou de pénurie nationale. Profitez de la file prioritaire dans toutes les stations du réseau, de zéro frais de service et d'alertes SMS instantanées.
+              Garantissez votre accès au carburant même en période de forte tension ou de pénurie nationale. Profitez de la file prioritaire dans les stations du réseau et de zéro frais de réservation.
             </p>
           </div>
 
@@ -109,20 +120,21 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" /> File express coupe-file en station
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> Notification WhatsApp & SMS des recharges
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> Notifications de vos tickets dans l'application
               </li>
             </ul>
           </div>
 
           <button
             onClick={handleSubscribe}
-            className={`w-full py-3.5 text-xs font-black uppercase tracking-wider transition-all rounded-xl border shadow-lg ${
+            disabled={isPremium || isSending}
+            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black uppercase tracking-wider transition-all rounded-xl border shadow-lg ${
               selectedPlan === 'monthly'
                 ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300 shadow-amber-400/20'
                 : 'bg-neutral-900 text-white border-neutral-700 hover:border-neutral-500'
             }`}
           >
-            S'abonner pour 2 500 FCFA / Mois
+            {isPremium ? 'Pass déjà actif sur votre compte' : isSending ? 'Envoi de la demande…' : "Demander le Pass mensuel (2 500 FCFA)"}
           </button>
         </div>
 
@@ -166,20 +178,29 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
 
           <button
             onClick={handleSubscribe}
-            className={`w-full py-3.5 text-xs font-black uppercase tracking-wider transition-all rounded-xl border shadow-lg ${
+            disabled={isPremium || isSending}
+            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black uppercase tracking-wider transition-all rounded-xl border shadow-lg ${
               selectedPlan === 'yearly'
                 ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300 shadow-amber-400/20'
                 : 'bg-neutral-900 text-white border-neutral-700 hover:border-neutral-500'
             }`}
           >
-            S'abonner pour 20 000 FCFA / An
+            {isPremium ? 'Pass déjà actif sur votre compte' : isSending ? 'Envoi de la demande…' : "Demander le Pass annuel (20 000 FCFA)"}
           </button>
         </div>
       </div>
 
       {subscribedMessage && (
-        <div className="p-4 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold uppercase text-center rounded-xl animate-fadeIn">
-          {subscribedMessage}
+        <div
+          ref={messageRef}
+          role={subscribedMessage.ok ? 'status' : 'alert'}
+          className={`p-4 border text-xs font-bold uppercase text-center rounded-xl animate-fadeIn ${
+            subscribedMessage.ok
+              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+              : 'bg-red-500/20 border-red-500/50 text-red-300'
+          }`}
+        >
+          {subscribedMessage.message}
         </div>
       )}
 
@@ -204,7 +225,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             <tbody className="divide-y divide-neutral-800/80 text-neutral-300">
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Frais de réservation par commande</td>
-                <td className="p-3.5 text-neutral-400">150 à 200 FCFA</td>
+                <td className="p-3.5 text-neutral-400">{SERVICE_FEE_XOF} FCFA</td>
                 <td className="p-3.5 font-black text-emerald-400">0 FCFA (GRATUIT)</td>
               </tr>
               <tr className="hover:bg-neutral-900/50 transition-colors">
@@ -216,11 +237,6 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
                 <td className="p-3.5 font-bold text-white">Réservation prioritaire en pénurie</td>
                 <td className="p-3.5 text-neutral-400">Quota standard</td>
                 <td className="p-3.5 font-black text-amber-300">OUI (Quota Réservé Garanti)</td>
-              </tr>
-              <tr className="hover:bg-neutral-900/50 transition-colors">
-                <td className="p-3.5 font-bold text-white">Alertes SMS rechargement de stock</td>
-                <td className="p-3.5 text-neutral-400">Non</td>
-                <td className="p-3.5 font-black text-amber-300">OUI (SMS & WhatsApp Temps Réel)</td>
               </tr>
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Assistance client téléphonique 24h/24</td>

@@ -4,6 +4,7 @@ import { ShieldCheck, Users, Fuel, DollarSign, AlertTriangle, CheckCircle2, XCir
 import { StationBrandLogo } from './StationBrandLogo';
 import { AdminUsersPanel } from './AdminUsersPanel';
 import { AddStationForm } from './AddStationForm';
+import { FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 
 interface AdminDashboardProps {
   stations: Station[];
@@ -53,9 +54,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const totalVolumeFCFA = reservations.reduce((acc, r) => acc + r.totalAmountXOF, 0);
-  const totalLitersDispensed = reservations.reduce((acc, r) => acc + r.liters, 0);
+  // Cancelled and expired tickets brought no money in.
+  const paidReservations = reservations.filter((r) => r.status === 'PENDING' || r.status === 'VALIDATED');
+  const totalVolumeFCFA = paidReservations.reduce((acc, r) => acc + r.totalAmountXOF, 0);
+  const totalLitersDispensed = paidReservations.reduce((acc, r) => acc + r.liters, 0);
   const partnerStationsCount = stations.filter((s) => s.isPartner).length;
+  const cities = [...new Set(stations.map((s) => s.city))];
+  // Every tank that is empty or low, worst first: the incidents an admin should look at.
+  const stockAlerts = stations
+    .flatMap((st) =>
+      FUEL_TYPES.filter((f) => st.stock[f] && st.stock[f].status !== 'AVAILABLE').map((f) => ({ station: st, fuel: f, stock: st.stock[f] })),
+    )
+    .sort((a, b) => (a.stock.status === b.stock.status ? a.stock.availableLiters - b.stock.availableLiters : a.stock.status === 'OUT_OF_STOCK' ? -1 : 1));
+  const tanks = stations.flatMap((st) => FUEL_TYPES.map((f) => st.stock[f]).filter(Boolean));
+  const availabilityRate = tanks.length
+    ? Math.round((tanks.filter((t) => t.status !== 'OUT_OF_STOCK').length / tanks.length) * 1000) / 10
+    : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono-code text-white">
@@ -80,7 +94,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Admin Tabs */}
-        <div className="flex border border-neutral-700 bg-neutral-900 rounded-xl p-1 text-xs font-bold text-neutral-300 flex-wrap">
+        <div className="flex border border-neutral-700 bg-neutral-900 rounded-xl p-1 text-xs font-bold text-neutral-300 flex-wrap self-start md:self-auto">
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
@@ -119,7 +133,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               activeTab === 'incidents' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
-            Incidents (1)
+            Alertes stock ({stockAlerts.length})
           </button>
         </div>
       </div>
@@ -137,7 +151,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 {totalVolumeFCFA.toLocaleString('fr-FR')} FCFA
               </div>
               <span className="text-[11px] text-neutral-400 block font-sans">
-                Flux transactionnés via TMoney & Flooz
+                Tickets payés (hors annulés et expirés)
               </span>
             </div>
 
@@ -146,7 +160,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 RÉSERVATIONS TOTALES
               </span>
               <div className="text-2xl sm:text-3xl font-black text-white font-mono-code">
-                {reservations.length} COMMANDES
+                {paidReservations.length} COMMANDES
               </div>
               <span className="text-[11px] text-neutral-400 block font-sans">
                 {totalLitersDispensed.toLocaleString('fr-FR')} Litres réservés
@@ -155,13 +169,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
               <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
-                STATIONS VÉRIFIÉES
+                STATIONS PARTENAIRES
               </span>
               <div className="text-2xl sm:text-3xl font-black text-amber-300 font-mono-code">
                 {partnerStationsCount} / {stations.length}
               </div>
               <span className="text-[11px] text-neutral-400 block font-sans">
-                Réseau Lomé, Tsévié, Atakpamé
+                {cities.join(', ')}
               </span>
             </div>
 
@@ -170,10 +184,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 TAUX DE DISPONIBILITÉ
               </span>
               <div className="text-2xl sm:text-3xl font-black text-white font-mono-code">
-                92.4%
+                {availabilityRate.toLocaleString('fr-FR')}%
               </div>
               <span className="text-[11px] text-neutral-400 block font-sans">
-                Surveillance nationale active
+                Cuves non vides, tous carburants
               </span>
             </div>
           </div>
@@ -189,15 +203,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono-code">
-              {['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE'].map((fuel) => {
-                const totalLiters = stations.reduce(
-                  (acc, s) => acc + (s.stock[fuel as any]?.availableLiters || 0),
-                  0
-                );
+              {FUEL_TYPES.map((fuel) => {
+                const totalLiters = stations.reduce((acc, s) => acc + (s.stock[fuel]?.availableLiters || 0), 0);
                 return (
                   <div key={fuel} className="p-4 border border-neutral-800 bg-black/60 rounded-xl space-y-1">
                     <span className="text-[10px] text-amber-400 uppercase block font-bold tracking-wider">
-                      STOCK TOTAL {fuel}
+                      {FUEL_LABELS[fuel]}
                     </span>
                     <div className="text-2xl font-black text-white">
                       {totalLiters.toLocaleString('fr-FR')} L
@@ -288,7 +299,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* STATIONS MANAGEMENT TAB */}
       {activeTab === 'stations' && (
         <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-6 shadow-2xl">
-          <div className="border-b border-neutral-800 pb-4 flex justify-between items-center">
+          <div className="border-b border-neutral-800 pb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
               <h2 className="text-xl font-black uppercase text-white">
                 GESTION ET VALIDATION DES STATIONS PARTENAIRES
@@ -376,21 +387,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {activeTab === 'incidents' && (
         <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-4 shadow-2xl">
           <h2 className="text-xl font-black uppercase text-white border-b border-neutral-800 pb-3">
-            JOURNAL DES INCIDENTS & RUPTURES
+            CUVES VIDES OU FAIBLES
           </h2>
 
-          <div className="p-4 border border-rose-500/40 bg-rose-500/10 rounded-xl space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold uppercase">
-              <span className="text-rose-300 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
-                Rupture partielle signalée — Cap Adidogomé
-              </span>
-              <span className="text-neutral-400">Il y a 45 min</span>
-            </div>
-            <p className="text-xs text-neutral-300 font-sans">
-              Le stock de Super à la station Cap Adidogomé Douane est descendu sous les 500 Litres. Notification de réapprovisionnement envoyée au fournisseur.
-            </p>
-          </div>
+          {stockAlerts.length === 0 ? (
+            <p className="text-sm text-emerald-300 font-bold">Aucune cuve vide ou faible en ce moment.</p>
+          ) : (
+            stockAlerts.map(({ station, fuel, stock }) => {
+              const empty = stock.status === 'OUT_OF_STOCK';
+              return (
+                <div
+                  key={`${station.id}-${fuel}`}
+                  className={`p-4 border rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                    empty ? 'border-rose-500/40 bg-rose-500/10' : 'border-amber-500/40 bg-amber-500/10'
+                  }`}
+                >
+                  <span className={`text-xs font-bold uppercase flex items-center gap-2 ${empty ? 'text-rose-300' : 'text-amber-300'}`}>
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    {empty ? 'Rupture' : 'Stock faible'} — {FUEL_LABELS[fuel]} — {station.name}
+                  </span>
+                  <span className="text-xs text-neutral-300">
+                    {stock.availableLiters.toLocaleString('fr-FR')} L libres / {stock.maxCapacityLiters.toLocaleString('fr-FR')} L
+                    {station.phone ? ` • ${station.phone}` : ''}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
       )}
     </div>
