@@ -120,8 +120,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     >
       <div className="bg-neutral-900 text-white border-b-2 border-black px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-code">
         <div className="flex items-center gap-3">
-          <span className="font-extrabold uppercase tracking-wider text-sm">Carte des stations</span>
-          <span className="px-2.5 py-0.5 bg-black text-emerald-400 border border-emerald-500 font-bold rounded text-[11px]">
+          <span className="font-extrabold tracking-wider text-sm">Carte des stations</span>
+          <span className="px-2.5 py-0.5 bg-black text-emerald-400 border border-emerald-500 font-bold rounded text-xs">
             {visible.length} stations
           </span>
         </div>
@@ -129,7 +129,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           <button
             onClick={onLocate}
             disabled={locating}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase rounded flex items-center gap-1.5 disabled:opacity-60"
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded flex items-center gap-1.5 disabled:opacity-60"
           >
             <Crosshair className="w-3.5 h-3.5" />
             {locating ? 'Localisation…' : userLocation ? 'Me relocaliser' : 'Me localiser'}
@@ -165,7 +165,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           ))}
         </MapContainer>
 
-        <div className="absolute bottom-3 left-3 z-[400] bg-white/95 text-black border-2 border-black p-2.5 rounded-lg text-[11px] font-mono-code grid grid-cols-2 gap-x-3 gap-y-1 shadow-lg">
+        <div className="absolute bottom-3 left-3 z-[400] bg-white/95 text-black border-2 border-black p-2.5 rounded-lg text-xs font-mono-code grid grid-cols-2 gap-x-3 gap-y-1 shadow-lg">
           {[STATUS.OK, STATUS.LOW, STATUS.OUT].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full" style={{ background: s.color }} />
@@ -183,19 +183,19 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         <div className="bg-white text-black p-4 sm:p-5 border-t-2 border-black flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 bg-black text-white text-[11px] font-mono-code font-extrabold uppercase rounded-sm">
+              <span className="px-2.5 py-0.5 bg-black text-white text-xs font-mono-code font-extrabold uppercase rounded-sm">
                 {selectedStation.brand}
               </span>
-              <span className="text-xs font-mono-code text-neutral-600 uppercase font-bold">
+              <span className="text-xs font-mono-code text-neutral-600 font-bold">
                 {selectedStation.district}, {selectedStation.city}
               </span>
               {selectedStation.isPartner && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono-code bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 font-extrabold rounded-full">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> PARTENAIRE
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono-code bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 font-extrabold rounded-full">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> Partenaire
                 </span>
               )}
             </div>
-            <h3 className="text-xl font-extrabold uppercase tracking-tight font-mono-code">{selectedStation.name}</h3>
+            <h3 className="text-xl font-extrabold tracking-tight font-mono-code">{selectedStation.name}</h3>
             <p className="text-xs text-neutral-600">
               {selectedStation.address}
               {selectedDistance !== null && (
@@ -206,7 +206,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               href={directionsUrl(selectedStation, userLocation)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white font-extrabold text-xs uppercase rounded hover:bg-neutral-800"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white font-extrabold text-xs rounded hover:bg-neutral-800"
             >
               <Navigation className="w-4 h-4" />
               Itinéraire
@@ -226,7 +226,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             />
             <button
               onClick={() => onBookStation(selectedStation)}
-              className="flex-1 md:flex-none px-7 py-3.5 bg-black text-white font-mono-code font-extrabold text-xs uppercase tracking-wider border-2 border-black hover:bg-neutral-800 flex items-center justify-center gap-2"
+              className="flex-1 md:flex-none px-7 py-3.5 bg-black text-white font-mono-code font-extrabold text-xs tracking-wider border-2 border-black hover:bg-neutral-800 flex items-center justify-center gap-2"
             >
               <span>Réserver le carburant</span>
               <ChevronRight className="w-4 h-4 text-emerald-400" />

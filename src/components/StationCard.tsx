@@ -2,6 +2,7 @@ import React from 'react';
 import { Station, FuelType } from '../types';
 import { Gauge } from './Gauge';
 import { formatDistance } from '../geo';
+import { FavoriteButton } from './FavoriteButton';
 import { ShieldCheck, MapPin, Clock, Phone, ChevronRight, Zap } from 'lucide-react';
 
 interface StationCardProps {
@@ -66,27 +67,30 @@ export const StationCard: React.FC<StationCardProps> = ({
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className={`px-2.5 py-0.5 text-[10px] font-mono-code uppercase tracking-wider rounded border shadow-sm ${getBrandBadge(station.brand)}`}>
+              <span className={`px-2.5 py-0.5 text-[11px] font-mono-code uppercase tracking-wider rounded border shadow-sm ${getBrandBadge(station.brand)}`}>
                 {station.brand}
               </span>
-              <span className="text-xs font-mono-code text-neutral-400 font-semibold uppercase">
+              <span className="text-xs font-mono-code text-neutral-400 font-semibold">
                 {station.district} • {station.city}
               </span>
             </div>
-            <h3 className="text-base font-extrabold uppercase tracking-tight text-white font-mono-code mt-1.5 leading-snug">
+            <h3 className="text-base font-extrabold tracking-tight text-white font-mono-code mt-1.5 leading-snug">
               {station.name}
             </h3>
           </div>
 
+          <div className="flex items-start gap-2 shrink-0">
           {station.isPartner && (
             <span
-              className="inline-flex items-center gap-1 text-[10px] font-mono-code border border-amber-400/80 bg-amber-400/10 text-amber-300 px-2 py-0.5 font-bold uppercase whitespace-nowrap rounded"
+              className="inline-flex items-center gap-1 text-[11px] font-mono-code border border-amber-400/80 bg-amber-400/10 text-amber-300 px-2 py-0.5 font-bold uppercase whitespace-nowrap rounded"
               title="Station partenaire vérifiée RONIKOV"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               Partenaire
             </span>
           )}
+          <FavoriteButton stationId={station.id} />
+          </div>
         </div>
 
         <p className="text-xs text-neutral-300 line-clamp-1">{station.address}</p>
@@ -119,9 +123,9 @@ export const StationCard: React.FC<StationCardProps> = ({
                 isSelected ? 'border-amber-400 bg-amber-400/10' : 'border-neutral-800 bg-neutral-900/90'
               }`}
             >
-              <div className="flex justify-between items-center text-[11px] font-mono-code font-bold text-white mb-1">
+              <div className="flex justify-between items-center text-xs font-mono-code font-bold text-white mb-1">
                 <span>{f.label}</span>
-                <span className="text-[10px] text-neutral-400">{stStock.pricePerLiter} F</span>
+                <span className="text-[11px] text-neutral-400">{stStock.pricePerLiter} F</span>
               </div>
               <Gauge
                 value={percent}
@@ -135,7 +139,7 @@ export const StationCard: React.FC<StationCardProps> = ({
       </div>
 
       {/* Amenities Tags */}
-      <div className="flex flex-wrap gap-1.5 text-[10px] font-mono-code text-neutral-400">
+      <div className="flex flex-wrap gap-1.5 text-[11px] font-mono-code text-neutral-400">
         {station.amenities.map((a, i) => (
           <span key={i} className="px-2 py-0.5 bg-neutral-900/90 border border-neutral-800 rounded text-neutral-300">
             {a}
@@ -147,14 +151,14 @@ export const StationCard: React.FC<StationCardProps> = ({
       <div className="flex items-center gap-2 pt-1">
         <button
           onClick={() => onViewDetails(station)}
-          className="flex-1 py-2 px-3 border border-neutral-700 bg-neutral-900/80 hover:bg-neutral-800 text-white text-xs font-mono-code font-bold uppercase rounded transition-colors"
+          className="flex-1 py-2 px-3 border border-neutral-700 bg-neutral-900/80 hover:bg-neutral-800 text-white text-xs font-mono-code font-bold rounded transition-colors"
         >
           Fiche Station
         </button>
         <button
           onClick={() => onBook(station)}
           disabled={!canBook}
-          className="flex-1 py-2 px-3 disabled:opacity-40 disabled:cursor-not-allowed bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs font-mono-code uppercase rounded transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-amber-400/20"
+          className="flex-1 py-2 px-3 disabled:opacity-40 disabled:cursor-not-allowed bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-xs font-mono-code rounded transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-amber-400/20"
         >
           <span>{canBook ? 'Réserver' : 'Rupture'}</span>
           <ChevronRight className="w-3.5 h-3.5" />

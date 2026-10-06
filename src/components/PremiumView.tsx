@@ -44,12 +44,12 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-neutral-800/80 pb-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-black text-xs font-black uppercase rounded-md shadow-md shadow-amber-400/20">
-              <Star className="w-3.5 h-3.5 fill-black" /> ABONNEMENT PRIVILÈGE TOGO
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-black text-xs font-black rounded-md shadow-md shadow-amber-400/20">
+              <Star className="w-3.5 h-3.5 fill-black" /> Abonnement privilège Togo
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
-              PASS PRIORITAIRE <span className="text-amber-400">RONIKOV PREMIUM</span>
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
+              Pass prioritaire <span className="text-amber-400">RONIKOV Premium</span>
             </h1>
 
             <p className="text-xs sm:text-sm text-neutral-300 font-sans max-w-3xl leading-relaxed">
@@ -58,17 +58,17 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           </div>
 
           {isPremium && (
-            <div className="p-4 border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-extrabold text-xs uppercase rounded-xl inline-flex items-center gap-2 shrink-0 shadow-lg">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> PASS PRIORITAIRE ACTIF
+            <div className="p-4 border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-extrabold text-xs rounded-xl inline-flex items-center gap-2 shrink-0 shadow-lg">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Pass prioritaire actif
             </div>
           )}
         </div>
 
         {/* Network Stations Interactive Logo Strip */}
         <div className="space-y-3 relative z-10 pt-2">
-          <div className="text-[10px] uppercase font-bold text-amber-400 tracking-widest flex items-center gap-1.5">
+          <div className="text-[11px] uppercase font-bold text-amber-400 tracking-widest flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>ACCÈS EXPRESS VALABLE SUR TOUTES LES ENSEIGNES PARTENAIRES DU TOGO</span>
+            <span>Accès express valable sur toutes les enseignes partenaires du Togo</span>
           </div>
 
           <div className="flex items-center gap-4 overflow-x-auto py-2">
@@ -78,7 +78,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
                 className="bg-black/60 border border-neutral-800 p-2 rounded-xl flex items-center gap-2.5 shrink-0 hover:border-amber-400 transition-colors"
               >
                 <StationBrandLogo brand={brand} size="sm" interactive={true} showBadge={false} />
-                <span className="text-xs font-extrabold uppercase text-neutral-200">{brand}</span>
+                <span className="text-xs font-extrabold text-neutral-200">{brand}</span>
               </div>
             ))}
           </div>
@@ -98,9 +98,9 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         >
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <span className="text-xs font-bold uppercase text-neutral-400">FORFAIT MENSUEL</span>
-              <span className="px-2.5 py-0.5 bg-neutral-800 border border-neutral-700 text-neutral-300 text-[10px] font-bold uppercase rounded">
-                SANS ENGAGEMENT
+              <span className="text-xs font-bold text-neutral-400">Forfait mensuel</span>
+              <span className="px-2.5 py-0.5 bg-neutral-800 border border-neutral-700 text-neutral-300 text-[11px] font-bold uppercase rounded">
+                Sans engagement
               </span>
             </div>
 
@@ -128,7 +128,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <button
             onClick={handleSubscribe}
             disabled={isPremium || isSending}
-            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black uppercase tracking-wider transition-all rounded-xl border shadow-lg ${
+            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black tracking-wider transition-all rounded-xl border shadow-lg ${
               selectedPlan === 'monthly'
                 ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300 shadow-amber-400/20'
                 : 'bg-neutral-900 text-white border-neutral-700 hover:border-neutral-500'
@@ -149,9 +149,9 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         >
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <span className="text-xs font-bold uppercase text-amber-400">FORFAIT ANNUEL</span>
-              <span className="px-2.5 py-0.5 bg-amber-400 text-black text-[10px] font-black uppercase rounded shadow">
-                2 MOIS OFFERTS
+              <span className="text-xs font-bold text-amber-400">Forfait annuel</span>
+              <span className="px-2.5 py-0.5 bg-amber-400 text-black text-[11px] font-black uppercase rounded shadow">
+                2 Mois offerts
               </span>
             </div>
 
@@ -179,7 +179,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <button
             onClick={handleSubscribe}
             disabled={isPremium || isSending}
-            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black uppercase tracking-wider transition-all rounded-xl border shadow-lg ${
+            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black tracking-wider transition-all rounded-xl border shadow-lg ${
               selectedPlan === 'yearly'
                 ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300 shadow-amber-400/20'
                 : 'bg-neutral-900 text-white border-neutral-700 hover:border-neutral-500'
@@ -194,7 +194,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         <div
           ref={messageRef}
           role={subscribedMessage.ok ? 'status' : 'alert'}
-          className={`p-4 border text-xs font-bold uppercase text-center rounded-xl animate-fadeIn ${
+          className={`p-4 border text-xs font-bold text-center rounded-xl animate-fadeIn ${
             subscribedMessage.ok
               ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
               : 'bg-red-500/20 border-red-500/50 text-red-300'
@@ -207,9 +207,9 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
       {/* Comparison Table with Dark Glass Theme */}
       <div className="border border-neutral-800 p-6 sm:p-8 bg-black/85 backdrop-blur-xl rounded-2xl space-y-6 shadow-2xl">
         <div className="border-b border-neutral-800 pb-4">
-          <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">COMPARATIF OFFICIEL</span>
-          <h2 className="text-2xl font-black uppercase text-white tracking-tight">
-            TABLEAU COMPARATIF DES AVANTAGES
+          <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">Comparatif officiel</span>
+          <h2 className="text-2xl font-black text-white tracking-tight">
+            Tableau comparatif des avantages
           </h2>
         </div>
 
@@ -217,16 +217,16 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <table className="w-full text-left text-xs font-mono-code border-collapse">
             <thead>
               <tr className="border-b border-neutral-800 bg-neutral-900/90 text-amber-300 font-extrabold">
-                <th className="p-3.5 uppercase">Fonctionnalité / Avantage</th>
-                <th className="p-3.5 uppercase text-neutral-400">Compte Standard</th>
-                <th className="p-3.5 uppercase text-amber-400 font-black">Pass Premium RONIKOV</th>
+                <th className="p-3.5">Fonctionnalité / Avantage</th>
+                <th className="p-3.5 text-neutral-400">Compte Standard</th>
+                <th className="p-3.5 text-amber-400 font-black">Pass Premium RONIKOV</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800/80 text-neutral-300">
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Frais de réservation par commande</td>
                 <td className="p-3.5 text-neutral-400">{SERVICE_FEE_XOF} FCFA</td>
-                <td className="p-3.5 font-black text-emerald-400">0 FCFA (GRATUIT)</td>
+                <td className="p-3.5 font-black text-emerald-400">0 FCFA (gratuit)</td>
               </tr>
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Accès à la file prioritaire en station</td>

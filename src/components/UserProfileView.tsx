@@ -26,13 +26,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservat
       <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
         <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
           <User className="w-12 h-12 mx-auto text-amber-400" />
-          <h1 className="text-2xl font-black uppercase">Mon profil</h1>
+          <h1 className="text-2xl font-black">Mon profil</h1>
           <p className="text-sm text-neutral-300 font-sans">
             Connectez-vous pour retrouver vos tickets, vos litres servis et votre Pass Premium.
           </p>
           <button
             onClick={onOpenAuth}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-400 text-black font-black text-xs uppercase rounded-xl hover:bg-amber-300"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300"
           >
             <LogIn className="w-4 h-4" /> Se connecter ou créer un compte
           </button>
@@ -71,20 +71,20 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservat
 
           <div className="space-y-2 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black uppercase rounded">
+              <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black rounded">
                 {ROLE_LABELS[user.role]}
               </span>
               {user.isPremium ? (
-                <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold uppercase rounded">
+                <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold rounded">
                   Pass Premium actif
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 bg-neutral-800 text-neutral-300 border border-neutral-700 text-xs font-bold uppercase rounded">
+                <span className="px-2.5 py-0.5 bg-neutral-800 text-neutral-300 border border-neutral-700 text-xs font-bold rounded">
                   Compte standard
                 </span>
               )}
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight break-words">{user.name}</h1>
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight break-words">{user.name}</h1>
             <div className="text-xs text-neutral-300 font-sans flex flex-wrap gap-x-4 gap-y-1">
               <span className="flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-amber-400" /> {formatPhone(user.phone)}
@@ -101,7 +101,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservat
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {stats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-xl space-y-1">
-              <span className="text-[10px] text-neutral-400 uppercase font-bold flex items-center gap-1.5">
+              <span className="text-[11px] text-neutral-400 uppercase font-bold flex items-center gap-1.5">
                 <Icon className="w-3.5 h-3.5 text-amber-400" /> {label}
               </span>
               <span className="text-lg sm:text-xl font-black text-white block">{value}</span>
@@ -118,7 +118,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservat
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold uppercase">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold">
         <ProfileLink icon={Ticket} label="Mes réservations" detail={active.length ? `${active.length} ticket(s) à récupérer` : 'Historique de vos tickets'} onClick={() => onNavigate('history')} />
         <ProfileLink icon={MapPin} label="Réserver du carburant" detail="Stations, stocks et carte" onClick={() => onNavigate('map')} />
         <ProfileLink
@@ -158,7 +158,7 @@ const ProfileLink: React.FC<{ icon: React.ComponentType<{ className?: string }>;
     <Icon className="w-5 h-5 text-amber-400 shrink-0" />
     <span className="flex-1 min-w-0">
       <span className="block">{label}</span>
-      <span className="block text-[11px] text-neutral-400 normal-case font-sans font-normal">{detail}</span>
+      <span className="block text-xs text-neutral-400 normal-case font-sans font-normal">{detail}</span>
     </span>
     <ChevronRight className="w-4 h-4 text-neutral-500 shrink-0" />
   </button>

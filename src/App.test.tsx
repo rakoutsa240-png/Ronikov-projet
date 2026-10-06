@@ -20,6 +20,7 @@ function mockApi(stations: unknown, prices: unknown, routes: Record<string, () =
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 describe('App', () => {
@@ -45,6 +46,16 @@ describe('App', () => {
     render(<App />);
     await vi.waitFor(() => expect(warn).toHaveBeenCalled());
     expect(screen.getAllByText(INITIAL_STATIONS[0].name).length).toBeGreaterThan(0);
+    warn.mockRestore();
+  });
+
+  it('shows the stations saved at the last visit when the server does not answer', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    localStorage.setItem('ronikov.stations', JSON.stringify([{...INITIAL_STATIONS[0], name: 'Station gardée sur le téléphone'}]));
+    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('Failed to fetch'))));
+    render(<App />);
+    expect(await screen.findByText(/Le serveur RONIKOV ne répond pas/)).toBeTruthy();
+    expect(screen.getAllByText('Station gardée sur le téléphone').length).toBeGreaterThan(0);
     warn.mockRestore();
   });
 

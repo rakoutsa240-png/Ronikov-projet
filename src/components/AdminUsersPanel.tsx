@@ -42,9 +42,9 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
 
   return (
     <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-4 shadow-2xl">
-      <h2 className="text-xl font-black uppercase text-white border-b border-neutral-800 pb-3 flex items-center gap-2">
+      <h2 className="text-xl font-black text-white border-b border-neutral-800 pb-3 flex items-center gap-2">
         <Users className="w-5 h-5 text-amber-400" />
-        COMPTES, RÔLES & PASS PREMIUM
+        Comptes, rôles & pass Premium
       </h2>
 
       {error && (
@@ -62,7 +62,7 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
             className="p-4 border border-neutral-800 rounded-xl bg-black/60 grid gap-3 md:grid-cols-[1.4fr_1fr_1.2fr_auto] md:items-center text-xs"
           >
             <div>
-              <div className="font-black text-white uppercase flex items-center gap-1.5">
+              <div className="font-black text-white flex items-center gap-1.5">
                 {user.name}
                 {user.isPremium && <Crown className="w-3.5 h-3.5 text-amber-400" aria-label="Premium" />}
               </div>
@@ -102,7 +102,7 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
               <span className="text-neutral-500">—</span>
             )}
 
-            <label className="flex items-center gap-2 font-bold uppercase text-neutral-200">
+            <label className="flex items-center gap-2 font-bold text-neutral-200">
               <input
                 type="checkbox"
                 checked={user.isPremium}

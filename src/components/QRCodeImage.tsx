@@ -44,7 +44,7 @@ export const QRCodeImage: React.FC<QRCodeImageProps> = ({ value, size = 160, cla
         style={{ width: size, height: size }}
         className="bg-neutral-100 text-neutral-800 flex flex-col items-center justify-center p-2 rounded-xl text-center border border-neutral-300"
       >
-        <span className="text-[10px] font-mono-code font-bold text-red-600">Erreur QR</span>
+        <span className="text-[11px] font-mono-code font-bold text-red-600">Erreur QR</span>
       </div>
     );
   }
@@ -55,7 +55,7 @@ export const QRCodeImage: React.FC<QRCodeImageProps> = ({ value, size = 160, cla
         style={{ width: size, height: size }} 
         className="bg-neutral-100 text-neutral-500 flex items-center justify-center rounded-xl p-2 animate-pulse border border-neutral-200"
       >
-        <span className="text-[10px] font-mono-code font-bold">Code QR...</span>
+        <span className="text-[11px] font-mono-code font-bold">Code QR...</span>
       </div>
     );
   }

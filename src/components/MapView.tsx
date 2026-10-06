@@ -3,12 +3,14 @@ import { Station, FuelType } from '../types';
 import { StationCard } from './StationCard';
 import { distanceKm, LatLng, locateUser } from '../geo';
 import { FUEL_TYPES } from '../../shared/stock';
+import { useFavorites } from '../storage';
+import { StationListSkeleton } from './Skeleton';
 
 // The map library is heavy, so it only loads when this page opens.
 const InteractiveMap = lazy(() => import('./InteractiveMap'));
 
 const mapFallback = (
-  <div className="h-[420px] sm:h-[520px] border-2 border-black bg-neutral-900 text-neutral-400 flex items-center justify-center text-xs font-mono-code uppercase">
+  <div className="h-[420px] sm:h-[520px] border-2 border-black bg-neutral-900 text-neutral-400 flex items-center justify-center text-xs font-mono-code">
     Chargement de la carte…
   </div>
 );
@@ -20,6 +22,7 @@ interface MapViewProps {
   onSelectStation: (station: Station) => void;
   onBookStation: (station: Station) => void;
   onViewStationDetails: (station: Station) => void;
+  loading?: boolean;
 }
 
 export const MapView: React.FC<MapViewProps> = ({
@@ -28,7 +31,9 @@ export const MapView: React.FC<MapViewProps> = ({
   onSelectStation,
   onBookStation,
   onViewStationDetails,
+  loading = false,
 }) => {
+  const favoriteIds = useFavorites();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFuel, setSelectedFuel] = useState<FuelType | 'ALL'>('ALL');
   const [onlyInStock, setOnlyInStock] = useState(false);
@@ -84,6 +89,9 @@ export const MapView: React.FC<MapViewProps> = ({
 
   // Sorting logic
   filtered.sort((a, b) => {
+    // Favourite stations come first, then the chosen order.
+    const favoriteOrder = Number(favoriteIds.includes(b.id)) - Number(favoriteIds.includes(a.id));
+    if (favoriteOrder !== 0) return favoriteOrder;
     if (sortBy === 'queue') {
       return a.queueTimeMinutes - b.queueTimeMinutes;
     }
@@ -98,14 +106,14 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const noResults = (
     <div className="p-8 border border-neutral-800 rounded-xl text-center font-mono-code space-y-3 bg-black/85">
-      <p className="text-sm font-bold uppercase text-white">Aucune station ne correspond à vos critères</p>
+      <p className="text-sm font-bold text-white">Aucune station ne correspond à vos critères</p>
       <button
         onClick={() => {
           setSearchTerm('');
           setSelectedFuel('ALL');
           setOnlyInStock(false);
         }}
-        className="px-4 py-2 bg-amber-400 text-black text-xs font-black uppercase rounded-lg hover:bg-amber-300"
+        className="px-4 py-2 bg-amber-400 text-black text-xs font-black rounded-lg hover:bg-amber-300"
       >
         Effacer les filtres
       </button>
@@ -117,11 +125,11 @@ export const MapView: React.FC<MapViewProps> = ({
       {/* Page Title Header */}
       <div className="border-b-2 border-neutral-700/80 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 font-mono-code">
         <div>
-          <div className="text-xs text-amber-400 font-bold uppercase tracking-widest">
-            RÉSEAU DE CARBURANT EN TEMPS RÉEL
+          <div className="hidden sm:block text-xs text-amber-400 font-bold uppercase tracking-widest">
+            Réseau de carburant en temps réel
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white">
-            CARTE & RECHERCHE DES STATIONS
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Carte & recherche des stations
           </h1>
         </div>
 
@@ -130,7 +138,7 @@ export const MapView: React.FC<MapViewProps> = ({
           <div className="flex border border-black text-xs font-bold">
             <button
               onClick={() => setViewLayout('split')}
-              className={`px-3 py-1.5 uppercase ${
+              className={`px-3 py-1.5 ${
                 viewLayout === 'split' ? 'bg-black text-white' : 'bg-white text-black'
               }`}
             >
@@ -138,7 +146,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setViewLayout('mapOnly')}
-              className={`px-3 py-1.5 uppercase ${
+              className={`px-3 py-1.5 ${
                 viewLayout === 'mapOnly' ? 'bg-black text-white' : 'bg-white text-black'
               }`}
             >
@@ -146,7 +154,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setViewLayout('listOnly')}
-              className={`px-3 py-1.5 uppercase ${
+              className={`px-3 py-1.5 ${
                 viewLayout === 'listOnly' ? 'bg-black text-white' : 'bg-white text-black'
               }`}
             >
@@ -175,7 +183,7 @@ export const MapView: React.FC<MapViewProps> = ({
           <div className="md:col-span-4 flex items-center gap-1 overflow-x-auto py-1">
             <button
               onClick={() => setSelectedFuel('ALL')}
-              className={`px-2.5 py-1.5 font-bold uppercase whitespace-nowrap ${
+              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
                 selectedFuel === 'ALL'
                   ? 'bg-white text-black border border-white'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
@@ -185,7 +193,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('SUPER')}
-              className={`px-2.5 py-1.5 font-bold uppercase whitespace-nowrap ${
+              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
                 selectedFuel === 'SUPER'
                   ? 'bg-white text-black border border-white'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
@@ -195,7 +203,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('GAZOLE')}
-              className={`px-2.5 py-1.5 font-bold uppercase whitespace-nowrap ${
+              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
                 selectedFuel === 'GAZOLE'
                   ? 'bg-white text-black border border-white'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
@@ -205,7 +213,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('MELANGE')}
-              className={`px-2.5 py-1.5 font-bold uppercase whitespace-nowrap ${
+              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
                 selectedFuel === 'MELANGE'
                   ? 'bg-white text-black border border-white'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
@@ -215,7 +223,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('KEROSENE')}
-              className={`px-2.5 py-1.5 font-bold uppercase whitespace-nowrap ${
+              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
                 selectedFuel === 'KEROSENE'
                   ? 'bg-white text-black border border-white'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
@@ -227,7 +235,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
           {/* Sort Dropdown */}
           <div className="md:col-span-3 flex items-center md:justify-end gap-2">
-            <span className="text-neutral-400 uppercase text-[10px]">Trier:</span>
+            <span className="text-neutral-400 uppercase text-[11px]">Trier:</span>
             <select
               value={sortBy}
               onChange={(e) => {
@@ -246,7 +254,7 @@ export const MapView: React.FC<MapViewProps> = ({
         </div>
 
         {/* Sub-row: Availability toggle & counter */}
-        <div className="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-neutral-800 text-[11px] text-neutral-400">
+        <div className="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-neutral-800 text-xs text-neutral-400">
           <label className="flex items-center gap-2 cursor-pointer hover:text-white">
             <input
               type="checkbox"
@@ -254,10 +262,10 @@ export const MapView: React.FC<MapViewProps> = ({
               onChange={(e) => setOnlyInStock(e.target.checked)}
               className="accent-white cursor-pointer"
             />
-            <span className="uppercase font-semibold">Afficher uniquement les stations avec du stock réel</span>
+            <span className=" font-semibold">Afficher uniquement les stations avec du stock réel</span>
           </label>
 
-          <span className="font-bold text-white uppercase">
+          <span className="font-bold text-white">
             {filtered.length} station(s) trouvée(s) sur {stations.length}
           </span>
         </div>
@@ -280,7 +288,8 @@ export const MapView: React.FC<MapViewProps> = ({
         </Suspense>
       )}
 
-      {viewLayout === 'listOnly' && filtered.length === 0 && noResults}
+      {viewLayout === 'listOnly' && loading && <StationListSkeleton />}
+      {viewLayout === 'listOnly' && !loading && filtered.length === 0 && noResults}
 
       {viewLayout === 'listOnly' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -318,7 +327,9 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* List Column */}
           {/* On a computer the list scrolls beside the map; on a phone it simply follows the map. */}
           <div className="lg:col-span-5 space-y-4 lg:max-h-[720px] lg:overflow-y-auto pr-1">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <StationListSkeleton />
+            ) : filtered.length === 0 ? (
               noResults
             ) : (
               filtered.map((st) => (

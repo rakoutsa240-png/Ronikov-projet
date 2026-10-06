@@ -10,6 +10,10 @@ import { ReservationModal } from './components/ReservationModal';
 import { AuthModal } from './components/AuthModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
+import { BottomNav } from './components/BottomNav';
+import { PageSkeleton } from './components/Skeleton';
+import { loadJSON, saveJSON, useOnline } from './storage';
+import { WifiOff, RefreshCw } from 'lucide-react';
 import { parseHash, routeToHash, Route, Tab } from './routes';
 
 // Pages other than the home page and the map are downloaded only when opened, so the first visit stays light.
@@ -22,34 +26,59 @@ const AdminDashboard = named(() => import('./components/AdminDashboard'), 'Admin
 const PremiumView = named(() => import('./components/PremiumView'), 'PremiumView');
 const UserProfileView = named(() => import('./components/UserProfileView'), 'UserProfileView');
 
-const pageFallback = (
-  <div className="py-24 text-center text-xs font-bold uppercase tracking-widest text-neutral-400">Chargement…</div>
-);
+const pageFallback = <PageSkeleton />;
+
+// Last answers from the server, kept on the phone so the site still shows something without network.
+const STATIONS_KEY = 'ronikov.stations';
+const PRICES_KEY = 'ronikov.prices';
+const TICKETS_KEY = 'ronikov.tickets';
 
 
 export default function App() {
-  // Everything comes from the API; the demo data is only shown until it answers.
-  const [stations, setStations] = useState<Station[]>(INITIAL_STATIONS);
+  // Everything comes from the API. Until it answers the pages show grey placeholders, or the stations
+  // saved at the last visit; the demo data is only a last resort when the server can't be reached.
+  const [stations, setStations] = useState<Station[]>(() => loadJSON<Station[]>(STATIONS_KEY, []));
+  const [stationsLoaded, setStationsLoaded] = useState(false);
+  // The server could not be reached: what is shown may be out of date.
+  const [serverUnreachable, setServerUnreachable] = useState(false);
+  const isOnline = useOnline();
   // Tickets and notifications belong to the signed-in account and only come from the API.
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [staffReservations, setStaffReservations] = useState<Reservation[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  const [globalPrices, setGlobalPrices] = useState<FuelPriceGlobal[]>(GLOBAL_FUEL_PRICES);
+  const [globalPrices, setGlobalPrices] = useState<FuelPriceGlobal[]>(() => loadJSON<FuelPriceGlobal[]>(PRICES_KEY, []));
 
   // Load stations and official prices.
-  useEffect(() => {
-    const controller = new AbortController();
-    Promise.all([api.stations(controller.signal), api.prices(controller.signal)])
+  const loadStationsAndPrices = useCallback((signal?: AbortSignal) => {
+    Promise.all([api.stations(signal), api.prices(signal)])
       .then(([apiStations, apiPrices]) => {
         setStations(apiStations);
         setGlobalPrices(apiPrices);
+        saveJSON(STATIONS_KEY, apiStations);
+        saveJSON(PRICES_KEY, apiPrices);
+        setServerUnreachable(false);
+        setStationsLoaded(true);
       })
       .catch((e) => {
-        if (!controller.signal.aborted) console.warn('API unavailable, using local data', e);
+        if (signal?.aborted) return;
+        console.warn('API unavailable, using saved or local data', e);
+        setServerUnreachable(true);
+        setStations((prev) => (prev.length > 0 ? prev : INITIAL_STATIONS));
+        setGlobalPrices((prev) => (prev.length > 0 ? prev : GLOBAL_FUEL_PRICES));
+        setStationsLoaded(true);
       });
-    return () => controller.abort();
   }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    loadStationsAndPrices(controller.signal);
+    return () => controller.abort();
+  }, [loadStationsAndPrices]);
+  // Coming back online refreshes stocks and prices.
+  useEffect(() => {
+    if (isOnline && serverUnreachable) loadStationsAndPrices();
+  }, [isOnline]);
+  const loading = !stationsLoaded && stations.length === 0;
 
   // Stock changes after every booking, cancellation or validation.
   const refreshStations = () => {
@@ -83,6 +112,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   // False until the server said who is signed in, so a refresh on #/admin does not bounce to the home page.
   const [authChecked, setAuthChecked] = useState(false);
+  const [showingSavedTickets, setShowingSavedTickets] = useState(false);
   const userRole: UserRole = currentUser?.role ?? 'CLIENT';
   const userName = currentUser?.name ?? '';
   const isUserPremium = Boolean(currentUser?.isPremium);
@@ -95,7 +125,11 @@ export default function App() {
       // A sign-in that finished first wins over a slower "nobody signed in" answer.
       .then((user) => setCurrentUser((prev) => prev ?? user))
       .catch((e) => {
-        if (!controller.signal.aborted) console.warn('Could not load the signed-in user', e);
+        if (controller.signal.aborted) return;
+        console.warn('Could not load the signed-in user', e);
+        // Without network the tickets saved at the last visit stay visible, so the code can still be shown at the pump.
+        setReservations(loadJSON<Reservation[]>(TICKETS_KEY, []));
+        setShowingSavedTickets(true);
       })
       .finally(() => {
         if (!controller.signal.aborted) setAuthChecked(true);
@@ -124,6 +158,7 @@ export default function App() {
     }
     setCurrentUser(null);
     setProStationId(undefined);
+    saveJSON(TICKETS_KEY, []);
     setActiveTab('home');
   };
 
@@ -134,12 +169,23 @@ export default function App() {
   const proStationId = chosenProStationId ?? managedStationId ?? stations[0]?.id;
   const loadAccountData = () => {
     if (!currentUser) {
+      if (showingSavedTickets) return;
       setReservations([]);
       setNotifications([]);
       setStaffReservations([]);
       return;
     }
-    api.myReservations().then(setReservations).catch((e) => console.warn('Could not load reservations', e));
+    setShowingSavedTickets(false);
+    api
+      .myReservations()
+      .then((tickets) => {
+        setReservations(tickets);
+        saveJSON(TICKETS_KEY, tickets);
+      })
+      .catch((e) => {
+        console.warn('Could not load reservations', e);
+        setReservations(loadJSON<Reservation[]>(TICKETS_KEY, []));
+      });
     api.notifications().then(setNotifications).catch((e) => console.warn('Could not load notifications', e));
     const staffRequest =
       currentUser.role === 'ADMIN'
@@ -149,6 +195,10 @@ export default function App() {
           : Promise.resolve([]);
     staffRequest.then(setStaffReservations).catch((e) => console.warn('Could not load station reservations', e));
   };
+  // Signed-in visitors get the tickets page downloaded in advance, so it opens even without network later.
+  useEffect(() => {
+    if (currentUser) void import('./components/HistoryView').catch(() => {});
+  }, [currentUser?.id]);
   useEffect(loadAccountData, [currentUser?.id, currentUser?.role, currentUser?.role === 'STATION_PRO' ? proStationId : undefined]);
 
   // Leave the Pro or Admin space when the account may not see it (signed out, or another role).
@@ -196,7 +246,11 @@ export default function App() {
 
   // The API created the ticket: show it, then refresh stock and notifications.
   const handleCompleteReservation = (newReservation: Reservation) => {
-    setReservations((prev) => [newReservation, ...prev]);
+    setReservations((prev) => {
+      const next = [newReservation, ...prev];
+      saveJSON(TICKETS_KEY, next);
+      return next;
+    });
     refreshStations();
     api.notifications().then(setNotifications).catch(() => {});
   };
@@ -205,7 +259,11 @@ export default function App() {
   const handleCancelReservation = async (resId: string) => {
     try {
       const cancelled = await api.cancelReservation(resId);
-      setReservations((prev) => prev.map((r) => (r.id === resId ? cancelled : r)));
+      setReservations((prev) => {
+        const next = prev.map((r) => (r.id === resId ? cancelled : r));
+        saveJSON(TICKETS_KEY, next);
+        return next;
+      });
       refreshStations();
     } catch (e) {
       window.alert(e instanceof ApiError ? e.message : 'Annulation impossible, réessayez.');
@@ -310,10 +368,12 @@ export default function App() {
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const activeTicketCount = reservations.filter((r) => r.status === 'PENDING' && new Date(r.expiresAt) > new Date()).length;
 
   return (
     <DynamicBackground>
-      <div className="min-h-screen text-slate-900 flex flex-col justify-between selection:bg-amber-400 selection:text-black">
+      {/* On phones the bottom menu covers the end of the page: leave room for it. */}
+      <div className="min-h-screen text-slate-900 flex flex-col justify-between selection:bg-amber-400 selection:text-black pb-[calc(4.5rem+env(safe-area-inset-bottom))] xl:pb-0">
         {/* Top Header */}
       <Header
         activeTab={activeTab}
@@ -325,9 +385,24 @@ export default function App() {
         onOpenNotifications={() => setIsNotifDrawerOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         userName={userName}
-        globalPrices={globalPrices}
-        stationCount={stations.length}
       />
+
+      {(!isOnline || serverUnreachable) && (
+        <div role="status" className="bg-amber-400 text-black text-sm font-semibold">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3">
+            <WifiOff className="w-4 h-4 shrink-0" />
+            <span className="flex-1">
+              {!isOnline ? 'Pas de connexion internet.' : 'Le serveur RONIKOV ne répond pas.'} Les stocks affichés peuvent ne pas être à jour
+              {reservations.length > 0 ? ', vos tickets restent visibles dans « Tickets ».' : '.'}
+            </span>
+            {isOnline && (
+              <button onClick={() => loadStationsAndPrices()} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-black/10 hover:bg-black/20 shrink-0">
+                <RefreshCw className="w-4 h-4" /> Réessayer
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Main View Router */}
       <main className="flex-1">
@@ -335,6 +410,8 @@ export default function App() {
         {activeTab === 'home' && (
           <HomeView
             stations={stations}
+            globalPrices={globalPrices}
+            loading={loading}
             onNavigateMap={() => setActiveTab('map')}
             onBookStation={handleOpenBooking}
             onViewStation={handleViewStationDetails}
@@ -348,6 +425,7 @@ export default function App() {
         {activeTab === 'map' && (
           <MapView
             stations={stations}
+            loading={loading}
             selectedStation={selectedStation}
             onSelectStation={setSelectedStation}
             onBookStation={handleOpenBooking}
@@ -355,7 +433,8 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'station-detail' && (
+        {activeTab === 'station-detail' && loading && <PageSkeleton />}
+        {activeTab === 'station-detail' && !loading && (
           <StationDetailView
             station={stations.find((s) => s.id === route.stationId) ?? null}
             onBack={() => (window.history.length > 1 ? window.history.back() : setActiveTab('map'))}
@@ -367,7 +446,8 @@ export default function App() {
           <HistoryView
             reservations={reservations}
             onCancelReservation={handleCancelReservation}
-            isSignedIn={currentUser !== null}
+            isSignedIn={currentUser !== null || (showingSavedTickets && reservations.length > 0)}
+            offline={showingSavedTickets}
             onOpenAuth={() => setIsAuthModalOpen(true)}
             onNavigateToMap={() => setActiveTab('map')}
           />
@@ -419,6 +499,8 @@ export default function App() {
 
       {/* Footer */}
       <Footer />
+
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} activeTicketCount={activeTicketCount} />
 
       {/* Booking Modal */}
       <ReservationModal
