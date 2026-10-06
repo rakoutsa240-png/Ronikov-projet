@@ -4,7 +4,7 @@ export const FUEL_TYPES: FuelType[] = ['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE']
 
 export const FUEL_LABELS: Record<FuelType, string> = {
   SUPER: 'Super Sans Plomb',
-  GAZOLE: 'Gazole (Désel)',
+  GAZOLE: 'Gazole (Diesel)',
   MELANGE: 'Mélange 2 Temps',
   KEROSENE: 'Pétrole / Kérosène',
 };

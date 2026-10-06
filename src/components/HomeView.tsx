@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Station } from '../types';
 import { StationCard } from './StationCard';
+import { FUEL_TYPES } from '../../shared/stock';
 import { Gauge } from './Gauge';
 import { InteractiveHeadline } from './InteractiveHeadline';
 import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart } from 'lucide-react';
@@ -14,7 +15,6 @@ interface HomeViewProps {
   onBookStation: (station: Station) => void;
   onViewStation: (station: Station) => void;
   onNavigatePro: () => void;
-  onNavigateProfile?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -23,9 +23,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onBookStation,
   onViewStation,
   onNavigatePro,
-  onNavigateProfile,
 }) => {
-  const featuredStations = stations.slice(0, 3);
+  // Live figures from the stations the API returned.
+  const cities = [...new Set(stations.map((s) => s.city))];
+  const totalLiters = stations.reduce(
+    (sum, s) => sum + FUEL_TYPES.reduce((acc, f) => acc + Math.max(0, s.stock[f]?.availableLiters ?? 0), 0),
+    0,
+  );
+  const averageWait = stations.length
+    ? Math.round(stations.reduce((sum, s) => sum + s.queueTimeMinutes, 0) / stations.length)
+    : 0;
+  const hasStock = (s: Station) => FUEL_TYPES.some((f) => (s.stock[f]?.availableLiters ?? 0) > 0);
+  // Three stations of Lomé that have fuel, shortest queue first.
+  const featuredStations = [...stations]
+    .filter((s) => s.city === 'Lomé' && hasStock(s))
+    .sort((a, b) => a.queueTimeMinutes - b.queueTimeMinutes)
+    .slice(0, 3);
 
   return (
     <div className="space-y-16 py-4">
@@ -54,7 +67,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <InteractiveHeadline />
 
           <p className="text-base sm:text-lg text-neutral-200 max-w-2xl font-sans leading-relaxed drop-shadow-sm font-medium">
-            Localisez les stations-service disposant de stock réel à Lomé et dans tout le Togo, réservez vos litres, payez en TMoney ou Flooz, et récupérez votre carburant immédiatement via code sécurisé.
+            Localisez les stations-service disposant de stock réel à Lomé et dans tout le Togo, réservez vos litres, payez en Mixx by Yas ou Flooz, et récupérez votre carburant immédiatement via code sécurisé.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-4 font-mono-code">
@@ -78,23 +91,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-black/90 backdrop-blur-md text-white font-mono-code border-2 border-white/20 mt-12">
             <div className="space-y-1 border-r border-neutral-800 pr-4">
               <div className="text-[10px] text-neutral-400 uppercase font-bold">STATIONS ACTIVES</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-white">12 STATIONS</div>
-              <div className="text-[11px] text-neutral-300">Lomé, Tsévié, Atakpamé</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white">{stations.length} STATIONS</div>
+              <div className="text-[11px] text-neutral-300">{cities.join(', ')}</div>
             </div>
-            <div className="space-y-1 border-r border-neutral-800 pr-4">
+            <div className="space-y-1 md:border-r border-neutral-800 pr-4">
               <div className="text-[10px] text-neutral-400 uppercase font-bold">STOCK DISPONIBLE</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-white">142 000 L</div>
-              <div className="text-[11px] text-neutral-300">Super, Gazole & Mélange</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white">{totalLiters.toLocaleString('fr-FR')} L</div>
+              <div className="text-[11px] text-neutral-300">Tous carburants, à réserver</div>
             </div>
             <div className="space-y-1 border-r border-neutral-800 pr-4">
-              <div className="text-[10px] text-neutral-400 uppercase font-bold">TEMPS MOYEN GAGNÉ</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-white">35 MIN / PLEIN</div>
-              <div className="text-[11px] text-neutral-300">Accès prioritaire sans queue</div>
+              <div className="text-[10px] text-neutral-400 uppercase font-bold">ATTENTE MOYENNE</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white">{averageWait} MIN</div>
+              <div className="text-[11px] text-neutral-300">Déclarée par les stations</div>
             </div>
             <div className="space-y-1">
-              <div className="text-[10px] text-neutral-400 uppercase font-bold">SÉCURITÉ CODE</div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-white">100% GARANTI</div>
-              <div className="text-[11px] text-neutral-300">Paiement Mobile Money</div>
+              <div className="text-[10px] text-neutral-400 uppercase font-bold">TICKET SÉCURISÉ</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white">CODE + QR</div>
+              <div className="text-[11px] text-neutral-300">Valable 2 heures, servi une fois</div>
             </div>
           </div>
         </div>
@@ -142,7 +155,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </div>
               <h3 className="text-lg font-bold uppercase tracking-tight">3. PAYER</h3>
               <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-                Réglez en toute sécurité via TMoney (Togocom) ou Flooz (Moov Africa). Vous recevez un code sécurisé unique valide 2 heures.
+                Réglez via Mixx by Yas (ex-TMoney) ou Flooz (Moov Africa). Vous recevez un code sécurisé unique valide 2 heures.
               </p>
             </div>
 
@@ -168,7 +181,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               STATIONS PARTENAIRES EN DIRECT
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold uppercase font-mono-code tracking-tight text-white">
-              STATIONS À PROXIMITÉ (LOMÉ)
+              STATIONS À LOMÉ, ATTENTE LA PLUS COURTE
             </h2>
           </div>
 
@@ -201,7 +214,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               SERVICE CLIENT & ACCUEIL CHALEUREUX
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold uppercase font-mono-code tracking-tight text-white">
-              SOUROIS & SATISFACTION AU QUOTIDIEN
+              SOURIRES & SATISFACTION AU QUOTIDIEN
             </h2>
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-400 text-black text-xs font-mono-code font-extrabold uppercase border border-amber-300 rounded shadow-lg">
@@ -274,7 +287,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           {/* Card 3: Happy Customer */}
           <div
-            onClick={onNavigateProfile}
+            onClick={onNavigateMap}
             className="group bg-black/85 backdrop-blur-xl text-white border-2 border-neutral-800 rounded-xl overflow-hidden shadow-2xl hover:border-amber-400 transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between cursor-pointer"
           >
             <div className="relative h-56 overflow-hidden">
@@ -285,13 +298,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 referrerPolicy="no-referrer"
               />
               <div className="absolute top-3 left-3 px-2.5 py-1 bg-amber-400 text-black text-[10px] font-mono-code font-extrabold uppercase border border-black rounded shadow">
-                🚗 Koffi Mensah & Clients Satisfaits
+                🚗 Kofi Mensah & Clients Satisfaits
               </div>
             </div>
             <div className="p-6 space-y-3 font-mono-code flex-1 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-extrabold uppercase text-white group-hover:text-amber-400 transition-colors">
-                  Voir Espace Koffi Mensah & Station Interactive
+                  Faire comme Kofi : réserver son plein
                 </h3>
                 <p className="text-xs text-neutral-300 font-sans mt-2 leading-relaxed">
                   « Plus besoin de perdre mon temps le matin avant d'aller au bureau. Mon réservoir est plein en un clin d'œil ! »
@@ -300,7 +313,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="pt-4 border-t border-neutral-800 flex items-center justify-between text-xs text-amber-300 font-bold">
                 <span className="underline decoration-amber-400 underline-offset-4">Kofi M. (Conducteur Lomé)</span>
                 <span className="px-2 py-0.5 bg-amber-400 text-black font-black text-[10px] rounded shadow">
-                  Ouvrir Profil
+                  Voir la carte
                 </span>
               </div>
             </div>
@@ -349,7 +362,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Que se passe-t-il si le délai de 2 heures expire ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              Si vous ne vous présentez pas à la station avant l'expiration du code (2h), votre réservation est annulée et le montant est automatiquement recrédité sur votre compte Mobile Money.
+              Si vous ne vous présentez pas à la station avant l'expiration du code (2h), le ticket expire et les litres retournent à la station. Vous pouvez aussi annuler vous-même un ticket actif depuis « Mes Réservations ».
             </p>
           </div>
 
@@ -358,7 +371,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Quels modes de paiement sont acceptés au Togo ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              RONIKOV accepte TMoney (Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.
+              RONIKOV accepte Mixx by Yas (ex-TMoney, Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.
             </p>
           </div>
 
@@ -367,7 +380,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Comment le pompiste valide-t-il ma réservation ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              Le pompiste saisit les 8 caractères de votre code sur le terminal RONIKOV de la station ou scanne votre QR Code. La pompe distribue exactement le nombre de litres réservés.
+              Le pompiste saisit votre code (RNK-XXXX-XX) dans l'Espace Pro RONIKOV ou scanne votre QR Code avec la caméra. Chaque ticket ne peut être servi qu'une fois, pour exactement les litres réservés.
             </p>
           </div>
 
@@ -376,7 +389,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Comment fonctionne le Pass Premium RONIKOV ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              Le Pass Premium offre zéro frais de réservation, un accès prioritaire à la file d'attente et des alertes SMS instantanées en cas de rechargement de stock en période de tension.
+              Le Pass Premium supprime les frais de réservation (150 FCFA par ticket). Demandez-le depuis la page Pass Premium : un administrateur RONIKOV l'active sur votre compte.
             </p>
           </div>
         </div>

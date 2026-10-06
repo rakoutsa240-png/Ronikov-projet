@@ -30,7 +30,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
 
   const fuels: { type: FuelType; label: string }[] = [
     { type: 'SUPER', label: 'Super Sans Plomb' },
-    { type: 'GAZOLE', label: 'Gazole (Désel)' },
+    { type: 'GAZOLE', label: 'Gazole (Diesel)' },
     { type: 'MELANGE', label: 'Mélange 2 Temps' },
     { type: 'KEROSENE', label: 'Pétrole / Kérosène' },
   ];

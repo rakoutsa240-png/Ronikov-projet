@@ -9,18 +9,34 @@ import { TicketCard } from './TicketCard';
 interface HistoryViewProps {
   reservations: Reservation[];
   onCancelReservation: (resId: string) => void;
+  isSignedIn: boolean;
+  onOpenAuth: () => void;
+  onNavigateToMap: () => void;
 }
+
+// "14:05" today, "3 oct. 14:05" otherwise.
+const formatWhen = (iso: string) => {
+  const date = new Date(iso);
+  const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return date.toDateString() === new Date().toDateString()
+    ? time
+    : `${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} ${time}`;
+};
 
 export const HistoryView: React.FC<HistoryViewProps> = ({
   reservations,
   onCancelReservation,
+  isSignedIn,
+  onOpenAuth,
+  onNavigateToMap,
 }) => {
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'VALIDATED' | 'EXPIRED'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'VALIDATED' | 'ENDED'>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTicketModal, setActiveTicketModal] = useState<Reservation | null>(null);
 
   const filteredReservations = reservations.filter((r) => {
     if (filterStatus === 'ALL') return true;
+    if (filterStatus === 'ENDED') return r.status === 'EXPIRED' || r.status === 'CANCELLED';
     return r.status === filterStatus;
   });
 
@@ -117,7 +133,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       case 'EXPIRED':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 font-mono-code font-bold text-xs uppercase rounded-md">
-            <AlertOctagon className="w-3.5 h-3.5" /> EXPIRÉ (REMBOURSÉ)
+            <AlertOctagon className="w-3.5 h-3.5" /> EXPIRÉ
           </span>
         );
       case 'CANCELLED':
@@ -129,59 +145,50 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
     }
   };
 
-  const partnerBrands: StationBrandType[] = ['TotalEnergies', 'Shell', 'Sanol', 'Cap', 'Somayaf'];
+  const handleCancel = (res: Reservation) => {
+    if (window.confirm(`Annuler votre ticket de ${res.liters} L chez ${res.stationName} ? Les litres seront rendus à la station.`)) {
+      onCancelReservation(res.id);
+    }
+  };
+
+  if (!isSignedIn) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
+        <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
+          <Ticket className="w-12 h-12 mx-auto text-amber-400" />
+          <h1 className="text-2xl font-black uppercase">Mes réservations</h1>
+          <p className="text-sm text-neutral-300 font-sans">Connectez-vous pour voir vos tickets et leur code QR.</p>
+          <button
+            onClick={onOpenAuth}
+            className="px-6 py-3 bg-amber-400 text-black font-black text-xs uppercase rounded-xl hover:bg-amber-300"
+          >
+            Se connecter
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono-code text-white">
-      {/* Top Interactive Partner Stations Brand Bar */}
-      <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-amber-400/10 border border-amber-400/30 rounded-xl text-amber-400">
-            <Sparkles className="w-5 h-5 animate-pulse" />
-          </div>
-          <div>
-            <span className="text-[10px] uppercase font-bold text-amber-400 tracking-widest block">
-              RESEAU OFFICIEL TOGO
-            </span>
-            <h2 className="text-sm sm:text-base font-extrabold text-white uppercase tracking-tight">
-              INTERAGISSEZ AVEC LES LOGOS OFFICIELS DES STATIONS
-            </h2>
-          </div>
-        </div>
-
-        {/* Row of Interactive Station Logos */}
-        <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto py-1 max-w-full">
-          {partnerBrands.map((b) => (
-            <StationBrandLogo
-              key={b}
-              brand={b}
-              size="md"
-              interactive={true}
-              showBadge={false}
-              className="bg-black/60 p-1.5 border border-neutral-800 rounded-xl hover:border-amber-400 transition-colors"
-            />
-          ))}
-        </div>
-      </div>
-
       {/* Page Header Container */}
       <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
         <div className="border-b border-neutral-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-xs text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-amber-400" />
-              HISTORIQUE DE VOS TICKET SÉCURISÉS
+              HISTORIQUE DE VOS TICKETS SÉCURISÉS
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold uppercase text-white tracking-tight">
               MES RÉSERVATIONS DE CARBURANT
             </h1>
             <p className="text-xs text-neutral-400 font-sans mt-1">
-              Chaque réservation arbore le logo et les couleurs uniques de la station choisie.
+              Présentez le code ou le QR d'un ticket actif au pompiste. Un ticket non utilisé expire au bout de 2 heures.
             </p>
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex border border-neutral-700 bg-neutral-900 rounded-lg p-1 text-xs font-bold text-neutral-300">
+          <div className="flex flex-wrap border border-neutral-700 bg-neutral-900 rounded-lg p-1 text-xs font-bold text-neutral-300">
             <button
               onClick={() => setFilterStatus('ALL')}
               className={`px-3.5 py-2 rounded-md uppercase transition-all ${
@@ -206,6 +213,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             >
               Servies ({reservations.filter((r) => r.status === 'VALIDATED').length})
             </button>
+            <button
+              onClick={() => setFilterStatus('ENDED')}
+              className={`px-3.5 py-2 rounded-md uppercase transition-all ${
+                filterStatus === 'ENDED' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
+              }`}
+            >
+              Annulées / expirées ({reservations.filter((r) => r.status === 'EXPIRED' || r.status === 'CANCELLED').length})
+            </button>
           </div>
         </div>
 
@@ -217,8 +232,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
               Aucune réservation enregistrée dans cette catégorie
             </p>
             <p className="text-xs text-neutral-400 font-sans max-w-md mx-auto">
-              Sélectionnez une station partenaire sur la carte de Lomé pour bloquer vos litres de carburant à l'avance.
+              Choisissez une station sur la carte pour réserver vos litres de carburant à l'avance.
             </p>
+            <button
+              onClick={onNavigateToMap}
+              className="px-5 py-2.5 bg-amber-400 text-black font-black text-xs uppercase rounded-xl hover:bg-amber-300"
+            >
+              Trouver une station
+            </button>
           </div>
         ) : (
           <div className="space-y-6">
@@ -240,7 +261,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
                   {/* Header Row with Brand Logo & Custom Styling */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-neutral-800/80 pb-5">
-                    <div className="flex items-start gap-4">
+                    <div className="flex flex-col sm:flex-row items-start gap-4 min-w-0">
                       {/* Interactive Station Brand Logo */}
                       <StationBrandLogo
                         brand={brand}
@@ -250,7 +271,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         className="bg-black/90 p-2.5 border border-neutral-700/80 rounded-2xl shadow-xl shrink-0"
                       />
 
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           {getStatusBadge(res.status)}
                           <span className={`px-2 py-0.5 text-[10px] font-black uppercase rounded border ${theme.badgeBg}`}>
@@ -270,7 +291,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     </div>
 
                     {/* Code Badge Box with Real Scannable QR Code */}
-                    <div className="bg-black/95 text-white p-4 border border-neutral-700 rounded-2xl text-center min-w-[240px] shadow-2xl shrink-0 flex flex-col items-center justify-center space-y-2">
+                    {res.status === 'PENDING' && (
+                    <div className="bg-black/95 text-white p-4 border border-neutral-700 rounded-2xl text-center w-full sm:w-auto sm:min-w-[240px] shadow-2xl shrink-0 flex flex-col items-center justify-center space-y-2">
                       <span className="text-[10px] text-neutral-400 uppercase tracking-widest block font-bold">
                         CODE SÉCURISÉ POMPISTE
                       </span>
@@ -298,6 +320,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         <span>Agrandir / Scanner le QR Code</span>
                       </button>
                     </div>
+                    )}
                   </div>
 
                   {/* Order Details Grid */}
@@ -325,19 +348,21 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[10px] uppercase font-bold">VALIDE JUSQU'À :</span>
+                      <span className="text-neutral-400 block text-[10px] uppercase font-bold">
+                        {res.status === 'VALIDATED' ? 'SERVI LE :' : res.status === 'PENDING' ? "VALIDE JUSQU'À :" : 'RÉSERVÉ LE :'}
+                      </span>
                       <span className="font-extrabold text-amber-300 text-sm">
-                        {new Date(res.expiresAt).toLocaleTimeString('fr-FR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {formatWhen(
+                          res.status === 'VALIDATED' ? res.validatedAt ?? res.createdAt : res.status === 'PENDING' ? res.expiresAt : res.createdAt,
+                        )}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions Footer */}
+                  {res.status === 'PENDING' && (
                   <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-1">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       <button
                         onClick={() => copyCode(res.code, res.id)}
                         className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold uppercase hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
@@ -355,15 +380,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       </button>
                     </div>
 
-                    {res.status === 'PENDING' && (
-                      <button
-                        onClick={() => onCancelReservation(res.id)}
-                        className="px-4 py-2.5 border border-rose-500/40 text-rose-400 bg-rose-500/10 hover:bg-rose-500 hover:text-white rounded-xl font-bold uppercase text-[11px] transition-colors"
-                      >
-                        Annuler la réservation (Remboursement)
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleCancel(res)}
+                      className="px-4 py-2.5 border border-rose-500/40 text-rose-400 bg-rose-500/10 hover:bg-rose-500 hover:text-white rounded-xl font-bold uppercase text-[11px] transition-colors"
+                    >
+                      Annuler la réservation
+                    </button>
                   </div>
+                  )}
                 </div>
               );
             })}
@@ -373,7 +397,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
       {/* Ticket Modal for Viewing & Printing */}
       {activeTicketModal && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto no-print">
+        <div className="fixed inset-0 z-[90] flex items-start sm:items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto no-print">
           <div className="bg-neutral-950 border border-neutral-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 text-white relative my-8 shadow-2xl">
             <TicketCard
               reservation={activeTicketModal}

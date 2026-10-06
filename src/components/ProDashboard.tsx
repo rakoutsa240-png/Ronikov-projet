@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Station, Reservation, FuelType } from '../types';
 import { Gauge } from './Gauge';
 import { ShieldCheck, CheckCircle2, AlertTriangle, Search, QrCode, Sliders, Save, RefreshCw, Lock, Fuel, Clock, Sparkles } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
+import { QrScanner } from './QrScanner';
 
 interface ProDashboardProps {
   managedStation: Station;
+  stationChoices: Station[]; // stations this account may run (all of them for an admin)
+  onChangeStation: (stationId: string) => void;
   reservations: Reservation[];
   onValidateCode: (
     stationId: string,
@@ -25,6 +28,8 @@ const toTankLevels = (stock: Station['stock']): Station['stock'] =>
 
 export const ProDashboard: React.FC<ProDashboardProps> = ({
   managedStation,
+  stationChoices,
+  onChangeStation,
   reservations,
   onValidateCode,
   onUpdateStock,
@@ -54,10 +59,11 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
 
   const [isVerifying, setIsVerifying] = useState(false);
 
+  const [isScanning, setIsScanning] = useState(false);
+
   // The API checks the code; signed QR contents are sent as scanned, typed codes in capitals.
-  const handleVerifyCodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = inputCode.trim();
+  const verify = async (raw: string) => {
+    const code = raw.trim();
     if (!code || isVerifying) return;
 
     setIsVerifying(true);
@@ -67,6 +73,23 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
       setIsVerifying(false);
     }
   };
+
+  const handleVerifyCodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void verify(inputCode);
+  };
+
+  // A scanned QR is checked at once; the field shows the readable code, not the signed content.
+  const handleScan = useCallback(
+    (text: string) => {
+      setIsScanning(false);
+      const parts = text.split('.');
+      setInputCode(text.startsWith('RNK1.') && parts[2] ? `RNK-${parts[2].slice(0, 4)}-${parts[2].slice(4)}` : text);
+      void verify(text);
+    },
+    // verify only depends on the station, which cannot change while the scanner is open.
+    [managedStation.id],
+  );
 
   const handleSaveStock = async () => {
     setIsSaving(true);
@@ -85,11 +108,41 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
 
   const stationReservations = reservations.filter((r) => r.stationId === managedStation.id);
 
+  if (stationChoices.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
+        <div className="bg-black/90 border border-neutral-800 rounded-2xl p-8 text-center space-y-3">
+          <AlertTriangle className="w-10 h-10 mx-auto text-amber-400" />
+          <h1 className="text-xl font-black uppercase">Aucune station attribuée</h1>
+          <p className="text-sm text-neutral-300 font-sans">
+            Votre compte gérant n'est relié à aucune station. Demandez à un administrateur RONIKOV de vous l'attribuer.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono-code text-white">
       {/* Top Station Header Card */}
       <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3">
+          {stationChoices.length > 1 && (
+            <label className="flex flex-col gap-1 text-[10px] uppercase font-bold text-neutral-400">
+              Station affichée
+              <select
+                value={managedStation.id}
+                onChange={(e) => onChangeStation(e.target.value)}
+                className="bg-black border border-neutral-700 rounded-lg px-3 py-2 text-xs text-white normal-case font-mono-code max-w-full"
+              >
+                {stationChoices.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.name} ({st.city})
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black uppercase rounded shadow">
               TERMINAL POMPISTE & GÉRANT
@@ -150,10 +203,13 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                 <div className="flex border border-neutral-700 rounded-xl overflow-hidden bg-black/80 focus-within:border-amber-400 transition-colors">
                   <input
                     type="text"
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    spellCheck={false}
                     value={inputCode}
                     onChange={(e) => setInputCode(e.target.value)}
                     placeholder="RNK-AB7K-Q3"
-                    className="w-full px-4 py-3.5 text-lg font-black font-mono-code tracking-widest text-amber-300 placeholder-neutral-600 bg-transparent focus:outline-none uppercase"
+                    className="w-full min-w-0 px-4 py-3.5 text-lg font-black font-mono-code tracking-widest text-amber-300 placeholder-neutral-600 bg-transparent focus:outline-none uppercase"
                   />
                   <button
                     type="submit"
@@ -165,6 +221,21 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                 </div>
               </div>
             </form>
+
+            {isScanning ? (
+              <QrScanner onResult={handleScan} onClose={() => setIsScanning(false)} />
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setValidationResult(null);
+                  setIsScanning(true);
+                }}
+                className="w-full py-3 border border-amber-400/70 bg-amber-400/10 text-amber-300 hover:bg-amber-400 hover:text-black rounded-xl text-xs font-black uppercase flex items-center justify-center gap-2 transition-colors"
+              >
+                <QrCode className="w-4 h-4" /> Scanner le QR code du client
+              </button>
+            )}
 
             {/* Verification Result Display */}
             {validationResult && (
@@ -315,7 +386,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                   <div className="flex justify-between items-center text-xs font-black uppercase border-b border-neutral-800 pb-2">
                     <span className="text-amber-300 flex items-center gap-1.5">
                       <Fuel className="w-3.5 h-3.5 text-amber-400" />
-                      {f === 'SUPER' ? 'Super Sans Plomb' : f === 'GAZOLE' ? 'Gazole (Désel)' : f === 'MELANGE' ? 'Mélange 2T' : 'Pétrole / Kérosène'}
+                      {f === 'SUPER' ? 'Super Sans Plomb' : f === 'GAZOLE' ? 'Gazole (Diesel)' : f === 'MELANGE' ? 'Mélange 2T' : 'Pétrole / Kérosène'}
                     </span>
                     <span className="text-neutral-400">Capacité: {currentFuelStock.maxCapacityLiters}L</span>
                   </div>

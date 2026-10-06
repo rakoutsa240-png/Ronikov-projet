@@ -1,5 +1,5 @@
-import React from 'react';
-import { Fuel, MapPin, Ticket, Crown, Shield, Bell, User, LogOut, LogIn } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Bell, User, LogOut, LogIn } from 'lucide-react';
 import { UserRole, FuelPriceGlobal } from '../types';
 
 interface HeaderProps {
@@ -13,6 +13,7 @@ interface HeaderProps {
   onOpenAuth: () => void;
   userName: string;
   globalPrices?: FuelPriceGlobal[];
+  stationCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,7 +27,16 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   userName,
   globalPrices,
+  stationCount,
 }) => {
+  // On phones the menu scrolls sideways: keep the current page's entry in view.
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const nav = mobileNavRef.current;
+    const active = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (nav && active) nav.scrollLeft = active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2;
+  }, [activeTab]);
+
   const superPrice = globalPrices?.find((p) => p.type === 'SUPER')?.officialPriceXOF ?? 725;
   const gazolePrice = globalPrices?.find((p) => p.type === 'GAZOLE')?.officialPriceXOF ?? 750;
   const melangePrice = globalPrices?.find((p) => p.type === 'MELANGE')?.officialPriceXOF ?? 811;
@@ -43,16 +53,11 @@ export const Header: React.FC<HeaderProps> = ({
     ...(userRole === 'ADMIN' ? [{ id: 'admin', label: 'Admin' }] : []),
   ];
 
-  const roleLabels: Record<UserRole, { title: string; subtitle: string }> = {
-    CLIENT: { title: 'Client (Automobiliste)', subtitle: 'Réservation & Code' },
-    STATION_PRO: { title: 'Station-Service (Gérant)', subtitle: 'Validation & Stock' },
-    ADMIN: { title: 'Administrateur RONIKOV', subtitle: 'Gestion Globale Togo' },
-  };
 
   return (
     <header className="sticky top-0 z-40 bg-black text-white border-b border-neutral-800">
       {/* Top Banner Ticker */}
-      <div className="bg-neutral-900 border-b border-neutral-800 py-1 px-4 text-[11px] font-mono-code text-neutral-300 flex justify-between items-center overflow-x-auto whitespace-nowrap">
+      <div className="bg-neutral-900 border-b border-neutral-800 py-1 px-4 text-[11px] font-mono-code text-neutral-300 flex justify-between items-center gap-6 overflow-x-auto whitespace-nowrap">
         <div className="flex items-center gap-4">
           <span className="inline-flex items-center gap-1.5 font-bold text-white">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
@@ -65,10 +70,14 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Mélange: {melangePrice} FCFA/L</span>
           <span className="text-neutral-600">|</span>
           <span>Pétrole/Kérosène: {kerosenePrice} FCFA/L</span>
-          <span className="text-neutral-600">|</span>
-          <span className="text-neutral-300 font-semibold">8/8 Stations Togo Connectées</span>
+          {stationCount ? (
+            <>
+              <span className="text-neutral-600">|</span>
+              <span className="text-neutral-300 font-semibold">{stationCount} stations connectées</span>
+            </>
+          ) : null}
         </div>
-        <div className="hidden sm:flex items-center gap-3 text-neutral-400">
+        <div className="hidden xl:flex items-center gap-3 text-neutral-400">
           <span>Service Client: +228 90 00 00 00</span>
           <span>•</span>
           <span>Lomé • Tsévié • Atakpamé • Kara</span>
@@ -98,14 +107,15 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Desktop Nav Items */}
-            <nav className="hidden lg:flex items-center space-x-1 ml-4 border-l border-neutral-800 pl-6">
+            <nav className="hidden xl:flex items-center space-x-1 ml-2 border-l border-neutral-800 pl-4">
               {navItems.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`px-3 py-1.5 text-xs font-semibold uppercase font-mono-code transition-all tracking-tight ${
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`px-2.5 py-1.5 text-xs font-semibold uppercase font-mono-code transition-all tracking-tight whitespace-nowrap ${
                       isActive
                         ? 'bg-white text-black border border-white'
                         : 'text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent'
@@ -120,14 +130,6 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Actions: Persona Selector, Notifications, User Auth */}
           <div className="flex items-center gap-3">
-            {/* Role and sign-out, for a signed-in account */}
-            {isSignedIn && (
-              <div className="hidden md:flex items-center gap-2 px-2.5 py-1.5 text-xs font-mono-code border border-neutral-700 bg-neutral-900 text-neutral-200">
-                <span className="text-[10px] uppercase text-neutral-400">Rôle:</span>
-                <span className="font-bold text-white">{roleLabels[userRole].title.split(' ')[0]}</span>
-              </div>
-            )}
-
             {/* Notifications Trigger */}
             <button
               onClick={onOpenNotifications}
@@ -153,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({
               title={isSignedIn ? 'Ouvrir mon profil' : 'Se connecter ou créer un compte'}
             >
               {isSignedIn ? <User className="w-3.5 h-3.5" /> : <LogIn className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{isSignedIn ? userName : 'Se connecter'}</span>
+              <span className="hidden sm:inline max-w-[140px] truncate">{isSignedIn ? userName : 'Se connecter'}</span>
             </button>
 
             {isSignedIn && (
@@ -170,13 +172,14 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Mobile Navigation Sub-bar */}
-        <div className="lg:hidden flex items-center gap-1 overflow-x-auto py-2 border-t border-neutral-800 font-mono-code text-xs">
+        <div ref={mobileNavRef} className="xl:hidden flex items-center gap-1 overflow-x-auto py-2 border-t border-neutral-800 font-mono-code text-xs [scrollbar-width:none]">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
+                aria-current={isActive ? 'page' : undefined}
                 className={`px-2.5 py-1 whitespace-nowrap uppercase ${
                   isActive ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
                 }`}

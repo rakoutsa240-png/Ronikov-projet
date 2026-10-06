@@ -60,7 +60,7 @@ export const Footer: React.FC = () => {
               <p>Service Client Togo: +228 90 00 00 00</p>
               <p>Email: contact@ronikov.tg</p>
               <p className="text-[10px] text-neutral-500 font-sans pt-1">
-                Paiements sécurisés via TMoney (Togocom) et Flooz (Moov Africa).
+                Paiements via Mixx by Yas (Togocom) et Flooz (Moov Africa).
               </p>
             </div>
           </div>
@@ -68,13 +68,10 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright & legal */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500">
-          <div>
-            © {new Date().getFullYear()} RONIKOV S.A. Tous droits réservés. Minimalisme suisse & sécurité bancaire.
-          </div>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-white uppercase">Conditions Générales</a>
-            <a href="#" className="hover:text-white uppercase">Confidentialité</a>
-            <a href="#" className="hover:text-white uppercase">Station Partner Portal</a>
+          <div>© {new Date().getFullYear()} RONIKOV. Tous droits réservés.</div>
+          <div className="flex flex-wrap justify-center gap-4">
+            <a href="#/carte" className="hover:text-white uppercase">Stations & carte</a>
+            <a href="#/premium" className="hover:text-white uppercase">Pass Premium</a>
           </div>
         </div>
       </div>
