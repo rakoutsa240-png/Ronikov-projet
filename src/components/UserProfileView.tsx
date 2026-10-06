@@ -1,6 +1,6 @@
 import React from 'react';
 import { AuthUser, Reservation, UserRole } from '../types';
-import { User, ShieldCheck, Star, Fuel, Ticket, Wallet, MapPin, Crown, LogIn, LogOut, ChevronRight, Phone, Mail, Building2 } from 'lucide-react';
+import { User, ShieldCheck, Star, Fuel, Ticket, Wallet, MapPin, Crown, LogIn, LogOut, ChevronRight, Phone, Mail, Building2, KeyRound } from 'lucide-react';
 
 interface UserProfileViewProps {
   user: AuthUser | null;
@@ -8,6 +8,7 @@ interface UserProfileViewProps {
   onOpenAuth: () => void;
   onNavigate: (tab: string) => void;
   onLogout: () => void;
+  onChangePassword: () => void;
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -20,7 +21,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 const formatPhone = (phone: string) => phone.replace(/^\+228(\d{2})(\d{2})(\d{2})(\d{2})$/, '+228 $1 $2 $3 $4');
 
 // The signed-in account, with figures computed from its own tickets.
-export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservations, onOpenAuth, onNavigate, onLogout }) => {
+export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservations, onOpenAuth, onNavigate, onLogout, onChangePassword }) => {
   if (!user) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
@@ -133,6 +134,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservat
         {user.role === 'ADMIN' && (
           <ProfileLink icon={ShieldCheck} label="Console Admin" detail="Prix, stations, comptes" onClick={() => onNavigate('admin')} />
         )}
+        <ProfileLink icon={KeyRound} label="Changer mon mot de passe" detail="Déconnecte vos autres appareils" onClick={onChangePassword} />
         <button
           onClick={onLogout}
           className="p-4 border border-neutral-800 bg-black/85 rounded-xl flex items-center gap-3 text-rose-300 hover:border-rose-400 transition-colors text-left"

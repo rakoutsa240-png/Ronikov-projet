@@ -44,6 +44,8 @@ export const api = {
   register: (data: { name: string; phone: string; password: string; email?: string }) =>
     request<AuthUser>('POST', '/auth/register', data),
   logout: () => request<void>('POST', '/auth/logout'),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<AuthUser>('POST', '/auth/password', { currentPassword, newPassword }),
 
   createReservation: (data: {
     stationId: string;
@@ -90,6 +92,8 @@ export const api = {
   users: () => request<AdminUser[]>('GET', '/users'),
   updateUser: (id: string, data: { role?: AdminUser['role']; isPremium?: boolean; stationIds?: string[] }) =>
     request<AdminUser>('PATCH', `/users/${encodeURIComponent(id)}`, data),
+  resetUserPassword: (id: string) =>
+    request<{ temporaryPassword: string }>('POST', `/users/${encodeURIComponent(id)}/password`),
   requestPremium: () => request<{ message: string }>('POST', '/premium/request'),
 
   notifications: () => request<NotificationItem[]>('GET', '/notifications'),

@@ -6,10 +6,10 @@ import { STATION_BRANDS, TOGO_BOUNDS } from '../../shared/stations';
 import { FUEL_TYPES } from '../../shared/stock';
 import type { AdminUser, FuelType, UserRole } from '../../shared/types';
 import { audit } from '../audit';
-import { rateLimit, requireRole, toAuthUser } from '../auth';
+import { hashPassword, rateLimit, requireRole, temporaryPassword, toAuthUser } from '../auth';
 import type { Db } from '../db/client';
 import { listPrices, listStations } from '../db/queries';
-import { fuelPrices, fuelStocks, notifications, stationManagers, stationPrices, stations, users } from '../db/schema';
+import { fuelPrices, fuelStocks, notifications, sessions, stationManagers, stationPrices, stations, users } from '../db/schema';
 import { canManageStation } from './reservations';
 
 // The project's tsconfig is not strict, so zod marks fields optional; handlers check what they need.
@@ -291,6 +291,38 @@ export function adminRouter(db: Db) {
     }
     const [updated] = await db.select().from(users).where(eq(users.id, userId));
     res.json({ ...(await toAuthUser(db, updated)), createdAt: updated.createdAt.toISOString() } satisfies AdminUser);
+  });
+
+  // For a user who forgot their password: the admin reads the temporary one out to them, and they
+  // must pick their own at their next sign-in. Their open sessions end so a lost phone stays locked out.
+  router.post('/users/:id/password', adminOnly, async (req, res) => {
+    const userId = String(req.params.id);
+    if (!z.string().uuid().safeParse(userId).success) {
+      res.status(400).json({ error: 'Compte introuvable' });
+      return;
+    }
+    if (userId === req.user!.id) {
+      res.status(409).json({ error: 'Changez votre propre mot de passe depuis votre profil' });
+      return;
+    }
+    const password = temporaryPassword();
+    const passwordHash = await hashPassword(password);
+    const found = await db.transaction(async (tx) => {
+      const [target] = await tx
+        .update(users)
+        .set({ passwordHash, mustChangePassword: true })
+        .where(eq(users.id, userId))
+        .returning({ id: users.id });
+      if (!target) return false;
+      await tx.delete(sessions).where(eq(sessions.userId, userId));
+      await audit(tx, req.user!.id, 'user.password_reset', `user:${userId}`, {});
+      return true;
+    });
+    if (!found) {
+      res.status(404).json({ error: 'Compte introuvable' });
+      return;
+    }
+    res.json({ temporaryPassword: password });
   });
 
   // Premium is granted by an admin: a client's request notifies every admin.

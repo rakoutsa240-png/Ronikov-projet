@@ -51,6 +51,21 @@ describe('auth routes', () => {
     await agent.get('/api/me').expect(401);
   });
 
+  it('changes the password and signs out the other devices only', async () => {
+    const phone = '91 55 66 77';
+    const laptop = request.agent(app);
+    await laptop.post('/api/auth/register').send({ name: 'Yao Agbo', phone, password: 'premier-123' }).expect(201);
+    const mobile = request.agent(app);
+    await mobile.post('/api/auth/login').send({ phone, password: 'premier-123' }).expect(200);
+
+    await request(app).post('/api/auth/password').send({ currentPassword: 'x', newPassword: 'second-456' }).expect(401);
+    await mobile.post('/api/auth/password').send({ currentPassword: 'premier-123', newPassword: 'premier-123' }).expect(400);
+    await mobile.post('/api/auth/password').send({ currentPassword: 'premier-123', newPassword: 'second-456' }).expect(200);
+    await mobile.get('/api/me').expect(200);
+    await laptop.get('/api/me').expect(401);
+    await request(app).post('/api/auth/login').send({ phone, password: 'second-456' }).expect(200);
+  });
+
   it('refuses a second account on the same number', async () => {
     await request(app)
       .post('/api/auth/register')

@@ -129,6 +129,46 @@ describe('accounts', () => {
   });
 });
 
+describe('forgotten passwords', () => {
+  it('get a temporary password from an admin, which must be replaced at the next sign-in', async () => {
+    const phone = '91234567';
+    const oldDevice = request.agent(app);
+    await oldDevice
+      .post('/api/auth/register')
+      .send({ name: 'Ama Lawson', phone, password: 'ancien-mot-de-passe' })
+      .expect(201);
+    const id = await userId('+22891234567');
+
+    await manager.post(`/api/users/${id}/password`).expect(403);
+    const res = await admin.post(`/api/users/${id}/password`).expect(200);
+    const temp: string = res.body.temporaryPassword;
+    expect(temp).toMatch(/^[a-z2-9]{8}$/);
+    expect(await db.select().from(auditLog).where(eq(auditLog.action, 'user.password_reset'))).toHaveLength(1);
+    expect(JSON.stringify(await db.select().from(auditLog))).not.toContain(temp);
+
+    // The old password and the old sessions no longer work.
+    await oldDevice.get('/api/me').expect(401);
+    await request(app).post('/api/auth/login').send({ phone, password: 'ancien-mot-de-passe' }).expect(401);
+
+    const phoneNow = request.agent(app);
+    const login = await phoneNow.post('/api/auth/login').send({ phone, password: temp }).expect(200);
+    expect(login.body.mustChangePassword).toBe(true);
+    await phoneNow.post('/api/auth/password').send({ currentPassword: 'faux', newPassword: 'nouveau-secret' }).expect(401);
+    await phoneNow.post('/api/auth/password').send({ currentPassword: temp, newPassword: 'court' }).expect(400);
+    const changed = await phoneNow
+      .post('/api/auth/password')
+      .send({ currentPassword: temp, newPassword: 'nouveau-secret' })
+      .expect(200);
+    expect(changed.body.mustChangePassword).toBe(false);
+    await phoneNow.get('/api/me').expect(200);
+    await request(app).post('/api/auth/login').send({ phone, password: 'nouveau-secret' }).expect(200);
+  });
+
+  it('cannot be reset by an admin on their own account', async () => {
+    await admin.post(`/api/users/${await userId('+22890000003')}/password`).expect(409);
+  });
+});
+
 describe('Premium requests', () => {
   it('notify the admins', async () => {
     const res = await client.post('/api/premium/request').expect(202);

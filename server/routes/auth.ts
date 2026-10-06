@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { normalizeTogoPhone } from '../../shared/phone';
 import {
   createSession,
+  deleteOtherSessions,
   deleteSession,
   hashPassword,
   rateLimit,
@@ -36,6 +37,11 @@ const registerBody = z.object({
 });
 
 const loginBody = z.object({ phone, password: z.string().min(1).max(200) });
+
+const passwordBody = z.object({
+  currentPassword: z.string().min(1, 'Mot de passe actuel manquant').max(200),
+  newPassword: z.string().min(8, 'Nouveau mot de passe : 8 caractères minimum').max(200),
+});
 
 // Compared against when the phone is unknown, so both failures take the same time.
 const DUMMY_HASH = hashPassword('ronikov-dummy-password');
@@ -94,6 +100,34 @@ export function authRouter(db: Db, { secureCookies }: { secureCookies: boolean }
     }
     res.cookie(SESSION_COOKIE, await createSession(db, user.id), cookieOptions);
     res.json(await toAuthUser(db, user));
+  });
+
+  // Also used right after signing in with a temporary password from an admin.
+  const perUser = rateLimit({ max: 10, windowMs: 60_000, key: (req) => `password:${req.user?.id}` });
+  router.post('/auth/password', requireRole(), perUser, async (req, res) => {
+    const parsed = passwordBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' });
+      return;
+    }
+    const { currentPassword, newPassword } = parsed.data;
+    const [user] = await db.select().from(users).where(eq(users.id, req.user!.id));
+    if (!user || !(await verifyPassword(currentPassword, user.passwordHash))) {
+      res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+      return;
+    }
+    if (newPassword === currentPassword) {
+      res.status(400).json({ error: 'Choisissez un mot de passe différent de l’actuel' });
+      return;
+    }
+    const [updated] = await db
+      .update(users)
+      .set({ passwordHash: await hashPassword(newPassword), mustChangePassword: false })
+      .where(eq(users.id, user.id))
+      .returning();
+    // Other devices are signed out; this one stays signed in.
+    await deleteOtherSessions(db, user.id, readCookie(req, SESSION_COOKIE)!);
+    res.json(await toAuthUser(db, updated));
   });
 
   router.post('/auth/logout', async (req, res) => {
