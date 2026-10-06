@@ -77,16 +77,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black uppercase rounded shadow">
-              CONSOLE ADMINISTRATEUR NATIONALE
+            <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black rounded shadow">
+              Console administrateur nationale
             </span>
-            <span className="text-xs text-neutral-400 font-bold uppercase flex items-center gap-1">
+            <span className="text-xs text-neutral-400 font-bold flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              RONIKOV TOGO S.A.
+              RONIKOV Togo s.a.
             </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">
-            TABLEAU DE BORD GLOBAL
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            Tableau de bord global
           </h1>
           <p className="text-xs text-neutral-400 font-sans mt-1">
             Supervision du réseau national, homologation des tarifs officiels et gestion des stations partenaires.
@@ -97,7 +97,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="flex border border-neutral-700 bg-neutral-900 rounded-xl p-1 text-xs font-bold text-neutral-300 flex-wrap self-start md:self-auto">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition-all ${
               activeTab === 'overview' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -105,7 +105,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('prices')}
-            className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition-all ${
               activeTab === 'prices' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -113,7 +113,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('stations')}
-            className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition-all ${
               activeTab === 'stations' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -121,7 +121,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('accounts')}
-            className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition-all ${
               activeTab === 'accounts' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -129,7 +129,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('incidents')}
-            className={`px-3.5 py-2 uppercase rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition-all ${
               activeTab === 'incidents' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -145,48 +145,48 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
               <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
-                VOLUMÉTRIE FINANCIÈRE
+                Volumétrie financière
               </span>
               <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono-code">
                 {totalVolumeFCFA.toLocaleString('fr-FR')} FCFA
               </div>
-              <span className="text-[11px] text-neutral-400 block font-sans">
+              <span className="text-xs text-neutral-400 block font-sans">
                 Tickets payés (hors annulés et expirés)
               </span>
             </div>
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
               <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
-                RÉSERVATIONS TOTALES
+                Réservations totales
               </span>
               <div className="text-2xl sm:text-3xl font-black text-white font-mono-code">
                 {paidReservations.length} COMMANDES
               </div>
-              <span className="text-[11px] text-neutral-400 block font-sans">
+              <span className="text-xs text-neutral-400 block font-sans">
                 {totalLitersDispensed.toLocaleString('fr-FR')} Litres réservés
               </span>
             </div>
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
               <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
-                STATIONS PARTENAIRES
+                Stations partenaires
               </span>
               <div className="text-2xl sm:text-3xl font-black text-amber-300 font-mono-code">
                 {partnerStationsCount} / {stations.length}
               </div>
-              <span className="text-[11px] text-neutral-400 block font-sans">
+              <span className="text-xs text-neutral-400 block font-sans">
                 {cities.join(', ')}
               </span>
             </div>
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
               <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
-                TAUX DE DISPONIBILITÉ
+                Taux de disponibilité
               </span>
               <div className="text-2xl sm:text-3xl font-black text-white font-mono-code">
                 {availabilityRate.toLocaleString('fr-FR')}%
               </div>
-              <span className="text-[11px] text-neutral-400 block font-sans">
+              <span className="text-xs text-neutral-400 block font-sans">
                 Cuves non vides, tous carburants
               </span>
             </div>
@@ -195,9 +195,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {/* Nationwide Fuel Inventory Breakdown */}
           <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-4 shadow-2xl">
             <div className="border-b border-neutral-800 pb-3 flex justify-between items-center">
-              <h2 className="text-xl font-black uppercase text-white flex items-center gap-2">
+              <h2 className="text-xl font-black text-white flex items-center gap-2">
                 <Fuel className="w-5 h-5 text-amber-400" />
-                <span>STOCKS DE CARBURANT DU TOGO</span>
+                <span>Stocks de carburant du Togo</span>
               </h2>
               <span className="text-xs font-bold text-neutral-400">Mise à jour en direct</span>
             </div>
@@ -207,7 +207,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 const totalLiters = stations.reduce((acc, s) => acc + (s.stock[fuel]?.availableLiters || 0), 0);
                 return (
                   <div key={fuel} className="p-4 border border-neutral-800 bg-black/60 rounded-xl space-y-1">
-                    <span className="text-[10px] text-amber-400 uppercase block font-bold tracking-wider">
+                    <span className="text-[11px] text-amber-400 uppercase block font-bold tracking-wider">
                       {FUEL_LABELS[fuel]}
                     </span>
                     <div className="text-2xl font-black text-white">
@@ -226,8 +226,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-6 shadow-2xl">
           <div className="border-b border-neutral-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-black uppercase text-white">
-                PRIX OFFICIELS HOMOLOGUÉS DE CARBURANT (TOGO)
+              <h2 className="text-xl font-black text-white">
+                Prix officiels homologués de carburant (Togo)
               </h2>
               <p className="text-xs text-neutral-400 font-sans mt-0.5">
                 Ajustez les tarifs nationaux officiels fixés par le Ministère du Commerce du Togo.
@@ -236,7 +236,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <button
               onClick={handleSavePrices}
-              className="px-6 py-3 bg-amber-400 text-black font-black text-xs uppercase hover:bg-amber-300 transition-colors rounded-xl flex items-center gap-2 self-start md:self-auto shadow-lg"
+              className="px-6 py-3 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition-colors rounded-xl flex items-center gap-2 self-start md:self-auto shadow-lg"
             >
               <Save className="w-4 h-4" />
               <span>Enregistrer les Prix</span>
@@ -244,13 +244,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           {priceSaveSuccess && (
-            <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold uppercase text-center rounded-xl animate-fadeIn">
-              PRIX OFFICIELS ET POMPES SYNCHRONISÉS DANS LE SYSTÈME NATIONAL !
+            <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn">
+              Prix officiels et pompes synchronisés dans le système national !
             </div>
           )}
 
           {priceError && (
-            <div role="alert" className="p-3.5 bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold uppercase text-center rounded-xl">
+            <div role="alert" className="p-3.5 bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold text-center rounded-xl">
               {priceError}
             </div>
           )}
@@ -258,12 +258,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {editingPrices.map((gp) => (
               <div key={gp.type} className="p-5 border border-neutral-800 bg-black/60 rounded-xl space-y-3">
-                <div className="text-xs font-black uppercase border-b border-neutral-800 pb-2 text-amber-300">
+                <div className="text-xs font-black border-b border-neutral-800 pb-2 text-amber-300">
                   {gp.label} ({gp.type})
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-neutral-400 font-bold uppercase block">
+                  <label className="text-[11px] text-neutral-400 font-bold uppercase block">
                     Prix Officiel (FCFA / Litre)
                   </label>
                   <input
@@ -274,7 +274,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   />
                 </div>
 
-                <div className="text-[11px] text-neutral-400">
+                <div className="text-xs text-neutral-400">
                   Disponibilité estimée: <span className="font-bold text-white">{gp.avgAvailabilityPercent}%</span>
                 </div>
               </div>
@@ -289,7 +289,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               onChange={(e) => setApplyToAllStations(e.target.checked)}
               className="w-4 h-4 accent-amber-400 cursor-pointer rounded"
             />
-            <label htmlFor="applyAll" className="text-xs font-bold text-neutral-200 uppercase cursor-pointer">
+            <label htmlFor="applyAll" className="text-xs font-bold text-neutral-200 cursor-pointer">
               Appliquer directement ces nouveaux prix aux pompes de toutes les stations-service du réseau Togo
             </label>
           </div>
@@ -301,8 +301,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-6 shadow-2xl">
           <div className="border-b border-neutral-800 pb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
-              <h2 className="text-xl font-black uppercase text-white">
-                GESTION ET VALIDATION DES STATIONS PARTENAIRES
+              <h2 className="text-xl font-black text-white">
+                Gestion et validation des stations partenaires
               </h2>
               <p className="text-xs text-neutral-400 font-sans mt-0.5">
                 Consultez les logos et statuts des enseignes partenaires au Togo.
@@ -315,7 +315,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               {!showAddStation && (
                 <button
                   onClick={() => setShowAddStation(true)}
-                  className="px-3 py-1 text-xs font-black uppercase rounded-md bg-amber-400 text-black hover:bg-amber-300"
+                  className="px-3 py-1 text-xs font-black rounded-md bg-amber-400 text-black hover:bg-amber-300"
                 >
                   + Ajouter une station
                 </button>
@@ -341,14 +341,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   />
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 text-[10px] font-black uppercase rounded">
+                      <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 text-[11px] font-black uppercase rounded">
                         {st.brand}
                       </span>
                       <span className="text-xs font-bold text-neutral-400">
                         {st.district} • {st.city}
                       </span>
                     </div>
-                    <h3 className="text-base font-black uppercase text-white">{st.name}</h3>
+                    <h3 className="text-base font-black text-white">{st.name}</h3>
                     <p className="text-xs text-neutral-400 font-sans flex items-center gap-1">
                       <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
                       <span>{st.address} • Tél: {st.phone}</span>
@@ -358,7 +358,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                 <div className="flex items-center gap-4">
                   <span
-                    className={`px-3 py-1 text-xs font-black uppercase rounded border ${
+                    className={`px-3 py-1 text-xs font-black rounded border ${
                       st.isPartner
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                         : 'bg-neutral-800 text-neutral-400 border-neutral-700'
@@ -369,7 +369,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   <button
                     onClick={() => onToggleStationPartner(st.id)}
-                    className="px-4 py-2 border border-neutral-700 bg-black/80 rounded-xl text-xs font-bold uppercase hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all text-white"
+                    className="px-4 py-2 border border-neutral-700 bg-black/80 rounded-xl text-xs font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all text-white"
                   >
                     {st.isPartner ? 'Suspendre la station' : 'Activer comme partenaire'}
                   </button>
@@ -386,8 +386,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* INCIDENTS TAB */}
       {activeTab === 'incidents' && (
         <div className="border border-neutral-800 p-6 bg-black/85 backdrop-blur-xl rounded-2xl space-y-4 shadow-2xl">
-          <h2 className="text-xl font-black uppercase text-white border-b border-neutral-800 pb-3">
-            CUVES VIDES OU FAIBLES
+          <h2 className="text-xl font-black text-white border-b border-neutral-800 pb-3">
+            Cuves vides ou faibles
           </h2>
 
           {stockAlerts.length === 0 ? (
@@ -402,7 +402,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     empty ? 'border-rose-500/40 bg-rose-500/10' : 'border-amber-500/40 bg-amber-500/10'
                   }`}
                 >
-                  <span className={`text-xs font-bold uppercase flex items-center gap-2 ${empty ? 'text-rose-300' : 'text-amber-300'}`}>
+                  <span className={`text-xs font-bold flex items-center gap-2 ${empty ? 'text-rose-300' : 'text-amber-300'}`}>
                     <AlertTriangle className="w-4 h-4 shrink-0" />
                     {empty ? 'Rupture' : 'Stock faible'} — {FUEL_LABELS[fuel]} — {station.name}
                   </span>

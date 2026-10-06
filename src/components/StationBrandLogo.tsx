@@ -137,7 +137,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
 
         {showBadge && (
           <div className="flex flex-col">
-            <span className={`px-2 py-0.5 text-[10px] font-mono-code font-black uppercase rounded tracking-wider border shadow-sm ${brandInfo.badge}`}>
+            <span className={`px-2 py-0.5 text-[11px] font-mono-code font-black uppercase rounded tracking-wider border shadow-sm ${brandInfo.badge}`}>
               {normalizedBrand}
             </span>
             <span className="text-[9px] text-neutral-400 font-mono-code flex items-center gap-1 mt-0.5">
@@ -174,10 +174,10 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
                 {renderLogoVector()}
               </div>
               <div>
-                <span className={`inline-block px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded mb-1 border ${brandInfo.badge}`}>
+                <span className={`inline-block px-2.5 py-0.5 text-[11px] font-extrabold uppercase rounded mb-1 border ${brandInfo.badge}`}>
                   Partenaire Réseau Togo
                 </span>
-                <h3 className="text-xl font-extrabold text-white uppercase leading-tight">
+                <h3 className="text-xl font-extrabold text-white leading-tight">
                   {brandInfo.name}
                 </h3>
                 <p className="text-xs text-amber-300 font-sans mt-0.5">
@@ -210,11 +210,11 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               </div>
 
               <div className="p-3.5 bg-amber-400/10 border border-amber-400/30 rounded-xl space-y-1">
-                <div className="text-[11px] font-extrabold text-amber-300 flex items-center gap-1.5 uppercase">
+                <div className="text-xs font-extrabold text-amber-300 flex items-center gap-1.5 uppercase">
                   <Sparkles className="w-4 h-4 text-amber-400" />
                   <span>Personnalisation de Logo & Design</span>
                 </div>
-                <p className="text-[11px] text-neutral-300 font-sans leading-relaxed">
+                <p className="text-xs text-neutral-300 font-sans leading-relaxed">
                   Chaque station partenaire affiche son identité visuelle propre. Vous pourrez bientôt télécharger vos propres logos de stations personnalisés depuis l'Espace Pro.
                 </p>
               </div>
@@ -225,7 +225,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               <button
                 type="button"
                 onClick={() => setShowDetailsModal(false)}
-                className="w-full py-3 bg-amber-400 text-black font-black text-xs uppercase rounded-xl hover:bg-amber-300 active:scale-98 transition-all shadow-lg shadow-amber-400/20"
+                className="w-full py-3 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300 active:scale-98 transition-all shadow-lg shadow-amber-400/20"
               >
                 Fermer l'Aperçu du Logo
               </button>

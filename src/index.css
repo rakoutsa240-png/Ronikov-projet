@@ -9,33 +9,15 @@
 }
 
 .font-mono-code {
+  /* Was a typewriter font across the whole site; the plain site font reads better on phones. */
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ticket codes (RNK-XXXX-XX) keep a fixed-width font, so 0/O and 1/I are easy to tell apart. */
+.font-code {
   font-family: 'Space Mono', monospace;
-}
-
-.font-syne {
-  font-family: 'Syne', sans-serif;
-}
-
-@keyframes gradient-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animated-gradient-text {
-  background: linear-gradient(135deg, #fbbf24 0%, #34d399 25%, #38bdf8 50%, #f43f5e 75%, #f59e0b 100%);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-flow 6s ease infinite;
-}
-
-.glow-text-gold {
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(245, 158, 11, 0.3);
-}
-
-.glow-text-cyan {
-  text-shadow: 0 0 20px rgba(56, 189, 248, 0.6), 0 0 40px rgba(14, 165, 233, 0.3);
+  letter-spacing: 0.05em;
 }
 
 /* Custom minimal monochrome scrollbar */

@@ -5,11 +5,13 @@ import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { PaymentMethodLabel } from './PaymentLogos';
 import { QRCodeImage } from './QRCodeImage';
 import { TicketCard } from './TicketCard';
+import { PumpScreen } from './PumpScreen';
 
 interface HistoryViewProps {
   reservations: Reservation[];
   onCancelReservation: (resId: string) => void;
   isSignedIn: boolean;
+  offline?: boolean; // showing the tickets saved on the phone, the server can't be reached
   onOpenAuth: () => void;
   onNavigateToMap: () => void;
 }
@@ -27,12 +29,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   reservations,
   onCancelReservation,
   isSignedIn,
+  offline = false,
   onOpenAuth,
   onNavigateToMap,
 }) => {
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'VALIDATED' | 'ENDED'>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTicketModal, setActiveTicketModal] = useState<Reservation | null>(null);
+  const [pumpTicket, setPumpTicket] = useState<Reservation | null>(null);
 
   const filteredReservations = reservations.filter((r) => {
     if (filterStatus === 'ALL') return true;
@@ -120,25 +124,25 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
     switch (status) {
       case 'PENDING':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-black border border-amber-300 font-mono-code font-black text-xs uppercase rounded-md shadow-md shadow-amber-400/20">
-            <Clock className="w-3.5 h-3.5" /> CODE ACTIF (À RÉCUPÉRER)
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-black border border-amber-300 font-mono-code font-black text-xs rounded-md shadow-md shadow-amber-400/20">
+            <Clock className="w-3.5 h-3.5" /> Code actif (à récupérer)
           </span>
         );
       case 'VALIDATED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono-code font-bold text-xs uppercase rounded-md">
-            <CheckCircle2 className="w-3.5 h-3.5" /> CARBURANT SERVI
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono-code font-bold text-xs rounded-md">
+            <CheckCircle2 className="w-3.5 h-3.5" /> Carburant servi
           </span>
         );
       case 'EXPIRED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 font-mono-code font-bold text-xs uppercase rounded-md">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 font-mono-code font-bold text-xs rounded-md">
             <AlertOctagon className="w-3.5 h-3.5" /> EXPIRÉ
           </span>
         );
       case 'CANCELLED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-neutral-800 text-neutral-400 border border-neutral-700 font-mono-code font-bold text-xs uppercase rounded-md">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-neutral-800 text-neutral-400 border border-neutral-700 font-mono-code font-bold text-xs rounded-md">
             <XCircle className="w-3.5 h-3.5" /> ANNULÉ
           </span>
         );
@@ -156,11 +160,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
         <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
           <Ticket className="w-12 h-12 mx-auto text-amber-400" />
-          <h1 className="text-2xl font-black uppercase">Mes réservations</h1>
+          <h1 className="text-2xl font-black">Mes réservations</h1>
           <p className="text-sm text-neutral-300 font-sans">Connectez-vous pour voir vos tickets et leur code QR.</p>
           <button
             onClick={onOpenAuth}
-            className="px-6 py-3 bg-amber-400 text-black font-black text-xs uppercase rounded-xl hover:bg-amber-300"
+            className="px-6 py-3 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300"
           >
             Se connecter
           </button>
@@ -177,21 +181,26 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           <div>
             <div className="text-xs text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-amber-400" />
-              HISTORIQUE DE VOS TICKETS SÉCURISÉS
+              Historique de vos tickets sécurisés
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold uppercase text-white tracking-tight">
-              MES RÉSERVATIONS DE CARBURANT
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Mes réservations de carburant
             </h1>
             <p className="text-xs text-neutral-400 font-sans mt-1">
               Présentez le code ou le QR d'un ticket actif au pompiste. Un ticket non utilisé expire au bout de 2 heures.
             </p>
+            {offline && (
+              <p role="status" className="mt-3 text-sm font-semibold text-amber-300">
+                Hors connexion : voici les tickets enregistrés sur ce téléphone lors de votre dernière visite.
+              </p>
+            )}
           </div>
 
           {/* Filter Tabs */}
           <div className="flex flex-wrap border border-neutral-700 bg-neutral-900 rounded-lg p-1 text-xs font-bold text-neutral-300">
             <button
               onClick={() => setFilterStatus('ALL')}
-              className={`px-3.5 py-2 rounded-md uppercase transition-all ${
+              className={`px-3.5 py-2 rounded-md transition-all ${
                 filterStatus === 'ALL' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
               }`}
             >
@@ -199,7 +208,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </button>
             <button
               onClick={() => setFilterStatus('PENDING')}
-              className={`px-3.5 py-2 rounded-md uppercase transition-all ${
+              className={`px-3.5 py-2 rounded-md transition-all ${
                 filterStatus === 'PENDING' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
               }`}
             >
@@ -207,7 +216,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </button>
             <button
               onClick={() => setFilterStatus('VALIDATED')}
-              className={`px-3.5 py-2 rounded-md uppercase transition-all ${
+              className={`px-3.5 py-2 rounded-md transition-all ${
                 filterStatus === 'VALIDATED' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
               }`}
             >
@@ -215,7 +224,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </button>
             <button
               onClick={() => setFilterStatus('ENDED')}
-              className={`px-3.5 py-2 rounded-md uppercase transition-all ${
+              className={`px-3.5 py-2 rounded-md transition-all ${
                 filterStatus === 'ENDED' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
               }`}
             >
@@ -228,7 +237,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         {filteredReservations.length === 0 ? (
           <div className="p-12 border border-dashed border-neutral-800 rounded-2xl text-center space-y-3 bg-neutral-950/60">
             <Ticket className="w-12 h-12 mx-auto text-neutral-600" />
-            <p className="text-base font-bold uppercase text-white">
+            <p className="text-base font-bold text-white">
               Aucune réservation enregistrée dans cette catégorie
             </p>
             <p className="text-xs text-neutral-400 font-sans max-w-md mx-auto">
@@ -236,7 +245,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </p>
             <button
               onClick={onNavigateToMap}
-              className="px-5 py-2.5 bg-amber-400 text-black font-black text-xs uppercase rounded-xl hover:bg-amber-300"
+              className="px-5 py-2.5 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300"
             >
               Trouver une station
             </button>
@@ -263,6 +272,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-neutral-800/80 pb-5">
                     <div className="flex flex-col sm:flex-row items-start gap-4 min-w-0">
                       {/* Interactive Station Brand Logo */}
+                      <div className="hidden sm:block">
                       <StationBrandLogo
                         brand={brand}
                         size="lg"
@@ -270,16 +280,17 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         showBadge={true}
                         className="bg-black/90 p-2.5 border border-neutral-700/80 rounded-2xl shadow-xl shrink-0"
                       />
+                      </div>
 
                       <div className="space-y-1.5 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           {getStatusBadge(res.status)}
-                          <span className={`px-2 py-0.5 text-[10px] font-black uppercase rounded border ${theme.badgeBg}`}>
+                          <span className={`hidden sm:inline px-2 py-0.5 text-[11px] font-black uppercase rounded border ${theme.badgeBg}`}>
                             {theme.brandTag}
                           </span>
                         </div>
 
-                        <h3 className="text-xl sm:text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
+                        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                           <span>{res.stationName}</span>
                         </h3>
 
@@ -293,16 +304,16 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     {/* Code Badge Box with Real Scannable QR Code */}
                     {res.status === 'PENDING' && (
                     <div className="bg-black/95 text-white p-4 border border-neutral-700 rounded-2xl text-center w-full sm:w-auto sm:min-w-[240px] shadow-2xl shrink-0 flex flex-col items-center justify-center space-y-2">
-                      <span className="text-[10px] text-neutral-400 uppercase tracking-widest block font-bold">
-                        CODE SÉCURISÉ POMPISTE
+                      <span className="text-[11px] text-neutral-400 uppercase tracking-widest block font-bold">
+                        Code sécurisé pompiste
                       </span>
-                      <div className={`text-2xl font-black font-mono-code tracking-widest ${theme.codeText}`}>
+                      <div className={`text-2xl font-black font-code tracking-widest ${theme.codeText}`}>
                         {res.code}
                       </div>
 
                       {/* Real Scannable QR Code */}
                       <div 
-                        onClick={() => setActiveTicketModal(res)} 
+                        onClick={() => setPumpTicket(res)} 
                         className="cursor-pointer hover:scale-105 transition-transform p-1 bg-white rounded-xl"
                         title="Cliquer pour ouvrir le ticket et le QR Code grand format"
                       >
@@ -313,11 +324,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       </div>
 
                       <button
-                        onClick={() => setActiveTicketModal(res)}
-                        className="text-[10px] text-amber-400 hover:text-amber-300 font-bold flex items-center justify-center gap-1 transition-colors"
+                        onClick={() => setPumpTicket(res)}
+                        className="w-full px-4 py-3 bg-amber-400 text-black text-sm font-extrabold rounded-xl hover:bg-amber-300 flex items-center justify-center gap-2"
                       >
-                        <Maximize2 className="w-3 h-3 text-amber-400" />
-                        <span>Agrandir / Scanner le QR Code</span>
+                        <Maximize2 className="w-4 h-4" />
+                        <span>Montrer à la pompe</span>
                       </button>
                     </div>
                     )}
@@ -326,19 +337,19 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                   {/* Order Details Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs border-b border-neutral-800/80 pb-5">
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[10px] uppercase font-bold flex items-center gap-1">
-                        <Fuel className="w-3 h-3 text-amber-400" /> CARBURANT :
+                      <span className="text-neutral-400 block text-[11px] uppercase font-bold flex items-center gap-1">
+                        <Fuel className="w-3 h-3 text-amber-400" /> Carburant :
                       </span>
                       <span className={`font-black text-sm ${theme.accentText}`}>{res.fuelLabel}</span>
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[10px] uppercase font-bold">QUANTITÉ RÉSERVÉE :</span>
+                      <span className="text-neutral-400 block text-[11px] uppercase font-bold">Quantité réservée :</span>
                       <span className="font-extrabold text-white text-sm">{res.liters} Litres</span>
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[10px] uppercase font-bold">MONTANT PAYÉ :</span>
+                      <span className="text-neutral-400 block text-[11px] uppercase font-bold">Montant payé :</span>
                       <span className="font-extrabold text-emerald-400 text-sm">
                         {res.totalAmountXOF.toLocaleString('fr-FR')} FCFA
                       </span>
@@ -348,7 +359,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[10px] uppercase font-bold">
+                      <span className="text-neutral-400 block text-[11px] uppercase font-bold">
                         {res.status === 'VALIDATED' ? 'SERVI LE :' : res.status === 'PENDING' ? "VALIDE JUSQU'À :" : 'RÉSERVÉ LE :'}
                       </span>
                       <span className="font-extrabold text-amber-300 text-sm">
@@ -365,7 +376,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     <div className="flex flex-wrap items-center gap-3">
                       <button
                         onClick={() => copyCode(res.code, res.id)}
-                        className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold uppercase hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
+                        className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
                       >
                         <Copy className="w-3.5 h-3.5" />
                         <span>{copiedId === res.id ? 'Code Copié !' : 'Copier Code'}</span>
@@ -373,19 +384,19 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
                       <button
                         onClick={() => setActiveTicketModal(res)}
-                        className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold uppercase transition-all flex items-center gap-2 text-amber-300 shadow-md"
+                        className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition-all flex items-center gap-2 text-amber-300 shadow-md"
                       >
                         <Printer className="w-3.5 h-3.5" />
                         <span>Imprimer Reçu / QR Code</span>
                       </button>
                     </div>
 
-                    <button
+                    {!offline && <button
                       onClick={() => handleCancel(res)}
-                      className="px-4 py-2.5 border border-rose-500/40 text-rose-400 bg-rose-500/10 hover:bg-rose-500 hover:text-white rounded-xl font-bold uppercase text-[11px] transition-colors"
+                      className="px-4 py-2.5 border border-rose-500/40 text-rose-400 bg-rose-500/10 hover:bg-rose-500 hover:text-white rounded-xl font-bold uppercase text-xs transition-colors"
                     >
                       Annuler la réservation
-                    </button>
+                    </button>}
                   </div>
                   )}
                 </div>
@@ -394,6 +405,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           </div>
         )}
       </div>
+
+      {pumpTicket && <PumpScreen reservation={pumpTicket} onClose={() => setPumpTicket(null)} />}
 
       {/* Ticket Modal for Viewing & Printing */}
       {activeTicketModal && (

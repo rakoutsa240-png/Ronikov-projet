@@ -115,15 +115,15 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                   <Bell className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black uppercase text-white tracking-tight flex items-center gap-2">
-                    <span>NOTIFICATIONS</span>
+                  <h2 className="text-base font-black text-white tracking-tight flex items-center gap-2">
+                    <span>Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="px-2 py-0.5 bg-amber-400 text-black text-[10px] font-black rounded-full">
+                      <span className="px-2 py-0.5 bg-amber-400 text-black text-[11px] font-black rounded-full">
                         {unreadCount}
                       </span>
                     )}
                   </h2>
-                  <p className="text-[10px] text-neutral-400 font-sans">
+                  <p className="text-[11px] text-neutral-400 font-sans">
                     Alertes stations & confirmations en direct
                   </p>
                 </div>
@@ -133,7 +133,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 {unreadCount > 0 && (
                   <button
                     onClick={onMarkAllRead}
-                    className="text-[10px] uppercase font-bold text-amber-300 hover:text-white border border-neutral-700 hover:border-amber-400 px-2.5 py-1 rounded-lg transition-colors"
+                    className="text-[11px] uppercase font-bold text-amber-300 hover:text-white border border-neutral-700 hover:border-amber-400 px-2.5 py-1 rounded-lg transition-colors"
                   >
                     Tout lire
                   </button>
@@ -152,8 +152,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             {notifications.length === 0 ? (
               <div className="py-16 text-center text-xs text-neutral-500 space-y-2 border border-dashed border-neutral-800 rounded-2xl bg-black/40">
                 <Bell className="w-8 h-8 mx-auto text-neutral-700" />
-                <p className="font-bold uppercase text-neutral-400">Aucune notification pour le moment</p>
-                <p className="text-[11px] text-neutral-600 font-sans">Vos confirmations et recharges apparaîtront ici.</p>
+                <p className="font-bold text-neutral-400">Aucune notification pour le moment</p>
+                <p className="text-xs text-neutral-600 font-sans">Vos confirmations et recharges apparaîtront ici.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -188,18 +188,18 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                           )}
 
                           <div>
-                            <span className={`text-xs font-black uppercase block ${accent.textAccent}`}>
+                            <span className={`text-xs font-black block ${accent.textAccent}`}>
                               {n.title}
                             </span>
                             {brand && (
-                              <span className="text-[9px] text-neutral-400 uppercase font-bold">
+                              <span className="text-[9px] text-neutral-400 font-bold">
                                 Station {brand}
                               </span>
                             )}
                           </div>
                         </div>
 
-                        <span className="text-[10px] text-neutral-400 font-sans shrink-0">
+                        <span className="text-[11px] text-neutral-400 font-sans shrink-0">
                           {formatNotificationTime(n.timestamp)}
                         </span>
                       </div>
@@ -219,7 +219,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           <div className="pt-2 border-t border-neutral-800">
             <button
               onClick={onClose}
-              className="w-full py-3 bg-amber-400 text-black text-xs font-black uppercase tracking-wider hover:bg-amber-300 active:scale-98 transition-all rounded-xl shadow-lg shadow-amber-400/20"
+              className="w-full py-3 bg-amber-400 text-black text-xs font-black tracking-wider hover:bg-amber-300 active:scale-98 transition-all rounded-xl shadow-lg shadow-amber-400/20"
             >
               Fermer les Notifications
             </button>

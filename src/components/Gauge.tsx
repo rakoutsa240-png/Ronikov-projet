@@ -28,7 +28,7 @@ export const Gauge: React.FC<GaugeProps> = ({
       <div className={`w-full ${className}`}>
         {(label || showPercent) && (
           <div className="flex justify-between items-center mb-1.5 text-xs font-mono-code tracking-tight">
-            {label && <span className={`font-semibold uppercase ${darkMode ? 'text-white' : 'text-slate-900'}`}>{label}</span>}
+            {label && <span className={`font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{label}</span>}
             {showPercent && <span className={`font-bold ${darkMode ? 'text-amber-400' : 'text-slate-600'}`}>{Math.round(percentage)}%</span>}
           </div>
         )}
@@ -39,7 +39,7 @@ export const Gauge: React.FC<GaugeProps> = ({
           />
         </div>
         {sublabel && (
-          <div className={`text-[11px] mt-1 font-mono-code ${darkMode ? 'text-neutral-400' : 'text-slate-500'}`}>{sublabel}</div>
+          <div className={`text-xs mt-1 font-mono-code ${darkMode ? 'text-neutral-400' : 'text-slate-500'}`}>{sublabel}</div>
         )}
       </div>
     );
@@ -96,8 +96,8 @@ export const Gauge: React.FC<GaugeProps> = ({
 
       {label && (
         <div className="mt-2 text-center">
-          <div className={`text-xs font-bold tracking-tight uppercase font-mono-code ${darkMode ? 'text-amber-300' : 'text-slate-900'}`}>{label}</div>
-          {sublabel && <div className={`text-[11px] font-mono-code mt-0.5 ${darkMode ? 'text-neutral-400' : 'text-slate-500'}`}>{sublabel}</div>}
+          <div className={`text-xs font-bold tracking-tight font-mono-code ${darkMode ? 'text-amber-300' : 'text-slate-900'}`}>{label}</div>
+          {sublabel && <div className={`text-xs font-mono-code mt-0.5 ${darkMode ? 'text-neutral-400' : 'text-slate-500'}`}>{sublabel}</div>}
         </div>
       )}
     </div>

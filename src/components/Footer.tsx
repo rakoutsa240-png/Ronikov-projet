@@ -17,15 +17,15 @@ export const Footer: React.FC = () => {
             <p className="text-neutral-400 font-sans text-xs leading-relaxed">
               Plateforme togolaise de localisation, réservation et paiement anticipé de carburant en stations-service.
             </p>
-            <div className="text-[11px] text-neutral-500 font-bold uppercase">
-              RÉPUBLIQUE TOGOLAISE — TOGO
+            <div className="text-xs text-neutral-500 font-bold uppercase">
+              République togolaise — Togo
             </div>
           </div>
 
           {/* Col 2: Villes & Couverture Togo */}
           <div className="space-y-3">
-            <h4 className="font-bold uppercase text-white border-b border-neutral-800 pb-1">
-              COUVERTURE NATIONALE
+            <h4 className="font-bold text-white border-b border-neutral-800 pb-1">
+              Couverture nationale
             </h4>
             <ul className="space-y-1.5 text-neutral-400">
               <li>Lomé (Golfe & Agoè-Nyivé)</li>
@@ -39,8 +39,8 @@ export const Footer: React.FC = () => {
 
           {/* Col 3: Partenaires & Services */}
           <div className="space-y-3">
-            <h4 className="font-bold uppercase text-white border-b border-neutral-800 pb-1">
-              RESEAUX PARTENAIRES
+            <h4 className="font-bold text-white border-b border-neutral-800 pb-1">
+              Reseaux partenaires
             </h4>
             <ul className="space-y-1.5 text-neutral-400">
               <li>TotalEnergies Marketing Togo</li>
@@ -53,13 +53,13 @@ export const Footer: React.FC = () => {
 
           {/* Col 4: Service Client */}
           <div className="space-y-3">
-            <h4 className="font-bold uppercase text-white border-b border-neutral-800 pb-1">
-              ASSISTANCE 24H/7J
+            <h4 className="font-bold text-white border-b border-neutral-800 pb-1">
+              Assistance 24h/7j
             </h4>
             <div className="space-y-2 text-neutral-300">
               <p>Service Client Togo: +228 90 00 00 00</p>
               <p>Email: contact@ronikov.tg</p>
-              <p className="text-[10px] text-neutral-500 font-sans pt-1">
+              <p className="text-[11px] text-neutral-500 font-sans pt-1">
                 Paiements via Mixx by Yas (Togocom) et Flooz (Moov Africa).
               </p>
             </div>
@@ -67,11 +67,11 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom copyright & legal */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <div>© {new Date().getFullYear()} RONIKOV. Tous droits réservés.</div>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="#/carte" className="hover:text-white uppercase">Stations & carte</a>
-            <a href="#/premium" className="hover:text-white uppercase">Pass Premium</a>
+            <a href="#/carte" className="hover:text-white">Stations & carte</a>
+            <a href="#/premium" className="hover:text-white">Pass Premium</a>
           </div>
         </div>
       </div>

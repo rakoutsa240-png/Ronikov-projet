@@ -62,10 +62,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Header */}
         <div className="border-b border-black pb-3 space-y-1">
-          <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest block">
-            ACCÈS ESPACE SÉCURISÉ TOGO
+          <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-widest block">
+            Accès espace sécurisé Togo
           </span>
-          <h2 className="text-2xl font-extrabold uppercase tracking-tight">
+          <h2 className="text-2xl font-extrabold tracking-tight">
             {mode === 'login' ? 'CONNEXION RONIKOV' : 'CRÉATION DE COMPTE'}
           </h2>
         </div>
@@ -77,7 +77,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'register' && (
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase block text-black">Nom & Prénoms</label>
+              <label className="text-xs font-bold block text-black">Nom & Prénoms</label>
               <input
                 type="text"
                 required
@@ -91,7 +91,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {mode === 'register' && (
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase block text-black">E-mail (facultatif)</label>
+              <label className="text-xs font-bold block text-black">E-mail (facultatif)</label>
               <input
                 type="email"
                 value={email}
@@ -103,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-bold uppercase block text-black">
+            <label className="text-xs font-bold block text-black">
               Numéro de Téléphone Togolais (+228)
             </label>
             <div className="flex border border-black">
@@ -124,7 +124,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold uppercase block text-black">Code Secret / Mot de Passe</label>
+            <label className="text-xs font-bold block text-black">Code Secret / Mot de Passe</label>
             <div className="flex border border-black">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -145,7 +145,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             </div>
-            {mode === 'register' && <p className="text-[10px] text-neutral-500 font-sans">8 caractères minimum.</p>}
+            {mode === 'register' && <p className="text-[11px] text-neutral-500 font-sans">8 caractères minimum.</p>}
           </div>
 
           {error && (
@@ -157,7 +157,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs uppercase tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
+            className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
           >
             <span>{mode === 'login' ? 'Se Connecter' : 'Créer Mon Compte'}</span>
             <ArrowRight className="w-4 h-4" />
@@ -170,7 +170,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               setMode(mode === 'login' ? 'register' : 'login');
               setError(null);
             }}
-            className="text-neutral-600 font-bold uppercase hover:text-black underline"
+            className="text-neutral-600 font-bold hover:text-black underline"
           >
             {mode === 'login'
               ? "Pas encore de compte ? S'inscrire"

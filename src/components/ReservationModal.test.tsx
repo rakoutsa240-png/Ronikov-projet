@@ -30,12 +30,12 @@ const ticket: Reservation = {
 };
 
 function goToPayment() {
-  fireEvent.click(screen.getByText('Continuer vers le récapitulatif'));
-  fireEvent.click(screen.getByText('Procéder au Paiement'));
+  fireEvent.click(screen.getByText('Continuer vers le paiement'));
 }
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 describe('ReservationModal', () => {
@@ -63,10 +63,35 @@ describe('ReservationModal', () => {
     expect(JSON.parse(String(init.body))).toEqual({
       stationId: station.id,
       fuelType: 'SUPER',
-      liters: 10,
+      // The amount comes first: 5 000 FCFA, rounded to the litre.
+      liters: Math.round(5000 / station.stock.SUPER.pricePerLiter),
       paymentMethod: 'MIXX_BY_YAS',
       paymentPhone: '90 00 00 01',
     });
+  });
+
+  it('remembers the last fuel, amount and payment for the next booking', async () => {
+    const fetchMock = vi.fn(async () => Response.json(ticket, {status: 201}));
+    vi.stubGlobal('fetch', fetchMock);
+    const props = {station, onClose: () => {}, onCompleteReservation: () => {}};
+    const {rerender} = render(<ReservationModal {...props} isOpen />);
+    fireEvent.click(screen.getByText('En Litres'));
+    fireEvent.click(screen.getByText('20 L'));
+    goToPayment();
+    fireEvent.click(screen.getByText('Flooz').closest('button')!);
+    fireEvent.change(screen.getByPlaceholderText('90 00 00 00'), {target: {value: '99 11 22 33'}});
+    fireEvent.click(screen.getByText(/^Payer /));
+    await screen.findAllByText('RNK-AB7K-Q3');
+
+    rerender(<ReservationModal {...props} isOpen={false} />);
+    rerender(<ReservationModal {...props} isOpen />);
+    expect(screen.getByText('20 Litres')).toBeTruthy();
+    goToPayment();
+    expect(screen.getByDisplayValue('99 11 22 33')).toBeTruthy();
+    fireEvent.click(screen.getByText(/^Payer /));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const [, init] = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toMatchObject({liters: 20, paymentMethod: 'MOOV_MONEY', paymentPhone: '99 11 22 33'});
   });
 
   it('shows why the API refused the booking', async () => {

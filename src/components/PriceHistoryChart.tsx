@@ -123,12 +123,12 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         <div>
           <div className="text-xs text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-amber-400" />
-            <span>ANALYSE TARIFAIRE TOGO</span>
+            <span>Analyse tarifaire Togo</span>
           </div>
-          <h2 className="text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
+          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
             Historique des prix ({days} derniers jours)
           </h2>
-          <div className="mt-2 inline-flex rounded-lg border border-neutral-800 p-0.5 text-[11px] font-bold">
+          <div className="mt-2 inline-flex rounded-lg border border-neutral-800 p-0.5 text-xs font-bold">
             {([7, 30] as const).map((d) => (
               <button
                 key={d}
@@ -145,7 +145,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         <div className="flex items-center gap-1.5 flex-wrap bg-neutral-900/90 p-1.5 rounded-xl border border-neutral-800">
           <button
             onClick={() => setSelectedFuel('ALL')}
-            className={`px-3 py-1.5 text-xs font-bold uppercase rounded-lg transition-all ${
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
               selectedFuel === 'ALL'
                 ? 'bg-amber-400 text-black shadow-md'
                 : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
@@ -157,7 +157,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
             <button
               key={type}
               onClick={() => setSelectedFuel(type)}
-              className={`px-3 py-1.5 text-xs font-bold uppercase rounded-lg transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
                 selectedFuel === type
                   ? 'bg-amber-400 text-black shadow-md'
                   : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
@@ -176,7 +176,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
       {/* Summary KPI stats strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[10px] text-neutral-400 font-bold uppercase flex items-center gap-1">
+          <div className="text-[11px] text-neutral-400 font-bold uppercase flex items-center gap-1">
             <Fuel className="w-3 h-3 text-amber-400" />
             <span>Carburant Affiché</span>
           </div>
@@ -184,19 +184,19 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[10px] text-neutral-400 font-bold uppercase">Prix Actuel</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">Prix Actuel</div>
           <div className="text-base font-black text-white">{stats.currentPrice} FCFA / L</div>
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[10px] text-neutral-400 font-bold uppercase">Min / Max ({days} jours)</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">Min / Max ({days} jours)</div>
           <div className="text-sm font-bold text-neutral-200">
             <span className="text-emerald-400">{stats.minPrice}</span> / <span className="text-amber-400">{stats.maxPrice}</span> FCFA
           </div>
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[10px] text-neutral-400 font-bold uppercase">Tendance {days}j</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">Tendance {days}j</div>
           <div className="flex items-center gap-1 text-xs font-black">
             {stats.diff > 0 ? (
               <span className="text-rose-400 flex items-center gap-0.5">
@@ -323,7 +323,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         </ResponsiveContainer>
       </div>
 
-      <div className="flex items-center gap-2 text-[11px] text-neutral-400 bg-neutral-900/60 p-3 rounded-xl border border-neutral-800">
+      <div className="flex items-center gap-2 text-xs text-neutral-400 bg-neutral-900/60 p-3 rounded-xl border border-neutral-800">
         <Info className="w-4 h-4 text-amber-400 shrink-0" />
         <span>
           Prix réellement pratiqués par la station <strong>{station.name}</strong>, enregistrés à chaque changement de tarif.
