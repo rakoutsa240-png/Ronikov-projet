@@ -3,6 +3,7 @@ import { Station, FuelType } from '../types';
 import { Gauge } from './Gauge';
 import { formatDistance } from '../geo';
 import { FavoriteButton } from './FavoriteButton';
+import { StationFreshness } from './StationFreshness';
 import { ShieldCheck, MapPin, Clock, Phone, ChevronRight, Zap } from 'lucide-react';
 
 interface StationCardProps {
@@ -94,6 +95,7 @@ export const StationCard: React.FC<StationCardProps> = ({
         </div>
 
         <p className="text-xs text-neutral-300 line-clamp-1">{station.address}</p>
+        <StationFreshness station={station} />
 
         <div className="flex items-center gap-4 text-xs font-mono-code pt-1 text-neutral-300">
           <div className="flex items-center gap-1.5 font-bold text-amber-400">

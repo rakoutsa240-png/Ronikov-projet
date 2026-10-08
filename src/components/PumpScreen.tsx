@@ -25,7 +25,7 @@ export const PumpScreen: React.FC<{ reservation: Reservation; onClose: () => voi
       role="dialog"
       aria-modal="true"
       aria-label="Ticket à présenter au pompiste"
-      className="fixed inset-0 z-[100] bg-white text-black flex flex-col items-center justify-center gap-4 p-6 no-print overflow-y-auto"
+      className="theme-fixed fixed inset-0 z-[100] bg-white text-black flex flex-col items-center justify-center gap-4 p-6 no-print overflow-y-auto"
     >
       <button
         onClick={onClose}

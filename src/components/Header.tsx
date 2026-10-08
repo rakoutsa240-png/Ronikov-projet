@@ -1,5 +1,6 @@
 import React from 'react';
-import { Bell, User, LogOut, LogIn } from 'lucide-react';
+import { Bell, User, LogOut, LogIn, Sun, Moon } from 'lucide-react';
+import { setTheme, useTheme } from '../theme';
 import { UserRole } from '../types';
 
 interface HeaderProps {
@@ -35,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
     ...(userRole === 'STATION_PRO' || userRole === 'ADMIN' ? [{ id: 'pro', label: 'Espace Pro' }] : []),
     ...(userRole === 'ADMIN' ? [{ id: 'admin', label: 'Admin' }] : []),
   ];
+  const theme = useTheme();
 
 
   return (
@@ -84,7 +86,17 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right Actions: Persona Selector, Notifications, User Auth */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Light theme for full sunlight, dark theme otherwise */}
+            <button
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              className="p-2 border border-neutral-800 hover:border-neutral-600 bg-neutral-900 text-white transition-colors"
+              aria-label={theme === 'light' ? 'Passer en mode sombre' : 'Passer en mode clair (plein soleil)'}
+              title={theme === 'light' ? 'Mode sombre' : 'Mode clair (plein soleil)'}
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+
             {/* Notifications Trigger */}
             <button
               onClick={onOpenNotifications}

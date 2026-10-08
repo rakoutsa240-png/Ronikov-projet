@@ -1,0 +1,22 @@
+# Checks every 20 minutes that the live site answers. A failed run sends GitHub's usual
+# "workflow failed" email to the repository owner. The free Render server sleeps after
+# 15 minutes without visits and takes up to a minute to wake, hence the long wait.
+name: Site en ligne
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Page d'accueil et API
+        env:
+          SITE: https://ronikov.onrender.com
+        run: |
+          curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 20 --retry-all-errors "$SITE/api/health" | grep -q '"ok":true'
+          curl --fail --silent --show-error --max-time 60 --retry 2 --retry-delay 10 "$SITE/" | grep -q 'RONIKOV'
+          echo "Le site répond."

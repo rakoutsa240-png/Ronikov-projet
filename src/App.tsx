@@ -13,7 +13,9 @@ import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
 import { BottomNav } from './components/BottomNav';
 import { PageSkeleton } from './components/Skeleton';
-import { loadJSON, saveJSON, useOnline } from './storage';
+import { getFavorites, loadJSON, replaceFavorites, saveJSON, setFavoritesSaver, useOnline } from './storage';
+import { ReportStationModal } from './components/ReportStationModal';
+import { showAlert } from './alerts';
 import { WifiOff, RefreshCw } from 'lucide-react';
 import { parseHash, routeToHash, Route, Tab } from './routes';
 
@@ -80,6 +82,19 @@ export default function App() {
     if (isOnline && serverUnreachable) loadStationsAndPrices();
   }, [isOnline]);
   const loading = !stationsLoaded && stations.length === 0;
+
+  // Stocks move all day: refresh them every two minutes while the page is on screen, and when it comes back.
+  useEffect(() => {
+    const refreshIfVisible = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) loadStationsAndPrices();
+    };
+    const id = window.setInterval(refreshIfVisible, 120_000);
+    document.addEventListener('visibilitychange', refreshIfVisible);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener('visibilitychange', refreshIfVisible);
+    };
+  }, [loadStationsAndPrices]);
 
   // Stock changes after every booking, cancellation or validation.
   const refreshStations = () => {
@@ -148,6 +163,11 @@ export default function App() {
       setIsBookingModalOpen(true);
       return;
     }
+    if (pendingReport) {
+      setReportStation(pendingReport);
+      setPendingReport(null);
+      return;
+    }
     if (user.role === 'STATION_PRO') setActiveTab('pro');
     if (user.role === 'ADMIN') setActiveTab('admin');
   };
@@ -195,7 +215,6 @@ export default function App() {
         console.warn('Could not load reservations', e);
         setReservations(loadJSON<Reservation[]>(TICKETS_KEY, []));
       });
-    api.notifications().then(setNotifications).catch((e) => console.warn('Could not load notifications', e));
     const staffRequest =
       currentUser.role === 'ADMIN'
         ? api.allReservations()
@@ -204,6 +223,48 @@ export default function App() {
           : Promise.resolve([]);
     staffRequest.then(setStaffReservations).catch((e) => console.warn('Could not load station reservations', e));
   };
+  // Favourites live on the phone; once signed in they are also kept on the account (merged both ways),
+  // so the server can warn the user when one of these stations gets fuel back or changes price.
+  useEffect(() => {
+    if (!currentUser) return;
+    let cancelled = false;
+    api
+      .favorites()
+      .then((saved) => {
+        if (cancelled) return;
+        const merged = [...new Set([...saved, ...getFavorites()])];
+        replaceFavorites(merged);
+        if (merged.length !== saved.length) api.saveFavorites(merged).catch((e) => console.warn('Could not save favourites', e));
+        setFavoritesSaver((ids) => api.saveFavorites(ids).catch((e) => console.warn('Could not save favourites', e)));
+      })
+      .catch((e) => console.warn('Could not load favourites', e));
+    return () => {
+      cancelled = true;
+      setFavoritesSaver(null);
+    };
+  }, [currentUser?.id]);
+
+  // New messages (fuel back at a favourite, new price, ticket news) are checked every minute and,
+  // when the visitor allowed it, shown as a phone alert while RONIKOV is in the background.
+  useEffect(() => {
+    if (!currentUser) return;
+    let known: Set<string> | null = null;
+    const check = () =>
+      api
+        .notifications()
+        .then((items) => {
+          setNotifications(items);
+          if (known && document.visibilityState === 'hidden') {
+            items.filter((n) => !n.read && !known!.has(n.id)).forEach((n) => void showAlert(n));
+          }
+          known = new Set(items.map((n) => n.id));
+        })
+        .catch(() => {});
+    void check();
+    const id = window.setInterval(check, 60_000);
+    return () => window.clearInterval(id);
+  }, [currentUser?.id]);
+
   // Signed-in visitors get the tickets page downloaded in advance, so it opens even without network later.
   useEffect(() => {
     if (currentUser) void import('./components/HistoryView').catch(() => {});
@@ -235,6 +296,16 @@ export default function App() {
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState<boolean>(false);
   // The visitor clicked "Réserver" while signed out: the booking opens once they sign in.
   const [pendingBooking, setPendingBooking] = useState(false);
+  // Same for "Signaler un problème": reports need an account, so one person cannot flood a station.
+  const [reportStation, setReportStation] = useState<Station | null>(null);
+  const [pendingReport, setPendingReport] = useState<Station | null>(null);
+  const handleOpenReport = (station: Station) => {
+    if (currentUser) setReportStation(station);
+    else {
+      setPendingReport(station);
+      setIsAuthModalOpen(true);
+    }
+  };
 
   // Open booking modal for a station
   // Booking needs an account: the ticket is tied to it.
@@ -325,6 +396,15 @@ export default function App() {
     if (stations.find((s) => s.id === stationId)?.queueTimeMinutes === newQueueTime) return;
     try {
       replaceStation(await api.updateStation(stationId, { queueTimeMinutes: newQueueTime }), stationId);
+    } catch (e) {
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+    }
+  };
+
+  const handleConfirmStationPro = async (stationId: string) => {
+    try {
+      const updated = await api.confirmStation(stationId);
+      if (updated) replaceStation(updated, stationId);
     } catch (e) {
       throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
     }
@@ -424,6 +504,8 @@ export default function App() {
             onNavigateMap={() => setActiveTab('map')}
             onBookStation={handleOpenBooking}
             onViewStation={handleViewStationDetails}
+            isSignedIn={currentUser !== null}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
             onNavigatePro={() => {
               if (canUsePro) setActiveTab('pro');
               else setIsAuthModalOpen(true);
@@ -448,6 +530,7 @@ export default function App() {
             station={stations.find((s) => s.id === route.stationId) ?? null}
             onBack={() => (window.history.length > 1 ? window.history.back() : setActiveTab('map'))}
             onBook={handleOpenBooking}
+            onReport={handleOpenReport}
           />
         )}
 
@@ -489,6 +572,7 @@ export default function App() {
             onValidateCode={handleValidateCodePro}
             onUpdateStock={handleUpdateStockPro}
             onUpdateQueueTime={handleUpdateQueueTimePro}
+            onConfirmStation={handleConfirmStationPro}
             canEditPrice={userRole === 'ADMIN'}
           />
         )}
@@ -525,10 +609,17 @@ export default function App() {
       {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        reason={pendingBooking ? 'Connectez-vous ou créez un compte gratuit pour réserver : votre ticket sera lié à votre compte.' : undefined}
+        reason={
+          pendingBooking
+            ? 'Connectez-vous ou créez un compte gratuit pour réserver : votre ticket sera lié à votre compte.'
+            : pendingReport
+              ? 'Connectez-vous ou créez un compte gratuit pour signaler un problème à cette station.'
+              : undefined
+        }
         onClose={() => {
           setIsAuthModalOpen(false);
           setPendingBooking(false);
+          setPendingReport(null);
         }}
         onAuthenticated={handleAuthenticated}
       />
@@ -540,6 +631,12 @@ export default function App() {
         onClose={() => setPasswordModal(null)}
         onLogout={handleLogout}
         onChanged={setCurrentUser}
+      />
+
+      <ReportStationModal
+        station={reportStation}
+        onClose={() => setReportStation(null)}
+        onReported={(updated) => replaceStation(updated, updated.id)}
       />
 
       {/* Notification Drawer */}

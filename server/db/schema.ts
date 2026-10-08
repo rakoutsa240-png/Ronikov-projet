@@ -26,6 +26,8 @@ export const notificationTypeEnum = pgEnum('notification_type', ['RESERVATION', 
 
 export const fuelTypeEnum = pgEnum('fuel_type', ['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE']);
 
+export const reportKindEnum = pgEnum('report_kind', ['NO_FUEL', 'LONG_QUEUE', 'WRONG_PRICE', 'CLOSED']);
+
 export const stations = pgTable('stations', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -41,6 +43,8 @@ export const stations = pgTable('stations', {
   queueTimeMinutes: integer('queue_time_minutes').notNull().default(0),
   isPartner: boolean('is_partner').notNull().default(false),
   isActive: boolean('is_active').notNull().default(true),
+  // Last time the station's staff updated or confirmed its stock, prices or waiting time.
+  checkedAt: timestamp('checked_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // One row per station and fuel. Status is computed from the litres, never stored.
@@ -204,4 +208,38 @@ export const stationPrices = pgTable(
     effectiveFrom: timestamp('effective_from', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('station_prices_station_effective_idx').on(t.stationId, t.effectiveFrom)],
+);
+
+// A client telling others what they saw at a station (no fuel, long queue, wrong price, closed).
+// Reports older than the station's last staff check are no longer shown.
+export const stationReports = pgTable(
+  'station_reports',
+  {
+    id: serial('id').primaryKey(),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    kind: reportKindEnum('kind').notNull(),
+    fuelType: fuelTypeEnum('fuel_type'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('station_reports_station_created_idx').on(t.stationId, t.createdAt)],
+);
+
+// Favourite stations of signed-in users: they are told when one gets fuel back or changes price.
+export const favorites = pgTable(
+  'favorites',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.stationId] }), index('favorites_station_idx').on(t.stationId)],
 );

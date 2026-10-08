@@ -50,3 +50,16 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+// Tapping an alert (fuel back, new price, ticket) opens RONIKOV, or brings its open tab forward.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = event.notification.data?.url || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((w) => new URL(w.url).origin === self.location.origin);
+      if (open) return open.focus();
+      return self.clients.openWindow(target);
+    }),
+  );
+});

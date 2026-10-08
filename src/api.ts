@@ -1,4 +1,4 @@
-import type { AdminUser, AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, PriceChange, Reservation, Station } from './types';
+import type { AdminUser, AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, Station } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -95,6 +95,12 @@ export const api = {
   resetUserPassword: (id: string) =>
     request<{ temporaryPassword: string }>('POST', `/users/${encodeURIComponent(id)}/password`),
   requestPremium: () => request<{ message: string }>('POST', '/premium/request'),
+
+  reportStation: (stationId: string, kind: ReportKind, fuelType?: FuelType) =>
+    request<Station>('POST', `/stations/${encodeURIComponent(stationId)}/reports`, { kind, fuelType: fuelType ?? null }),
+  confirmStation: (stationId: string) => request<Station | null>('POST', `/stations/${encodeURIComponent(stationId)}/check`),
+  favorites: () => request<string[]>('GET', '/favorites'),
+  saveFavorites: (stationIds: string[]) => request<string[]>('PUT', '/favorites', { stationIds }),
 
   notifications: () => request<NotificationItem[]>('GET', '/notifications'),
   markNotificationsRead: () => request<void>('POST', '/notifications/read-all'),

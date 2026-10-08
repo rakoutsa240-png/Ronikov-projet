@@ -3,6 +3,7 @@ import { Reservation } from '../types';
 import { QRCodeImage } from './QRCodeImage';
 import { PumpScreen, ticketQrPayload } from './PumpScreen';
 import { PaymentMethodLabel } from './PaymentLogos';
+import { ReceiptButton } from './ReceiptButton';
 import { Check, Copy, Printer, Clock, MapPin, Fuel, Maximize2, X, ShieldCheck } from 'lucide-react';
 
 interface TicketCardProps {
@@ -130,7 +131,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
 
         {/* Action Controls (Hidden on Print) */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 no-print">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => copyCode(reservation.code)}
               className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition-all shadow-md"
@@ -146,6 +147,8 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               <Printer className="w-4 h-4 text-amber-400" />
               <span>Imprimer Ticket</span>
             </button>
+
+            <ReceiptButton reservation={reservation} />
           </div>
 
           {onClose && (
