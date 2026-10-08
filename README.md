@@ -105,6 +105,14 @@ Render generates `TICKET_SECRET` once; do not change it afterwards or existing t
 
 Production settings read by `server/env.ts`: `STATIC_DIR` (folder with the built site, `dist`), `SEED_DEMO_DATA` (`true` loads the demo stations and prices on start, keeping existing rows), `TRUST_PROXY` (Express "trust proxy", `true` behind Render's proxy) and `ADMIN_PHONES` (accounts promoted to admin on start; removing a number later does not demote it).
 
+## Android app
+
+`android/` is a [Capacitor](https://capacitorjs.com) project (app id `com.ronikov.app`, set in `capacitor.config.ts`). The app opens the live site (`server.url`), so it uses the same accounts and roles, and every deploy of `main` reaches it at once. A new Play Store release is only needed when `android/` changes: icon, permissions, name, or Capacitor upgrade. Raise `versionCode` and `versionName` in `android/app/build.gradle` before each upload.
+
+The **Appli Android** GitHub workflow builds it (Actions tab, or automatically when `android/` changes) and leaves two files under the run's **Artifacts**: `ronikov-test.apk` to install on a phone, and `ronikov-play-store.aab` to upload to the Play Console. Building locally needs Android Studio: `npm run build && npx cap sync android`, then open `android/`.
+
+Play Store signing: create an upload key once (`keytool -genkeypair -v -keystore upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload`), keep the file and its passwords safe, and add four repository secrets: `ANDROID_KEYSTORE_BASE64` (`base64 -w0 upload.jks`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`upload`) and `ANDROID_KEY_PASSWORD`. Without them the `.aab` is unsigned and the Play Console refuses it.
+
 ## Scripts
 
 | Command | What it does |
