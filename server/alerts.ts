@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { Db } from './db/client';
 import { favorites, notifications, stationManagers, users } from './db/schema';
 
@@ -26,7 +26,11 @@ export async function notifyFavoritesOnce(db: Db | Tx, stationIds: string[], tit
 
 // The station's managers, or the admins when nobody runs it.
 export async function notifyStationStaff(db: Db | Tx, stationId: string, title: string, message: string) {
-  let staff = await db.select({ userId: stationManagers.userId }).from(stationManagers).where(eq(stationManagers.stationId, stationId));
+  let staff = await db
+    .select({ userId: stationManagers.userId })
+    .from(stationManagers)
+    .innerJoin(users, eq(users.id, stationManagers.userId))
+    .where(and(eq(stationManagers.stationId, stationId), eq(users.role, 'STATION_PRO')));
   if (staff.length === 0) staff = await db.select({ userId: users.id }).from(users).where(eq(users.role, 'ADMIN'));
   if (staff.length === 0) return;
   await db

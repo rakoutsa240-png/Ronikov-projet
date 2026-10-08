@@ -5,6 +5,7 @@ import { ShieldCheck, CheckCircle2, AlertTriangle, Search, QrCode, Sliders, Save
 import { StationBrandLogo } from './StationBrandLogo';
 import { QrScanner } from './QrScanner';
 import { StationFreshness } from './StationFreshness';
+import { AttendantsPanel } from './AttendantsPanel';
 
 interface ProDashboardProps {
   managedStation: Station;
@@ -21,6 +22,7 @@ interface ProDashboardProps {
   // Tells clients the station's figures are still right, even when nothing changed (clears their reports).
   onConfirmStation: (stationId: string) => Promise<void>;
   canEditPrice?: boolean; // only admins set prices
+  isAttendant?: boolean; // pump attendants only validate tickets: no stock, no team
 }
 
 // The form edits what is physically in the tank: litres still bookable plus litres held by tickets.
@@ -39,6 +41,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
   onUpdateQueueTime,
   onConfirmStation,
   canEditPrice = false,
+  isAttendant = false,
 }) => {
   const [inputCode, setInputCode] = useState('');
   const [validationResult, setValidationResult] = useState<{
@@ -120,7 +123,9 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
           <AlertTriangle className="w-10 h-10 mx-auto text-amber-400" />
           <h1 className="text-xl font-black">Aucune station attribuée</h1>
           <p className="text-sm text-neutral-300 font-sans">
-            Votre compte gérant n'est relié à aucune station. Demandez à un administrateur RONIKOV de vous l'attribuer.
+            {isAttendant
+              ? "Votre compte pompiste n'est relié à aucune station. Demandez au gérant de votre station de vous ajouter."
+              : "Votre compte gérant n'est relié à aucune station. Demandez à un administrateur RONIKOV de vous l'attribuer."}
           </p>
         </div>
       </div>
@@ -150,7 +155,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
           )}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black rounded shadow">
-              Terminal pompiste & gérant
+              {isAttendant ? 'Terminal pompiste' : 'Terminal pompiste & gérant'}
             </span>
             <span className="text-xs text-neutral-400 font-bold flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
@@ -177,19 +182,21 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
           </div>
         </div>
 
-        <div className="p-4 bg-black/80 border border-neutral-700 rounded-2xl text-center min-w-[180px] shadow-inner shrink-0">
-          <span className="text-[11px] text-neutral-400 uppercase font-bold block flex items-center justify-center gap-1">
-            <Clock className="w-3 h-3 text-amber-400" /> Attente déclarée
-          </span>
-          <span className="text-3xl font-black text-amber-300 my-0.5 block">{queueTime} MIN</span>
-          <span className="text-[11px] text-emerald-400 font-bold uppercase block">Flux en Direct</span>
-        </div>
+        {!isAttendant && (
+          <div className="p-4 bg-black/80 border border-neutral-700 rounded-2xl text-center min-w-[180px] shadow-inner shrink-0">
+            <span className="text-[11px] text-neutral-400 uppercase font-bold block flex items-center justify-center gap-1">
+              <Clock className="w-3 h-3 text-amber-400" /> Attente déclarée
+            </span>
+            <span className="text-3xl font-black text-amber-300 my-0.5 block">{queueTime} MIN</span>
+            <span className="text-[11px] text-emerald-400 font-bold uppercase block">Flux en Direct</span>
+          </div>
+        )}
       </div>
 
       {/* Grid: Left Code Validation, Right Live Stock Control */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Client Code Verification Terminal */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className={`${isAttendant ? 'lg:col-span-12 max-w-2xl w-full mx-auto' : 'lg:col-span-6'} space-y-6`}>
           <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-6">
             <div className="border-b border-neutral-800 pb-4">
               <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
@@ -326,136 +333,140 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
         </div>
 
         {/* Right Column: Real-Time Stock & Queue Control */}
-        <div className="lg:col-span-6 p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-6">
-          <div className="border-b border-neutral-800 pb-4 flex justify-between items-center gap-2">
-            <div>
-              <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
-                Gestion des stocks & files en direct
-              </span>
-              <h2 className="text-2xl font-black text-white tracking-tight">
-                Mises à jour réseau
-              </h2>
+        {!isAttendant && (
+          <div className="lg:col-span-6 p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-6">
+            <div className="border-b border-neutral-800 pb-4 flex justify-between items-center gap-2">
+              <div>
+                <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+                  Gestion des stocks & files en direct
+                </span>
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                  Mises à jour réseau
+                </h2>
+              </div>
+
+              <button
+                onClick={handleSaveStock}
+                disabled={isSaving}
+                className="px-4 py-2.5 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition-all rounded-xl flex items-center gap-1.5 shadow-lg shrink-0 disabled:opacity-60"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>{isSaving ? 'Enregistrement...' : 'Enregistrer'}</span>
+              </button>
             </div>
 
-            <button
-              onClick={handleSaveStock}
-              disabled={isSaving}
-              className="px-4 py-2.5 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition-all rounded-xl flex items-center gap-1.5 shadow-lg shrink-0 disabled:opacity-60"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>{isSaving ? 'Enregistrement...' : 'Enregistrer'}</span>
-            </button>
-          </div>
-
-          <div className="space-y-1.5">
-            <StationFreshness station={managedStation} maxReports={4} className="text-sm" />
-            <p className="text-xs text-neutral-400 font-sans">
-              Appuyez sur « Enregistrer » même si rien n'a changé : les clients voient que les chiffres sont à jour, et leurs signalements
-              sont effacés.
-            </p>
-          </div>
-
-          {stockSavedMessage && (
-            <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn">
-              Stocks et temps d'attente à jour : les clients le voient tout de suite.
+            <div className="space-y-1.5">
+              <StationFreshness station={managedStation} maxReports={4} className="text-sm" />
+              <p className="text-xs text-neutral-400 font-sans">
+                Appuyez sur « Enregistrer » même si rien n'a changé : les clients voient que les chiffres sont à jour, et leurs signalements
+                sont effacés.
+              </p>
             </div>
-          )}
 
-          {stockError && (
-            <div role="alert" className="p-3.5 bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold text-center rounded-xl">
-              {stockError}
+            {stockSavedMessage && (
+              <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn">
+                Stocks et temps d'attente à jour : les clients le voient tout de suite.
+              </div>
+            )}
+
+            {stockError && (
+              <div role="alert" className="p-3.5 bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold text-center rounded-xl">
+                {stockError}
+              </div>
+            )}
+
+            {/* Queue Wait Time Adjuster */}
+            <div className="space-y-2 border-b border-neutral-800 pb-5">
+              <label className="text-xs font-bold text-neutral-300 block flex justify-between items-center">
+                <span>Temps d'attente estimé à la station :</span>
+                <span className="text-amber-300 font-black text-sm">{queueTime} minutes</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="60"
+                step="5"
+                value={queueTime}
+                onChange={(e) => setQueueTime(Number(e.target.value))}
+                className="w-full accent-amber-400 cursor-pointer bg-neutral-800 h-2 rounded-lg"
+              />
+              <div className="flex justify-between text-[11px] text-neutral-400 font-bold">
+                <span>0 MIN (Fluide)</span>
+                <span>30 MIN (Modéré)</span>
+                <span>60 MIN (Forte Affluence)</span>
+              </div>
             </div>
-          )}
 
-          {/* Queue Wait Time Adjuster */}
-          <div className="space-y-2 border-b border-neutral-800 pb-5">
-            <label className="text-xs font-bold text-neutral-300 block flex justify-between items-center">
-              <span>Temps d'attente estimé à la station :</span>
-              <span className="text-amber-300 font-black text-sm">{queueTime} minutes</span>
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="60"
-              step="5"
-              value={queueTime}
-              onChange={(e) => setQueueTime(Number(e.target.value))}
-              className="w-full accent-amber-400 cursor-pointer bg-neutral-800 h-2 rounded-lg"
-            />
-            <div className="flex justify-between text-[11px] text-neutral-400 font-bold">
-              <span>0 MIN (Fluide)</span>
-              <span>30 MIN (Modéré)</span>
-              <span>60 MIN (Forte Affluence)</span>
-            </div>
-          </div>
+            {/* Fuel Stocks Inputs */}
+            <div className="space-y-4">
+              {(['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE'] as FuelType[]).map((f) => {
+                const currentFuelStock = stockState[f];
 
-          {/* Fuel Stocks Inputs */}
-          <div className="space-y-4">
-            {(['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE'] as FuelType[]).map((f) => {
-              const currentFuelStock = stockState[f];
-
-              return (
-                <div key={f} className="p-4 border border-neutral-800 rounded-xl space-y-3 bg-black/60">
-                  <div className="flex justify-between items-center text-xs font-black border-b border-neutral-800 pb-2">
-                    <span className="text-amber-300 flex items-center gap-1.5">
-                      <Fuel className="w-3.5 h-3.5 text-amber-400" />
-                      {f === 'SUPER' ? 'Super Sans Plomb' : f === 'GAZOLE' ? 'Gazole (Diesel)' : f === 'MELANGE' ? 'Mélange 2T' : 'Pétrole / Kérosène'}
-                    </span>
-                    <span className="text-neutral-400">Capacité: {currentFuelStock.maxCapacityLiters}L</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <label className="text-[11px] text-neutral-400 font-bold block mb-1">
-                        Litres en stock
-                      </label>
-                      <input
-                        type="number"
-                        value={currentFuelStock.availableLiters}
-                        onChange={(e) =>
-                          setStockState({
-                            ...stockState,
-                            [f]: { ...currentFuelStock, availableLiters: Number(e.target.value) },
-                          })
-                        }
-                        className="w-full p-2.5 border border-neutral-700 bg-black/80 text-white font-extrabold rounded-lg focus:border-amber-400 focus:outline-none"
-                      />
+                return (
+                  <div key={f} className="p-4 border border-neutral-800 rounded-xl space-y-3 bg-black/60">
+                    <div className="flex justify-between items-center text-xs font-black border-b border-neutral-800 pb-2">
+                      <span className="text-amber-300 flex items-center gap-1.5">
+                        <Fuel className="w-3.5 h-3.5 text-amber-400" />
+                        {f === 'SUPER' ? 'Super Sans Plomb' : f === 'GAZOLE' ? 'Gazole (Diesel)' : f === 'MELANGE' ? 'Mélange 2T' : 'Pétrole / Kérosène'}
+                      </span>
+                      <span className="text-neutral-400">Capacité: {currentFuelStock.maxCapacityLiters}L</span>
                     </div>
 
-                    <div>
-                      <label className="text-[11px] text-neutral-400 font-bold block mb-1">
-                        Prix du litre (FCFA)
-                      </label>
-                      <input
-                        type="number"
-                        value={currentFuelStock.pricePerLiter}
-                        readOnly={!canEditPrice}
-                        title={canEditPrice ? undefined : 'Prix fixé par l’administrateur RONIKOV'}
-                        onChange={(e) =>
-                          setStockState({
-                            ...stockState,
-                            [f]: { ...currentFuelStock, pricePerLiter: Number(e.target.value) },
-                          })
-                        }
-                        className="w-full p-2.5 border border-neutral-700 bg-black/80 text-emerald-400 font-extrabold rounded-lg focus:border-amber-400 focus:outline-none read-only:opacity-70 read-only:cursor-not-allowed"
-                      />
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <label className="text-[11px] text-neutral-400 font-bold block mb-1">
+                          Litres en stock
+                        </label>
+                        <input
+                          type="number"
+                          value={currentFuelStock.availableLiters}
+                          onChange={(e) =>
+                            setStockState({
+                              ...stockState,
+                              [f]: { ...currentFuelStock, availableLiters: Number(e.target.value) },
+                            })
+                          }
+                          className="w-full p-2.5 border border-neutral-700 bg-black/80 text-white font-extrabold rounded-lg focus:border-amber-400 focus:outline-none"
+                        />
+                      </div>
 
-                  <Gauge
-                    value={(currentFuelStock.availableLiters / currentFuelStock.maxCapacityLiters) * 100}
-                    type="bar"
-                    showPercent={true}
-                    sublabel={`${currentFuelStock.availableLiters} Litres en cuve${
-                      currentFuelStock.reservedLiters ? `, dont ${currentFuelStock.reservedLiters} L réservés` : ''
-                    }`}
-                  />
-                </div>
-              );
-            })}
+                      <div>
+                        <label className="text-[11px] text-neutral-400 font-bold block mb-1">
+                          Prix du litre (FCFA)
+                        </label>
+                        <input
+                          type="number"
+                          value={currentFuelStock.pricePerLiter}
+                          readOnly={!canEditPrice}
+                          title={canEditPrice ? undefined : 'Prix fixé par l’administrateur RONIKOV'}
+                          onChange={(e) =>
+                            setStockState({
+                              ...stockState,
+                              [f]: { ...currentFuelStock, pricePerLiter: Number(e.target.value) },
+                            })
+                          }
+                          className="w-full p-2.5 border border-neutral-700 bg-black/80 text-emerald-400 font-extrabold rounded-lg focus:border-amber-400 focus:outline-none read-only:opacity-70 read-only:cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    <Gauge
+                      value={(currentFuelStock.availableLiters / currentFuelStock.maxCapacityLiters) * 100}
+                      type="bar"
+                      showPercent={true}
+                      sublabel={`${currentFuelStock.availableLiters} Litres en cuve${
+                        currentFuelStock.reservedLiters ? `, dont ${currentFuelStock.reservedLiters} L réservés` : ''
+                      }`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
+
+      {!isAttendant && <AttendantsPanel stationId={managedStation.id} stationName={managedStation.name} />}
     </div>
   );
 };

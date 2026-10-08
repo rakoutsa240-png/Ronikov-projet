@@ -8,7 +8,7 @@ interface AuditLogPanelProps {
   stations: Station[];
 }
 
-const ROLE_NAMES: Record<string, string> = { CLIENT: 'client', STATION_PRO: 'gérant de station', ADMIN: 'administrateur' };
+const ROLE_NAMES: Record<string, string> = { CLIENT: 'client', STATION_PRO: 'gérant de station', ADMIN: 'administrateur', ATTENDANT: 'pompiste' };
 
 const fuelName = (type: unknown) => FUEL_LABELS[type as FuelType] ?? String(type);
 
@@ -52,6 +52,12 @@ export function describeEntry(entry: AuditEntry, stationName: (id: string) => st
     }
     case 'user.password_reset':
       return `Mot de passe temporaire donné à ${user}`;
+    case 'attendant.add':
+      return `${user} ajouté comme pompiste à ${station}`;
+    case 'attendant.remove':
+      return `${user} n’est plus pompiste à ${station}`;
+    case 'attendant.password_reset':
+      return `Mot de passe temporaire donné au pompiste ${user}`;
     case 'manager.request':
       return `Demande pour gérer ${station}`;
     case 'manager.accept':

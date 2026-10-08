@@ -328,7 +328,9 @@ export function adminRouter(db: Db) {
       if (isSuspended) await tx.delete(sessions).where(eq(sessions.userId, userId));
 
       const finalRole = role ?? target.role;
-      if (stationIds !== undefined || finalRole !== 'STATION_PRO') {
+      // An attendant keeps their station while only their premium or suspension changes.
+      const keepsAttendantStation = finalRole === 'ATTENDANT' && role === undefined && stationIds === undefined;
+      if (!keepsAttendantStation && (stationIds !== undefined || finalRole !== 'STATION_PRO')) {
         // Only managers run stations; other roles lose their assignments.
         const wanted = finalRole === 'STATION_PRO' ? [...new Set(stationIds ?? [])] : [];
         if (wanted.length > 0) {

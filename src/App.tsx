@@ -132,7 +132,9 @@ export default function App() {
   const userRole: UserRole = currentUser?.role ?? 'CLIENT';
   const userName = currentUser?.name ?? '';
   const isUserPremium = Boolean(currentUser?.isPremium);
-  const canUsePro = userRole === 'STATION_PRO' || userRole === 'ADMIN';
+  const canUsePro = userRole === 'STATION_PRO' || userRole === 'ATTENDANT' || userRole === 'ADMIN';
+  // Managers and attendants only see their own station's tickets.
+  const isStationStaff = userRole === 'STATION_PRO' || userRole === 'ATTENDANT';
 
   useEffect(() => {
     const controller = new AbortController();
@@ -168,7 +170,7 @@ export default function App() {
       setPendingReport(null);
       return;
     }
-    if (user.role === 'STATION_PRO') setActiveTab('pro');
+    if (user.role === 'STATION_PRO' || user.role === 'ATTENDANT') setActiveTab('pro');
     if (user.role === 'ADMIN') setActiveTab('admin');
   };
 
@@ -218,7 +220,7 @@ export default function App() {
     const staffRequest =
       currentUser.role === 'ADMIN'
         ? api.allReservations()
-        : currentUser.role === 'STATION_PRO' && proStationId && currentUser.managedStationIds.includes(proStationId)
+        : isStationStaff && proStationId && currentUser.managedStationIds.includes(proStationId)
           ? api.stationReservations(proStationId)
           : Promise.resolve([]);
     staffRequest.then(setStaffReservations).catch((e) => console.warn('Could not load station reservations', e));
@@ -269,7 +271,7 @@ export default function App() {
   useEffect(() => {
     if (currentUser) void import('./components/HistoryView').catch(() => {});
   }, [currentUser?.id]);
-  useEffect(loadAccountData, [currentUser?.id, currentUser?.role, currentUser?.role === 'STATION_PRO' ? proStationId : undefined]);
+  useEffect(loadAccountData, [currentUser?.id, currentUser?.role, isStationStaff ? proStationId : undefined]);
 
   // Leave the Pro or Admin space when the account may not see it (signed out, or another role).
   useEffect(() => {
@@ -576,6 +578,7 @@ export default function App() {
             onUpdateQueueTime={handleUpdateQueueTimePro}
             onConfirmStation={handleConfirmStationPro}
             canEditPrice={userRole === 'ADMIN'}
+            isAttendant={userRole === 'ATTENDANT'}
           />
         )}
 

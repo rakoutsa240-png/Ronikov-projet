@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'history', label: 'Mes Réservations' },
     { id: 'premium', label: 'Pass Premium' },
     { id: 'profile', label: 'Mon Profil' },
-    ...(userRole === 'STATION_PRO' || userRole === 'ADMIN' ? [{ id: 'pro', label: 'Espace Pro' }] : []),
+    ...(userRole === 'STATION_PRO' || userRole === 'ATTENDANT' || userRole === 'ADMIN' ? [{ id: 'pro', label: 'Espace Pro' }] : []),
     ...(userRole === 'ADMIN' ? [{ id: 'admin', label: 'Admin' }] : []),
   ];
   const theme = useTheme();

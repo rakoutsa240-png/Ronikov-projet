@@ -55,7 +55,8 @@ export interface Reservation {
   qrPayload?: string; // signed QR content, only sent to the ticket's owner
 }
 
-export type UserRole = 'CLIENT' | 'STATION_PRO' | 'ADMIN';
+// ATTENDANT: a pump attendant, who only validates tickets at their station (added by its manager).
+export type UserRole = 'CLIENT' | 'STATION_PRO' | 'ADMIN' | 'ATTENDANT';
 
 export interface User {
   id: string;
@@ -95,6 +96,15 @@ export interface AuthUser {
   isPremium: boolean;
   managedStationIds: string[];
   mustChangePassword: boolean; // signed in with a temporary password from an admin
+}
+
+// A station's pump attendant as its manager sees it (GET /api/stations/:id/attendants).
+export interface Attendant {
+  id: string;
+  name: string;
+  phone: string;
+  isSuspended: boolean;
+  mustChangePassword: boolean; // has not yet replaced the temporary password
 }
 
 // An account as the admin console lists it (GET /api/users).

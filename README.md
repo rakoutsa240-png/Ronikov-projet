@@ -61,6 +61,8 @@ bun run user:create --name "Nom" --phone 90123456 --password "un-mot-de-passe" -
 bun run user:create --name "Gérant" --phone 91234567 --password "..." --role STATION_PRO --station st-01
 ```
 
+Pump attendants (`ATTENDANT`) only validate tickets at their one station: they see the ticket terminal of the Espace Pro, not the stock. The station's manager (or an admin) adds them under **Mes pompistes** in the Espace Pro with `POST /api/stations/:id/attendants`: a new number gets a temporary password to read out, a number that already has a client account keeps its own. Removing an attendant turns the account back into a client.
+
 For local testing, `bun run db:seed --demo-users` adds three accounts with the password `ronikov-demo`: `90000001` (client), `90000002` (manager of `st-01`) and `90000003` (admin). Do not run it on a real database. With npm, put `--` before the options (`npm run db:seed -- --demo-users`).
 
 Sessions are random tokens in an `httpOnly`, `SameSite=Lax` cookie, valid 30 days and `Secure` when `NODE_ENV=production`; the database only stores their SHA-256 hash. Passwords are hashed with scrypt. Login is limited to 10 attempts per minute per number and 30 per IP.

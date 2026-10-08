@@ -18,6 +18,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   CLIENT: 'Client',
   STATION_PRO: 'Gérant de station',
   ADMIN: 'Administrateur',
+  ATTENDANT: 'Pompiste',
 };
 
 // "+22890123456" -> "+228 90 12 34 56"
@@ -146,7 +147,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           </div>
         )}
         {user.role !== 'CLIENT' && (
-          <ProfileLink icon={Building2} label="Espace Pro" detail="Valider les tickets, stocks" onClick={() => onNavigate('pro')} />
+          <ProfileLink icon={Building2} label="Espace Pro" detail={user.role === 'ATTENDANT' ? 'Valider les tickets' : 'Valider les tickets, stocks'} onClick={() => onNavigate('pro')} />
         )}
         {user.role === 'ADMIN' && (
           <ProfileLink icon={ShieldCheck} label="Console Admin" detail="Prix, stations, comptes" onClick={() => onNavigate('admin')} />
