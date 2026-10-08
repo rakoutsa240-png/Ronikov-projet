@@ -91,3 +91,71 @@
     margin: 10px auto !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Light theme ("Mode clair"), easier to read in full sunlight.
+   The site is drawn dark; in light mode black/white and the grey scale swap places.
+   Coloured buttons and the pump screen keep their own black and white so their text stays readable.
+   --------------------------------------------------------------------------- */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-black: #fff;
+  --color-white: oklch(14.5% 0 0);
+  --color-neutral-50: oklch(15% 0 0);
+  --color-neutral-100: oklch(20% 0 0);
+  --color-neutral-200: oklch(26% 0 0);
+  --color-neutral-300: oklch(33% 0 0);
+  --color-neutral-400: oklch(42% 0 0);
+  --color-neutral-500: oklch(50% 0 0);
+  --color-neutral-600: oklch(62% 0 0);
+  --color-neutral-700: oklch(80% 0 0);
+  --color-neutral-800: oklch(88% 0 0);
+  --color-neutral-900: oklch(94.5% 0 0);
+  --color-neutral-950: oklch(96% 0 0);
+}
+
+:root[data-theme='light'] :is(
+    .theme-fixed,
+    .bg-amber-300, .bg-amber-400, .bg-amber-500, .bg-yellow-400,
+    .bg-emerald-400, .bg-emerald-500, .bg-blue-500, .bg-blue-600, .bg-red-500, .bg-rose-500,
+    .bg-orange-500, .bg-sky-600, .bg-teal-600, .bg-purple-600,
+    .hover\:bg-amber-300:hover, .hover\:bg-amber-400:hover, .hover\:bg-rose-500:hover
+  ) {
+  --color-black: #000;
+  --color-white: #fff;
+  --color-neutral-50: oklch(98.5% 0 0);
+  --color-neutral-100: oklch(97% 0 0);
+  --color-neutral-200: oklch(92.2% 0 0);
+  --color-neutral-300: oklch(87% 0 0);
+  --color-neutral-400: oklch(70.8% 0 0);
+  --color-neutral-500: oklch(55.6% 0 0);
+  --color-neutral-600: oklch(43.9% 0 0);
+  --color-neutral-700: oklch(37.1% 0 0);
+  --color-neutral-800: oklch(26.9% 0 0);
+  --color-neutral-900: oklch(20.5% 0 0);
+  --color-neutral-950: oklch(14.5% 0 0);
+}
+
+/* Pale yellow, green and red text is made for a dark background: darker shades on a light one. */
+:root[data-theme='light'] :is(.text-amber-200, .text-amber-300, .text-amber-400, .text-yellow-300, .text-yellow-400) {
+  color: var(--color-amber-700);
+}
+:root[data-theme='light'] :is(.text-sky-300, .text-blue-300, .text-blue-400) {
+  color: var(--color-blue-700);
+}
+:root[data-theme='light'] :is(.text-emerald-300, .text-emerald-400) {
+  color: var(--color-emerald-700);
+}
+:root[data-theme='light'] :is(.text-red-300, .text-red-400, .text-rose-300, .text-rose-400) {
+  color: var(--color-red-700);
+}
+:root[data-theme='light'] :is(.theme-fixed, .bg-amber-300, .bg-amber-400, .bg-yellow-400)
+  :is(.text-amber-200, .text-amber-300, .text-amber-400, .text-yellow-300, .text-yellow-400, .text-emerald-300, .text-emerald-400, .text-red-300, .text-red-400, .text-rose-300, .text-rose-400, .text-sky-300, .text-blue-300, .text-blue-400) {
+  color: revert-layer;
+}
+:root[data-theme='light'] ::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+:root[data-theme='light'] ::-webkit-scrollbar-thumb {
+  background: #9a9a9a;
+}

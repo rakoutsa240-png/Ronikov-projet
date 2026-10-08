@@ -29,10 +29,24 @@ const subscribeFavorites = (listener: () => void) => {
   return () => favoriteListeners.delete(listener);
 };
 
-export function toggleFavorite(stationId: string) {
-  favorites = favorites.includes(stationId) ? favorites.filter((id) => id !== stationId) : [...favorites, stationId];
+// Set while someone is signed in: their favourites are also kept on their account, so the server
+// can tell them when one of these stations gets fuel back or changes price.
+let favoritesSaver: ((stationIds: string[]) => void) | null = null;
+export function setFavoritesSaver(saver: ((stationIds: string[]) => void) | null) {
+  favoritesSaver = saver;
+}
+
+export const getFavorites = () => favorites;
+
+export function replaceFavorites(stationIds: string[]) {
+  favorites = stationIds;
   saveJSON(FAVORITES_KEY, favorites);
   favoriteListeners.forEach((listener) => listener());
+}
+
+export function toggleFavorite(stationId: string) {
+  replaceFavorites(favorites.includes(stationId) ? favorites.filter((id) => id !== stationId) : [...favorites, stationId]);
+  favoritesSaver?.(favorites);
 }
 
 export function useFavorites(): string[] {

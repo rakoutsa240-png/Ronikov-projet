@@ -5,6 +5,7 @@ import { FUEL_TYPES } from '../../shared/stock';
 import { distanceKm, directionsUrl, formatDistance, LatLng, locateUser } from '../geo';
 import { loadJSON, saveJSON } from '../storage';
 import { FavoriteButton } from './FavoriteButton';
+import { StationFreshness } from './StationFreshness';
 
 const SHORT_LABELS: Record<FuelType, string> = { SUPER: 'Super', GAZOLE: 'Gazole', MELANGE: 'Mélange', KEROSENE: 'Kérosène' };
 const FUEL_KEY = 'ronikov.homeFuel';
@@ -56,9 +57,16 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
 
   const candidates = stations
     .filter((s) => (s.stock[fuel]?.availableLiters ?? 0) >= MIN_LITERS)
-    .map((s) => ({ station: s, km: position ? distanceKm(position, s) : undefined }))
-    .sort((a, b) =>
-      a.km !== undefined && b.km !== undefined ? a.km - b.km : a.station.queueTimeMinutes - b.station.queueTimeMinutes,
+    .map((s) => ({
+      station: s,
+      km: position ? distanceKm(position, s) : undefined,
+      // Clients just said this fuel ran out there: suggest it last.
+      reportedEmpty: (s.reports ?? []).some((r) => r.kind === 'NO_FUEL' && r.fuelType === fuel),
+    }))
+    .sort(
+      (a, b) =>
+        Number(a.reportedEmpty) - Number(b.reportedEmpty) ||
+        (a.km !== undefined && b.km !== undefined ? a.km - b.km : a.station.queueTimeMinutes - b.station.queueTimeMinutes),
     );
   const best = candidates[0];
   const others = candidates.slice(1, 3);
@@ -123,6 +131,7 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
                 {best.station.stock[fuel].pricePerLiter} FCFA/L • {best.station.stock[fuel].availableLiters.toLocaleString('fr-FR')} L dispo
               </span>
             </div>
+            <StationFreshness station={best.station} />
             <div className="grid grid-cols-2 gap-2">
               <a
                 href={directionsUrl(best.station, position)}

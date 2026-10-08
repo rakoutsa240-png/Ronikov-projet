@@ -4,6 +4,7 @@ import { Gauge } from './Gauge';
 import { ShieldCheck, CheckCircle2, AlertTriangle, Search, QrCode, Sliders, Save, RefreshCw, Lock, Fuel, Clock, Sparkles } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
 import { QrScanner } from './QrScanner';
+import { StationFreshness } from './StationFreshness';
 
 interface ProDashboardProps {
   managedStation: Station;
@@ -17,6 +18,8 @@ interface ProDashboardProps {
   // Both resolve once the API saved the change, and reject with a message to show otherwise.
   onUpdateStock: (stationId: string, updatedStock: Station['stock']) => Promise<void>;
   onUpdateQueueTime: (stationId: string, newQueueTime: number) => Promise<void>;
+  // Tells clients the station's figures are still right, even when nothing changed (clears their reports).
+  onConfirmStation: (stationId: string) => Promise<void>;
   canEditPrice?: boolean; // only admins set prices
 }
 
@@ -34,6 +37,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
   onValidateCode,
   onUpdateStock,
   onUpdateQueueTime,
+  onConfirmStation,
   canEditPrice = false,
 }) => {
   const [inputCode, setInputCode] = useState('');
@@ -97,6 +101,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
     try {
       await onUpdateStock(managedStation.id, stockState);
       await onUpdateQueueTime(managedStation.id, queueTime);
+      await onConfirmStation(managedStation.id);
       setStockSavedMessage(true);
       setTimeout(() => setStockSavedMessage(false), 3000);
     } catch (e) {
@@ -342,9 +347,17 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
             </button>
           </div>
 
+          <div className="space-y-1.5">
+            <StationFreshness station={managedStation} maxReports={4} className="text-sm" />
+            <p className="text-xs text-neutral-400 font-sans">
+              Appuyez sur « Enregistrer » même si rien n'a changé : les clients voient que les chiffres sont à jour, et leurs signalements
+              sont effacés.
+            </p>
+          </div>
+
           {stockSavedMessage && (
             <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn">
-              Stocks et temps d'attente synchronisés avec succès sur le réseau Togo !
+              Stocks et temps d'attente à jour : les clients le voient tout de suite.
             </div>
           )}
 

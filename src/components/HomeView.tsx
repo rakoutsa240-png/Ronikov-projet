@@ -7,6 +7,8 @@ import { NearestStationCard } from './NearestStationCard';
 import { PricesCard } from './PricesCard';
 import { StationSkeleton } from './Skeleton';
 import { useFavorites } from '../storage';
+import { StationFreshness } from './StationFreshness';
+import { enableAlerts, useAlertPermission } from '../alerts';
 import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart } from 'lucide-react';
 import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
 import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
@@ -20,7 +22,37 @@ interface HomeViewProps {
   onNavigatePro: () => void;
   globalPrices: FuelPriceGlobal[];
   loading?: boolean; // stations not received from the server yet
+  isSignedIn: boolean;
+  onOpenAuth: () => void;
 }
+
+// Under the favourites: how the visitor hears about fuel coming back or a new price.
+const FavoriteAlertsHint: React.FC<{ isSignedIn: boolean; onOpenAuth: () => void }> = ({ isSignedIn, onOpenAuth }) => {
+  const permission = useAlertPermission();
+  if (!isSignedIn) {
+    return (
+      <p className="text-xs text-neutral-400">
+        <button onClick={onOpenAuth} className="text-amber-300 font-semibold underline">
+          Connectez-vous
+        </button>{' '}
+        pour être prévenu quand une de ces stations retrouve du carburant ou change de prix.
+      </p>
+    );
+  }
+  if (permission === 'default') {
+    return (
+      <button onClick={() => void enableAlerts()} className="text-xs text-amber-300 font-semibold underline text-left">
+        Recevoir aussi les alertes sur ce téléphone
+      </button>
+    );
+  }
+  return (
+    <p className="text-xs text-neutral-400">
+      Vous êtes prévenu (cloche en haut{permission === 'granted' ? ' et alertes du téléphone' : ''}) quand une de ces stations retrouve du
+      carburant ou change de prix.
+    </p>
+  );
+};
 
 export const HomeView: React.FC<HomeViewProps> = ({
   stations,
@@ -30,6 +62,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigatePro,
   globalPrices,
   loading = false,
+  isSignedIn,
+  onOpenAuth,
 }) => {
   const favoriteIds = useFavorites();
   const favoriteStations = stations.filter((s) => favoriteIds.includes(s.id));
@@ -83,6 +117,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       <button onClick={() => onViewStation(st)} className="text-left text-neutral-100 font-medium truncate hover:text-amber-300">
                         {st.name}
                         <span className="block text-xs text-neutral-400">{st.queueTimeMinutes} min d'attente</span>
+                        <StationFreshness station={st} maxReports={1} className="mt-0.5" />
                       </button>
                       <button
                         onClick={() => onBookStation(st)}
@@ -93,6 +128,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     </li>
                   ))}
                 </ul>
+                <FavoriteAlertsHint isSignedIn={isSignedIn} onOpenAuth={onOpenAuth} />
               </section>
             )}
             <button

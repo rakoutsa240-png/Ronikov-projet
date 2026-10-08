@@ -23,6 +23,8 @@ export interface Station {
   queueTimeMinutes: number;
   isPartner: boolean;
   stock: Record<FuelType, FuelStock>;
+  checkedAt?: string; // ISO date the staff last updated or confirmed stock, prices or waiting time (API only)
+  reports?: StationReport[]; // client reports since then, within the last few hours (API only)
 }
 
 export type PaymentMethod = 'MIXX_BY_YAS' | 'MOOV_MONEY' | 'CARD' | 'TMONEY' | 'FLOOZ';
@@ -105,4 +107,15 @@ export interface PriceChange {
   fuelType: FuelType;
   pricePerLiter: number;
   effectiveFrom: string; // ISO date
+}
+
+// What a client can report about a station.
+export type ReportKind = 'NO_FUEL' | 'LONG_QUEUE' | 'WRONG_PRICE' | 'CLOSED';
+
+// Recent client reports of one kind (and fuel, for NO_FUEL) at a station.
+export interface StationReport {
+  kind: ReportKind;
+  fuelType: FuelType | null;
+  count: number;
+  lastAt: string; // ISO date of the latest one
 }

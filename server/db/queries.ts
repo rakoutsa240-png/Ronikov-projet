@@ -1,8 +1,9 @@
 import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
+import { REPORT_WINDOW_HOURS } from '../../shared/reports';
 import { computeStockStatus, FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
-import type { FuelPriceGlobal, FuelStock, FuelType, PriceChange, Station } from '../../shared/types';
+import type { FuelPriceGlobal, FuelStock, FuelType, PriceChange, Station, StationReport } from '../../shared/types';
 import type { Db } from './client';
-import { fuelPrices, fuelStocks, stationPrices, stations } from './schema';
+import { fuelPrices, fuelStocks, stationPrices, stationReports, stations } from './schema';
 
 type StockRow = typeof fuelStocks.$inferSelect;
 
@@ -18,10 +19,32 @@ function toFuelStock(row: StockRow): FuelStock {
   };
 }
 
+type ReportRow = typeof stationReports.$inferSelect;
+
+// Client reports made after the station's last staff check, grouped by problem, most recent first.
+export function summarizeReports(rows: ReportRow[], checkedAt: Date): StationReport[] {
+  const groups = new Map<string, StationReport>();
+  for (const row of rows) {
+    if (row.createdAt <= checkedAt) continue;
+    const key = `${row.kind}:${row.fuelType ?? ''}`;
+    const group = groups.get(key);
+    const at = row.createdAt.toISOString();
+    if (!group) groups.set(key, { kind: row.kind, fuelType: row.fuelType, count: 1, lastAt: at });
+    else {
+      group.count += 1;
+      if (at > group.lastAt) group.lastAt = at;
+    }
+  }
+  return [...groups.values()].sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+}
+
+export const reportWindowStart = () => new Date(Date.now() - REPORT_WINDOW_HOURS * 3_600_000);
+
 export async function listStations(db: Db): Promise<Station[]> {
-  const [stationRows, stockRows] = await Promise.all([
+  const [stationRows, stockRows, reportRows] = await Promise.all([
     db.select().from(stations).orderBy(asc(stations.id)),
     db.select().from(fuelStocks),
+    db.select().from(stationReports).where(gte(stationReports.createdAt, reportWindowStart())),
   ]);
 
   const stockByStation = new Map<string, Partial<Record<FuelType, FuelStock>>>();
@@ -49,6 +72,11 @@ export async function listStations(db: Db): Promise<Station[]> {
         amenities: s.amenities,
         queueTimeMinutes: s.queueTimeMinutes,
         isPartner: s.isPartner,
+        checkedAt: s.checkedAt.toISOString(),
+        reports: summarizeReports(
+          reportRows.filter((r) => r.stationId === s.id),
+          s.checkedAt,
+        ),
         stock: Object.fromEntries(
           FUEL_TYPES.map((type) => [
             type,

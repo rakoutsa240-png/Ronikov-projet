@@ -7,6 +7,7 @@ import type { Db } from './db/client';
 import { listPrices, listStationPriceHistory, listStations } from './db/queries';
 import { adminRouter } from './routes/admin';
 import { authRouter } from './routes/auth';
+import { communityRouter } from './routes/community';
 import { reservationsRouter } from './routes/reservations';
 import type { TicketKeys } from './tickets';
 
@@ -33,6 +34,7 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
   app.use('/api', authRouter(db, { secureCookies }));
   app.use('/api', reservationsRouter(db, ticketKeys));
   app.use('/api', adminRouter(db));
+  app.use('/api', communityRouter(db));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });

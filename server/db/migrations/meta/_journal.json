@@ -43,6 +43,13 @@
       "when": 1791326099830,
       "tag": "0005_temporary_password",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791455354023,
+      "tag": "0006_community",
+      "breakpoints": true
     }
   ]
 }

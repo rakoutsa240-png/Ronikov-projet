@@ -3,8 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
 import { STATION_BRANDS, TOGO_BOUNDS } from '../../shared/stations';
-import { FUEL_TYPES } from '../../shared/stock';
+import { computeStockStatus, FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 import type { AdminUser, FuelType, UserRole } from '../../shared/types';
+import { notifyFavorites, notifyFavoritesOnce } from '../alerts';
 import { audit } from '../audit';
 import { hashPassword, rateLimit, requireRole, temporaryPassword, toAuthUser } from '../auth';
 import type { Db } from '../db/client';
@@ -110,12 +111,26 @@ export function adminRouter(db: Db) {
       if (next.availableLiters > next.maxCapacityLiters) {
         return { status: 400, message: `Le stock dépasse la capacité de la cuve (${next.maxCapacityLiters} L)` };
       }
+      const now = new Date();
       await tx
         .update(fuelStocks)
-        .set({ ...next, updatedAt: new Date() })
+        .set({ ...next, updatedAt: now })
         .where(and(eq(fuelStocks.stationId, stationId), eq(fuelStocks.fuelType, fuel.data)));
+      const [station] = await tx.update(stations).set({ checkedAt: now }).where(eq(stations.id, stationId)).returning();
+      const label = FUEL_LABELS[fuel.data];
+      const wasOut = computeStockStatus(row.availableLiters - row.reservedLiters, row.maxCapacityLiters) === 'OUT_OF_STOCK';
+      const isOut = computeStockStatus(next.availableLiters - row.reservedLiters, next.maxCapacityLiters) === 'OUT_OF_STOCK';
+      if (wasOut && !isOut) {
+        await notifyFavorites(tx, stationId, `${label} de retour`, `${station.name} a de nouveau du ${label}. Réservez vos litres avant qu’il ne parte.`);
+      }
       if (next.pricePerLiterXof !== row.pricePerLiterXof) {
         await tx.insert(stationPrices).values({ stationId, fuelType: fuel.data, pricePerLiterXof: next.pricePerLiterXof });
+        await notifyFavorites(
+          tx,
+          stationId,
+          `Nouveau prix du ${label}`,
+          `${station.name} : ${next.pricePerLiterXof} FCFA/L au lieu de ${row.pricePerLiterXof} FCFA/L.`,
+        );
       }
       await audit(tx, req.user!.id, 'stock.update', `station:${stationId}:${fuel.data}`, {
         before: {
@@ -193,7 +208,9 @@ export function adminRouter(db: Db) {
       res.status(400).json({ error: 'Rien à modifier' });
       return;
     }
-    const [updated] = await db.update(stations).set(changes).where(eq(stations.id, stationId)).returning();
+    // A new waiting time is fresh news from the station.
+    const checked = queueTimeMinutes !== undefined ? { checkedAt: new Date() } : {};
+    const [updated] = await db.update(stations).set({ ...changes, ...checked }).where(eq(stations.id, stationId)).returning();
     if (!updated) {
       res.status(404).json({ error: 'Station introuvable' });
       return;
@@ -225,6 +242,12 @@ export function adminRouter(db: Db) {
           if (changed.length > 0) {
             await tx.insert(stationPrices).values(
               changed.map((c) => ({ stationId: c.stationId, fuelType: p.type, pricePerLiterXof: p.officialPriceXOF, effectiveFrom: now })),
+            );
+            await notifyFavoritesOnce(
+              tx,
+              changed.map((c) => c.stationId),
+              `Nouveau prix du ${FUEL_LABELS[p.type]}`,
+              `Le ${FUEL_LABELS[p.type]} passe à ${p.officialPriceXOF} FCFA/L dans vos stations favorites.`,
             );
           }
         }

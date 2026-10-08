@@ -37,6 +37,8 @@ describe('GET /api/stations', () => {
     const expected = INITIAL_STATIONS.find((s) => s.id === 'st-01')!;
     expect(first).toEqual({
       ...expected,
+      checkedAt: expect.any(String),
+      reports: [],
       stock: Object.fromEntries(
         Object.entries(expected.stock).map(([fuel, stock]) => [fuel, { ...stock, reservedLiters: 0 }]),
       ),

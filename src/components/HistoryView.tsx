@@ -5,6 +5,7 @@ import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { PaymentMethodLabel } from './PaymentLogos';
 import { QRCodeImage } from './QRCodeImage';
 import { TicketCard } from './TicketCard';
+import { ReceiptButton } from './ReceiptButton';
 import { PumpScreen } from './PumpScreen';
 
 interface HistoryViewProps {
@@ -369,6 +370,13 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       </span>
                     </div>
                   </div>
+
+                  {/* Served, cancelled or expired tickets keep their receipt */}
+                  {res.status !== 'PENDING' && (
+                    <div className="flex pt-1">
+                      <ReceiptButton reservation={res} />
+                    </div>
+                  )}
 
                   {/* Actions Footer */}
                   {res.status === 'PENDING' && (

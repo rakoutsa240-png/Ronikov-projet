@@ -1,23 +1,29 @@
 import React from 'react';
 import { Station, FuelType } from '../types';
 import { Gauge } from './Gauge';
-import { ShieldCheck, MapPin, Phone, Clock, ArrowLeft, Navigation, Fuel, CheckCircle2, ChevronRight, Sparkles } from 'lucide-react';
+import { ShieldCheck, MapPin, Phone, Clock, ArrowLeft, Navigation, Fuel, CheckCircle2, ChevronRight, Sparkles, AlertTriangle } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
 import { PriceHistoryChart } from './PriceHistoryChart';
 import { directionsUrl } from '../geo';
 import { FavoriteButton } from './FavoriteButton';
+import { StationFreshness, useNow } from './StationFreshness';
+import { reportLabel } from '../../shared/reports';
+import { timeAgo } from '../time';
 
 interface StationDetailViewProps {
   station: Station | null;
   onBack: () => void;
   onBook: (station: Station) => void;
+  onReport: (station: Station) => void; // opens the "Signaler un problème" sheet
 }
 
 export const StationDetailView: React.FC<StationDetailViewProps> = ({
   station,
   onBack,
   onBook,
+  onReport,
 }) => {
+  const now = useNow();
   if (!station) {
     return (
       <div className="max-w-7xl mx-auto p-8 text-center font-mono-code text-white">
@@ -82,6 +88,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
               <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
               <span>{station.address}</span>
             </p>
+            <StationFreshness station={station} maxReports={0} className="text-sm" />
           </div>
 
           {/* Booking CTA (on phones it lives in the bar fixed at the bottom of the screen) */}
@@ -144,6 +151,31 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
               Disponibilité des carburants
             </h2>
           </div>
+        </div>
+
+        {/* What clients saw at the station since its last update */}
+        <div className="bg-black/85 border border-neutral-800 rounded-2xl p-4 space-y-3">
+          {(station.reports ?? []).length > 0 ? (
+            <ul className="space-y-2">
+              {station.reports!.map((r) => (
+                <li key={`${r.kind}-${r.fuelType ?? ''}`} className="flex items-center gap-2 text-sm">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span className="font-bold text-red-300">{reportLabel(r)}</span>
+                  <span className="text-neutral-400">
+                    · {r.count > 1 ? `${r.count} clients` : '1 client'}, {timeAgo(r.lastAt, now)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-400">Aucun problème signalé par les clients ces dernières heures.</p>
+          )}
+          <button
+            onClick={() => onReport(station)}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-neutral-700 text-sm font-bold text-white hover:border-amber-400 inline-flex items-center justify-center gap-2"
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-400" /> Signaler un problème
+          </button>
         </div>
 
         {/* Phones: one line per fuel with price and stock */}

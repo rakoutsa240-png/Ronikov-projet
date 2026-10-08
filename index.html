@@ -6,6 +6,15 @@
     <title>RONIKOV — Localisation, Réservation & Paiement de Carburant au Togo</title>
     <meta name="description" content="Trouvez une station avec du carburant en stock près de vous, réservez vos litres et payez par mobile money (TMoney, Flooz). Lomé et tout le Togo." />
     <meta name="theme-color" content="#000000" />
+    <script>
+      // Light theme chosen on this phone: apply it before the page draws.
+      try {
+        if (JSON.parse(localStorage.getItem('ronikov.theme')) === 'light') {
+          document.documentElement.dataset.theme = 'light';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff');
+        }
+      } catch (e) {}
+    </script>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
