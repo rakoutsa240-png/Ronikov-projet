@@ -98,6 +98,10 @@ export function authRouter(db: Db, { secureCookies }: { secureCookies: boolean }
       res.status(401).json({ error: 'Numéro ou mot de passe incorrect' });
       return;
     }
+    if (user.suspendedAt) {
+      res.status(403).json({ error: 'Ce compte est suspendu. Contactez RONIKOV pour en savoir plus.' });
+      return;
+    }
     res.cookie(SESSION_COOKIE, await createSession(db, user.id), cookieOptions);
     res.json(await toAuthUser(db, user));
   });

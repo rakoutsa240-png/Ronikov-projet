@@ -20,6 +20,8 @@ export default defineConfig((env) =>
             name: 'server',
             include: ['server/**/*.test.ts'],
             environment: 'node',
+            // Each file starts its own in-memory database; under a full parallel run that can pass 10 s.
+            hookTimeout: 30_000,
           },
         },
       ],

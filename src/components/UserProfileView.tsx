@@ -1,5 +1,6 @@
 import React from 'react';
-import { AuthUser, Reservation, UserRole } from '../types';
+import { AuthUser, Reservation, Station, UserRole } from '../types';
+import { ManagerRequestCard } from './ManagerRequestCard';
 import { User, ShieldCheck, Star, Fuel, Ticket, Wallet, MapPin, Crown, LogIn, LogOut, ChevronRight, Phone, Mail, Building2, KeyRound } from 'lucide-react';
 
 interface UserProfileViewProps {
@@ -9,6 +10,8 @@ interface UserProfileViewProps {
   onNavigate: (tab: string) => void;
   onLogout: () => void;
   onChangePassword: () => void;
+  stations: Station[];
+  onUserChanged: (user: AuthUser) => void;
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -21,7 +24,16 @@ const ROLE_LABELS: Record<UserRole, string> = {
 const formatPhone = (phone: string) => phone.replace(/^\+228(\d{2})(\d{2})(\d{2})(\d{2})$/, '+228 $1 $2 $3 $4');
 
 // The signed-in account, with figures computed from its own tickets.
-export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservations, onOpenAuth, onNavigate, onLogout, onChangePassword }) => {
+export const UserProfileView: React.FC<UserProfileViewProps> = ({
+  user,
+  reservations,
+  onOpenAuth,
+  onNavigate,
+  onLogout,
+  onChangePassword,
+  stations,
+  onUserChanged,
+}) => {
   if (!user) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
@@ -128,6 +140,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user, reservat
           detail={user.isPremium ? 'Actif : pas de frais de réservation' : 'Réservations sans frais'}
           onClick={() => onNavigate('premium')}
         />
+        {user.role === 'CLIENT' && (
+          <div className="sm:col-span-2">
+            <ManagerRequestCard stations={stations} onUserChanged={onUserChanged} />
+          </div>
+        )}
         {user.role !== 'CLIENT' && (
           <ProfileLink icon={Building2} label="Espace Pro" detail="Valider les tickets, stocks" onClick={() => onNavigate('pro')} />
         )}

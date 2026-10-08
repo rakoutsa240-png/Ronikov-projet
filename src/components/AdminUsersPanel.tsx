@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Crown, KeyRound, Users } from 'lucide-react';
+import { Ban, Check, Crown, KeyRound, UserPlus, Users, X } from 'lucide-react';
 import { api, ApiError } from '../api';
-import { AdminUser, Station, UserRole } from '../types';
+import { AdminUser, ManagerRequest, Station, UserRole } from '../types';
 
 interface AdminUsersPanelProps {
   stations: Station[];
@@ -14,7 +14,8 @@ const ROLE_LABELS: Record<UserRole, string> = {
   ADMIN: 'Administrateur',
 };
 
-// Accounts tab of the admin console: roles, managed station and Premium are saved as soon as they change.
+// Accounts tab of the admin console: manager requests to answer, then every account with its role,
+// managed station, Premium and suspension, saved as soon as they change.
 export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, currentUserId }) => {
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,14 +23,45 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
   // The temporary password just given to one user, shown once so the admin can read it out to them.
   const [temporary, setTemporary] = useState<{ userId: string; password: string } | null>(null);
 
-  useEffect(() => {
+  const [requests, setRequests] = useState<ManagerRequest[]>([]);
+  const [decidingId, setDecidingId] = useState<number | null>(null);
+
+  const loadUsers = () =>
     api
       .users()
       .then(setUsers)
       .catch((e) => setError(e instanceof ApiError ? e.message : 'Comptes indisponibles.'));
+
+  useEffect(() => {
+    loadUsers();
+    api.managerRequests().then(setRequests).catch(() => {});
   }, []);
 
-  const save = async (user: AdminUser, changes: { role?: UserRole; isPremium?: boolean; stationIds?: string[] }) => {
+  const decide = async (request: ManagerRequest, decision: 'accept' | 'reject') => {
+    setDecidingId(request.id);
+    setError(null);
+    try {
+      await api.decideManagerRequest(request.id, decision);
+      setRequests((prev) => prev.filter((r) => r.id !== request.id));
+      if (decision === 'accept') await loadUsers();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Réponse impossible, réessayez.');
+    } finally {
+      setDecidingId(null);
+    }
+  };
+
+  const toggleSuspended = (user: AdminUser) => {
+    const question = user.isSuspended
+      ? `Réactiver le compte de ${user.name} (${user.phone}) ? La personne pourra se reconnecter.`
+      : `Suspendre le compte de ${user.name} (${user.phone}) ? La personne sera déconnectée et ne pourra plus se connecter.`;
+    if (window.confirm(question)) save(user, { isSuspended: !user.isSuspended });
+  };
+
+  const save = async (
+    user: AdminUser,
+    changes: { role?: UserRole; isPremium?: boolean; stationIds?: string[]; isSuspended?: boolean },
+  ) => {
     setSavingId(user.id);
     setError(null);
     try {
@@ -69,18 +101,63 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
         </p>
       )}
 
+      {requests.length > 0 && (
+        <section aria-label="Demandes de gérant" className="space-y-2">
+          <h3 className="text-sm font-black text-amber-300 flex items-center gap-2">
+            <UserPlus className="w-4 h-4" /> Demandes de gérant ({requests.length})
+          </h3>
+          {requests.map((request) => (
+            <div
+              key={request.id}
+              className="p-4 border border-amber-400/50 bg-amber-400/5 rounded-xl flex flex-col sm:flex-row sm:items-center gap-3 text-xs"
+            >
+              <div className="flex-1 min-w-0 space-y-0.5">
+                <p className="font-black text-white">
+                  {request.userName} <span className="text-neutral-400 font-normal">{request.userPhone}</span>
+                </p>
+                <p className="text-neutral-200">
+                  Veut gérer <span className="font-bold text-amber-300">{request.stationName}</span>
+                  <span className="text-neutral-500"> · {new Date(request.createdAt).toLocaleDateString('fr-FR')}</span>
+                </p>
+                {request.message && <p className="text-neutral-400 font-sans italic break-words">« {request.message} »</p>}
+                <p className="text-neutral-500 font-sans">Appelez ce numéro pour vérifier que la personne gère bien cette station.</p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => decide(request, 'accept')}
+                  disabled={decidingId === request.id}
+                  className="inline-flex items-center gap-1 px-3 py-2 bg-emerald-500 text-black font-black rounded-lg hover:bg-emerald-400 disabled:opacity-60"
+                >
+                  <Check className="w-3.5 h-3.5" /> Accepter
+                </button>
+                <button
+                  onClick={() => decide(request, 'reject')}
+                  disabled={decidingId === request.id}
+                  className="inline-flex items-center gap-1 px-3 py-2 border border-neutral-600 text-neutral-200 font-bold rounded-lg hover:border-rose-400 hover:text-rose-300 disabled:opacity-60"
+                >
+                  <X className="w-3.5 h-3.5" /> Refuser
+                </button>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
       {users === null && !error && <p className="text-xs text-neutral-400">Chargement des comptes…</p>}
 
       <div className="space-y-3">
         {users?.map((user) => (
           <div
             key={user.id}
-            className="p-4 border border-neutral-800 rounded-xl bg-black/60 grid gap-3 md:grid-cols-[1.4fr_1fr_1.2fr_auto] md:items-center text-xs"
+            className={`p-4 border rounded-xl grid ${user.isSuspended ? 'border-rose-500/60 bg-rose-950/30' : 'border-neutral-800 bg-black/60'} gap-3 md:grid-cols-[1.4fr_1fr_1.2fr_auto] md:items-center text-xs`}
           >
             <div>
               <div className="font-black text-white flex items-center gap-1.5">
                 {user.name}
                 {user.isPremium && <Crown className="w-3.5 h-3.5 text-amber-400" aria-label="Premium" />}
+                {user.isSuspended && (
+                  <span className="px-1.5 py-0.5 bg-rose-500 text-white text-[10px] font-black rounded uppercase">Suspendu</span>
+                )}
               </div>
               <div className="text-neutral-400">{user.phone}</div>
               {user.id !== currentUserId && (
@@ -90,6 +167,17 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
                   className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 hover:text-amber-200 underline disabled:opacity-60"
                 >
                   <KeyRound className="w-3 h-3" /> Mot de passe oublié
+                </button>
+              )}
+              {user.id !== currentUserId && user.role !== 'ADMIN' && (
+                <button
+                  onClick={() => toggleSuspended(user)}
+                  disabled={savingId === user.id}
+                  className={`mt-1.5 ml-3 inline-flex items-center gap-1 text-[11px] font-bold underline disabled:opacity-60 ${
+                    user.isSuspended ? 'text-emerald-300 hover:text-emerald-200' : 'text-rose-300 hover:text-rose-200'
+                  }`}
+                >
+                  <Ban className="w-3 h-3" /> {user.isSuspended ? 'Réactiver' : 'Suspendre'}
                 </button>
               )}
             </div>

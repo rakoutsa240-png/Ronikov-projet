@@ -100,6 +100,33 @@ export interface AuthUser {
 // An account as the admin console lists it (GET /api/users).
 export interface AdminUser extends AuthUser {
   createdAt: string;
+  isSuspended: boolean;
+}
+
+// A client asking to become the manager of a station.
+export type ManagerRequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+export interface ManagerRequest {
+  id: number;
+  userId: string;
+  userName: string;
+  userPhone: string;
+  stationId: string;
+  stationName: string;
+  message: string | null;
+  status: ManagerRequestStatus;
+  createdAt: string; // ISO date
+}
+
+// One line of the admin's action log (GET /api/audit).
+export interface AuditEntry {
+  id: number;
+  action: string; // e.g. stock.update, user.update
+  target: string; // e.g. station:st-01:SUPER, user:<id>
+  details: Record<string, unknown>;
+  actorName: string | null; // null once the account is deleted
+  actorPhone: string | null;
+  createdAt: string; // ISO date
 }
 
 // One price a station started charging (GET /api/stations/:id/price-history).

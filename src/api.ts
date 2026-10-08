@@ -1,4 +1,4 @@
-import type { AdminUser, AuthUser, FuelPriceGlobal, FuelType, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, Station } from './types';
+import type { AdminUser, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, Station } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -90,11 +90,21 @@ export const api = {
   updatePrices: (prices: { type: FuelType; officialPriceXOF: number }[], applyToAllStations: boolean) =>
     request<FuelPriceGlobal[]>('PUT', '/prices', { prices, applyToAllStations }),
   users: () => request<AdminUser[]>('GET', '/users'),
-  updateUser: (id: string, data: { role?: AdminUser['role']; isPremium?: boolean; stationIds?: string[] }) =>
+  updateUser: (
+    id: string,
+    data: { role?: AdminUser['role']; isPremium?: boolean; stationIds?: string[]; isSuspended?: boolean },
+  ) =>
     request<AdminUser>('PATCH', `/users/${encodeURIComponent(id)}`, data),
   resetUserPassword: (id: string) =>
     request<{ temporaryPassword: string }>('POST', `/users/${encodeURIComponent(id)}/password`),
   requestPremium: () => request<{ message: string }>('POST', '/premium/request'),
+  auditLog: (before?: number) => request<AuditEntry[]>('GET', before ? `/audit?before=${before}` : '/audit'),
+  managerRequests: () => request<ManagerRequest[]>('GET', '/manager-requests'),
+  decideManagerRequest: (id: number, decision: 'accept' | 'reject') =>
+    request<ManagerRequest>('POST', `/manager-requests/${id}/${decision}`),
+  myManagerRequest: () => request<ManagerRequest | null>('GET', '/manager-requests/mine'),
+  requestManager: (stationId: string, message: string) =>
+    request<ManagerRequest>('POST', '/manager-requests', { stationId, message: message || undefined }),
 
   reportStation: (stationId: string, kind: ReportKind, fuelType?: FuelType) =>
     request<Station>('POST', `/stations/${encodeURIComponent(stationId)}/reports`, { kind, fuelType: fuelType ?? null }),
