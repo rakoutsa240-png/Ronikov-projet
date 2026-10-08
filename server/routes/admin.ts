@@ -1,16 +1,27 @@
-import { and, asc, eq, inArray, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, lt, ne, type SQL } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
 import { STATION_BRANDS, TOGO_BOUNDS } from '../../shared/stations';
 import { computeStockStatus, FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
-import type { AdminUser, FuelType, UserRole } from '../../shared/types';
+import type { AdminUser, AuditEntry, FuelType, ManagerRequest, UserRole } from '../../shared/types';
 import { notifyFavorites, notifyFavoritesOnce } from '../alerts';
 import { audit } from '../audit';
 import { hashPassword, rateLimit, requireRole, temporaryPassword, toAuthUser } from '../auth';
 import type { Db } from '../db/client';
 import { listPrices, listStations } from '../db/queries';
-import { fuelPrices, fuelStocks, notifications, sessions, stationManagers, stationPrices, stations, users } from '../db/schema';
+import {
+  auditLog,
+  fuelPrices,
+  fuelStocks,
+  managerRequests,
+  notifications,
+  sessions,
+  stationManagers,
+  stationPrices,
+  stations,
+  users,
+} from '../db/schema';
 import { canManageStation } from './reservations';
 
 // The project's tsconfig is not strict, so zod marks fields optional; handlers check what they need.
@@ -67,10 +78,22 @@ const userBody = z
     role: z.enum(['CLIENT', 'STATION_PRO', 'ADMIN']).optional(),
     isPremium: z.boolean().optional(),
     stationIds: z.array(z.string().min(1)).max(50).optional(),
+    isSuspended: z.boolean().optional(),
   })
   .strict();
 
+const managerRequestBody = z.object({
+  stationId: z.string().min(1, 'Choisissez votre station'),
+  message: z.string().trim().max(500, 'Message trop long').optional(),
+});
+
 const firstIssue = (error: z.ZodError) => error.issues[0]?.message ?? 'Données invalides';
+
+async function toAdminUser(db: Db, row: typeof users.$inferSelect): Promise<AdminUser> {
+  return { ...(await toAuthUser(db, row)), createdAt: row.createdAt.toISOString(), isSuspended: row.suspendedAt !== null };
+}
+
+const AUDIT_PAGE = 100;
 
 export function adminRouter(db: Db) {
   const router = Router();
@@ -260,7 +283,7 @@ export function adminRouter(db: Db) {
   router.get('/users', adminOnly, async (_req, res) => {
     const rows = await db.select().from(users).orderBy(asc(users.createdAt));
     const list: AdminUser[] = [];
-    for (const row of rows) list.push({ ...(await toAuthUser(db, row)), createdAt: row.createdAt.toISOString() });
+    for (const row of rows) list.push(await toAdminUser(db, row));
     res.json(list);
   });
 
@@ -271,9 +294,18 @@ export function adminRouter(db: Db) {
       res.status(400).json({ error: parsed.success ? 'Compte introuvable' : firstIssue(parsed.error) });
       return;
     }
-    const { role, isPremium, stationIds } = parsed.data as { role?: UserRole; isPremium?: boolean; stationIds?: string[] };
+    const { role, isPremium, stationIds, isSuspended } = parsed.data as {
+      role?: UserRole;
+      isPremium?: boolean;
+      stationIds?: string[];
+      isSuspended?: boolean;
+    };
     if (userId === req.user!.id && role !== undefined && role !== 'ADMIN') {
       res.status(409).json({ error: 'Vous ne pouvez pas retirer votre propre rôle d’administrateur' });
+      return;
+    }
+    if (userId === req.user!.id && isSuspended) {
+      res.status(409).json({ error: 'Vous ne pouvez pas suspendre votre propre compte' });
       return;
     }
 
@@ -281,8 +313,19 @@ export function adminRouter(db: Db) {
       const [target] = await tx.select().from(users).where(eq(users.id, userId)).for('update');
       if (!target) return { status: 404, message: 'Compte introuvable' };
 
-      const changes = Object.fromEntries(Object.entries({ role, isPremium }).filter(([, v]) => v !== undefined));
+      // An admin is never suspended directly, so one admin cannot lock the others out.
+      if (isSuspended && (role ?? target.role) === 'ADMIN') {
+        return { status: 409, message: 'Retirez d’abord son rôle d’administrateur pour suspendre ce compte' };
+      }
+      const changes: Partial<typeof users.$inferInsert> = Object.fromEntries(
+        Object.entries({ role, isPremium }).filter(([, v]) => v !== undefined),
+      );
+      if (isSuspended !== undefined && isSuspended !== (target.suspendedAt !== null)) {
+        changes.suspendedAt = isSuspended ? new Date() : null;
+      }
       if (Object.keys(changes).length > 0) await tx.update(users).set(changes).where(eq(users.id, userId));
+      // A suspended account is signed out everywhere at once.
+      if (isSuspended) await tx.delete(sessions).where(eq(sessions.userId, userId));
 
       const finalRole = role ?? target.role;
       if (stationIds !== undefined || finalRole !== 'STATION_PRO') {
@@ -305,7 +348,7 @@ export function adminRouter(db: Db) {
           message: 'Votre pass prioritaire RONIKOV est actif : vos prochaines réservations sont sans frais de service.',
         });
       }
-      await audit(tx, req.user!.id, 'user.update', `user:${userId}`, { role, isPremium, stationIds });
+      await audit(tx, req.user!.id, 'user.update', `user:${userId}`, { role, isPremium, stationIds, isSuspended });
       return null;
     });
     if (error) {
@@ -313,7 +356,7 @@ export function adminRouter(db: Db) {
       return;
     }
     const [updated] = await db.select().from(users).where(eq(users.id, userId));
-    res.json({ ...(await toAuthUser(db, updated)), createdAt: updated.createdAt.toISOString() } satisfies AdminUser);
+    res.json(await toAdminUser(db, updated));
   });
 
   // For a user who forgot their password: the admin reads the temporary one out to them, and they
@@ -348,6 +391,136 @@ export function adminRouter(db: Db) {
     res.json({ temporaryPassword: password });
   });
 
+  // The admin's log of who changed what, newest first, 100 at a time (pass ?before=<id> for older ones).
+  router.get('/audit', adminOnly, async (req, res) => {
+    const before = Number(req.query.before);
+    const rows = await db
+      .select({ entry: auditLog, actorName: users.name, actorPhone: users.phone })
+      .from(auditLog)
+      .leftJoin(users, eq(users.id, auditLog.actorId))
+      .where(Number.isInteger(before) && before > 0 ? lt(auditLog.id, before) : undefined)
+      .orderBy(desc(auditLog.id))
+      .limit(AUDIT_PAGE);
+    res.json(
+      rows.map(
+        ({ entry, actorName, actorPhone }): AuditEntry => ({
+          id: entry.id,
+          action: entry.action,
+          target: entry.target,
+          details: entry.details,
+          actorName,
+          actorPhone,
+          createdAt: entry.createdAt.toISOString(),
+        }),
+      ),
+    );
+  });
+
+  // A station's manager signs up like any client, then asks here to run their station (or one more).
+  const managerRequestLimit = rateLimit({ max: 5, windowMs: 3_600_000, key: (req) => `manager:${req.user?.id}` });
+  router.post('/manager-requests', requireRole('CLIENT', 'STATION_PRO'), managerRequestLimit, async (req, res) => {
+    const parsed = managerRequestBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: firstIssue(parsed.error) });
+      return;
+    }
+    const user = req.user!;
+    const { stationId, message } = parsed.data as { stationId: string; message?: string };
+    const [station] = await db
+      .select({ name: stations.name })
+      .from(stations)
+      .where(and(eq(stations.id, stationId), eq(stations.isActive, true)));
+    if (!station) {
+      res.status(400).json({ error: 'Station inconnue' });
+      return;
+    }
+    const created = await db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(managerRequests)
+        .values({ userId: user.id, stationId, message: message || null })
+        .onConflictDoNothing()
+        .returning();
+      if (!row) return null;
+      const admins = await tx.select({ id: users.id }).from(users).where(eq(users.role, 'ADMIN'));
+      if (admins.length > 0) {
+        await tx.insert(notifications).values(
+          admins.map((admin) => ({
+            userId: admin.id,
+            type: 'SYSTEM' as const,
+            title: 'Demande de gérant',
+            message: `${user.name} (${user.phone}) demande à gérer ${station.name}. Répondez dans Admin › Comptes.`,
+            stationId,
+          })),
+        );
+      }
+      await audit(tx, user.id, 'manager.request', `station:${stationId}`, { message: message || null });
+      return row;
+    });
+    if (!created) {
+      res.status(409).json({ error: 'Vous avez déjà une demande en attente' });
+      return;
+    }
+    res.status(201).json((await listManagerRequests(db, eq(managerRequests.id, created.id)))[0]);
+  });
+
+  // The signed-in person's latest request, so their profile can show where it stands.
+  router.get('/manager-requests/mine', requireRole(), async (req, res) => {
+    const [latest] = await listManagerRequests(db, eq(managerRequests.userId, req.user!.id), 1);
+    res.json(latest ?? null);
+  });
+
+  router.get('/manager-requests', adminOnly, async (_req, res) => {
+    res.json(await listManagerRequests(db, eq(managerRequests.status, 'PENDING')));
+  });
+
+  router.post('/manager-requests/:id/:decision', adminOnly, async (req, res) => {
+    const id = Number(req.params.id);
+    const decision = String(req.params.decision);
+    if (!Number.isInteger(id) || (decision !== 'accept' && decision !== 'reject')) {
+      res.status(404).json({ error: 'Demande introuvable' });
+      return;
+    }
+    const error = await db.transaction(async (tx) => {
+      const [request] = await tx.select().from(managerRequests).where(eq(managerRequests.id, id)).for('update');
+      if (!request) return { status: 404, message: 'Demande introuvable' };
+      if (request.status !== 'PENDING') return { status: 409, message: 'Cette demande a déjà reçu une réponse' };
+      const [station] = await tx.select({ name: stations.name }).from(stations).where(eq(stations.id, request.stationId));
+
+      if (decision === 'accept') {
+        const [target] = await tx.select().from(users).where(eq(users.id, request.userId)).for('update');
+        if (target.role === 'ADMIN') return { status: 409, message: 'Ce compte est administrateur' };
+        if (target.suspendedAt) return { status: 409, message: 'Ce compte est suspendu' };
+        await tx.update(users).set({ role: 'STATION_PRO' }).where(eq(users.id, target.id));
+        await tx.insert(stationManagers).values({ userId: target.id, stationId: request.stationId }).onConflictDoNothing();
+      }
+      await tx
+        .update(managerRequests)
+        .set({ status: decision === 'accept' ? 'ACCEPTED' : 'REJECTED', decidedAt: new Date(), decidedBy: req.user!.id })
+        .where(eq(managerRequests.id, id));
+      await tx.insert(notifications).values({
+        userId: request.userId,
+        type: 'SYSTEM',
+        stationId: request.stationId,
+        ...(decision === 'accept'
+          ? {
+              title: 'Espace Pro ouvert',
+              message: `Vous gérez maintenant ${station.name} sur RONIKOV. Ouvrez l’Espace Pro pour mettre à jour vos stocks.`,
+            }
+          : {
+              title: 'Demande de gérant refusée',
+              message: `Votre demande pour gérer ${station.name} n’a pas été acceptée. Contactez RONIKOV si c’est une erreur.`,
+            }),
+      });
+      await audit(tx, req.user!.id, `manager.${decision}`, `user:${request.userId}`, { stationId: request.stationId });
+      return null;
+    });
+    if (error) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
+    res.json((await listManagerRequests(db, eq(managerRequests.id, id)))[0]);
+  });
+
   // Premium is granted by an admin: a client's request notifies every admin.
   const requestLimit = rateLimit({ max: 3, windowMs: 3_600_000, key: (req) => `premium:${req.user?.id}` });
   router.post('/premium/request', requireRole(), requestLimit, async (req, res) => {
@@ -374,3 +547,25 @@ export function adminRouter(db: Db) {
   return router;
 }
 
+
+async function listManagerRequests(db: Db, where: SQL, limit = 200): Promise<ManagerRequest[]> {
+  const rows = await db
+    .select({ request: managerRequests, userName: users.name, userPhone: users.phone, stationName: stations.name })
+    .from(managerRequests)
+    .innerJoin(users, eq(users.id, managerRequests.userId))
+    .innerJoin(stations, eq(stations.id, managerRequests.stationId))
+    .where(where)
+    .orderBy(desc(managerRequests.createdAt), desc(managerRequests.id))
+    .limit(limit);
+  return rows.map(({ request, userName, userPhone, stationName }) => ({
+    id: request.id,
+    userId: request.userId,
+    userName,
+    userPhone,
+    stationId: request.stationId,
+    stationName,
+    message: request.message,
+    status: request.status,
+    createdAt: request.createdAt.toISOString(),
+  }));
+}

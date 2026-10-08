@@ -560,6 +560,8 @@ export default function App() {
             onNavigate={setActiveTab}
             onLogout={handleLogout}
             onChangePassword={() => setPasswordModal({ forced: false })}
+            stations={stations}
+            onUserChanged={setCurrentUser}
           />
         )}
 

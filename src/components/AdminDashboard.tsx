@@ -3,6 +3,7 @@ import { Station, Reservation, FuelPriceGlobal, FuelType } from '../types';
 import { ShieldCheck, Users, Fuel, DollarSign, AlertTriangle, CheckCircle2, XCircle, Plus, Building2, BarChart3, Save, Sparkles, MapPin } from 'lucide-react';
 import { StationBrandLogo } from './StationBrandLogo';
 import { AdminUsersPanel } from './AdminUsersPanel';
+import { AuditLogPanel } from './AuditLogPanel';
 import { AddStationForm } from './AddStationForm';
 import { FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 
@@ -27,7 +28,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   currentUserId,
 }) => {
   const [showAddStation, setShowAddStation] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'accounts' | 'incidents'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'accounts' | 'incidents' | 'journal'>('overview');
   const [priceError, setPriceError] = useState<string | null>(null);
   const [editingPrices, setEditingPrices] = useState<FuelPriceGlobal[]>(globalPrices);
   const [applyToAllStations, setApplyToAllStations] = useState<boolean>(true);
@@ -134,6 +135,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             }`}
           >
             Alertes stock ({stockAlerts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('journal')}
+            className={`px-3.5 py-2 rounded-lg transition-all ${
+              activeTab === 'journal' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
+            }`}
+          >
+            Journal
           </button>
         </div>
       </div>
@@ -382,6 +391,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* ACCOUNTS TAB */}
       {activeTab === 'accounts' && <AdminUsersPanel stations={stations} currentUserId={currentUserId} />}
+
+      {/* JOURNAL TAB */}
+      {activeTab === 'journal' && <AuditLogPanel stations={stations} />}
 
       {/* INCIDENTS TAB */}
       {activeTab === 'incidents' && (

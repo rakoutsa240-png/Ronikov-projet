@@ -1,6 +1,6 @@
 import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { and, eq, gt, ne } from 'drizzle-orm';
+import { and, eq, gt, isNull, ne } from 'drizzle-orm';
 import type { CookieOptions, NextFunction, Request, RequestHandler, Response } from 'express';
 import type { AuthUser, UserRole } from '../shared/types';
 import type { Db } from './db/client';
@@ -104,7 +104,7 @@ export function loadUser(db: Db): RequestHandler {
         .select({ user: users })
         .from(sessions)
         .innerJoin(users, eq(users.id, sessions.userId))
-        .where(and(eq(sessions.tokenHash, hashToken(token)), gt(sessions.expiresAt, new Date())));
+        .where(and(eq(sessions.tokenHash, hashToken(token)), gt(sessions.expiresAt, new Date()), isNull(users.suspendedAt)));
       if (row) req.user = await toAuthUser(db, row.user);
     }
     next();

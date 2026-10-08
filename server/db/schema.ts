@@ -26,6 +26,8 @@ export const notificationTypeEnum = pgEnum('notification_type', ['RESERVATION', 
 
 export const fuelTypeEnum = pgEnum('fuel_type', ['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE']);
 
+export const managerRequestStatusEnum = pgEnum('manager_request_status', ['PENDING', 'ACCEPTED', 'REJECTED']);
+
 export const reportKindEnum = pgEnum('report_kind', ['NO_FUEL', 'LONG_QUEUE', 'WRONG_PRICE', 'CLOSED']);
 
 export const stations = pgTable('stations', {
@@ -92,6 +94,8 @@ export const users = pgTable(
     isPremium: boolean('is_premium').notNull().default(false),
     // Set when an admin gives a temporary password; cleared once the user picks their own.
     mustChangePassword: boolean('must_change_password').notNull().default(false),
+    // Set when an admin suspends the account: it can no longer sign in.
+    suspendedAt: timestamp('suspended_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('users_phone_idx').on(t.phone)],
@@ -242,4 +246,28 @@ export const favorites = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.stationId] }), index('favorites_station_idx').on(t.stationId)],
+);
+
+// A signed-up client asking to run a station. An admin accepts (they become its manager) or rejects it.
+export const managerRequests = pgTable(
+  'manager_requests',
+  {
+    id: serial('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id, { onDelete: 'cascade' }),
+    message: text('message'),
+    status: managerRequestStatusEnum('status').notNull().default('PENDING'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    decidedBy: uuid('decided_by').references(() => users.id, { onDelete: 'set null' }),
+  },
+  (t) => [
+    index('manager_requests_status_idx').on(t.status, t.createdAt),
+    // At most one open request per person.
+    uniqueIndex('manager_requests_pending_user_idx').on(t.userId).where(sql`${t.status} = 'PENDING'`),
+  ],
 );
