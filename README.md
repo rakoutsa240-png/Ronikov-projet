@@ -99,11 +99,11 @@ Every stock, station, price, account change and ticket validation is written to 
 
 1. Sign in to render.com with GitHub and give Render access to this repository.
 2. Choose **New > Blueprint**, pick the repository, then **Apply**.
-3. Once the service is live, open its **Shell** tab and create the first admin with `npm run user:create -- --name "Nom" --phone 90123456 --password "..." --role ADMIN`.
+3. Once the service is live, sign up on the site with your phone number. In the service's **Environment** tab, set `ADMIN_PHONES` to that number (several numbers: comma-separated) and save: the service restarts and that account becomes an admin. Free instances have no Shell; on a paid plan you can also run `npm run user:create` from the **Shell** tab.
 
 Render generates `TICKET_SECRET` once; do not change it afterwards or existing tickets stop working. Both resources start on the free plan: the service sleeps after 15 minutes without visits and the free database is deleted after 30 days, so switch both to a paid plan before real use.
 
-Production settings read by `server/env.ts`: `STATIC_DIR` (folder with the built site, `dist`), `SEED_DEMO_DATA` (`true` loads the demo stations and prices on start, keeping existing rows) and `TRUST_PROXY` (Express "trust proxy", `true` behind Render's proxy).
+Production settings read by `server/env.ts`: `STATIC_DIR` (folder with the built site, `dist`), `SEED_DEMO_DATA` (`true` loads the demo stations and prices on start, keeping existing rows), `TRUST_PROXY` (Express "trust proxy", `true` behind Render's proxy) and `ADMIN_PHONES` (accounts promoted to admin on start; removing a number later does not demote it).
 
 ## Scripts
 

@@ -12,6 +12,8 @@ const schema = z.object({
   STATIC_DIR: z.string().optional(),
   // "true" loads the demo stations and prices on start (keeps existing rows).
   SEED_DEMO_DATA: z.enum(['true', 'false']).default('false'),
+  // Comma-separated phones whose existing accounts become admins on start (for hosts without a shell).
+  ADMIN_PHONES: z.string().default(''),
 });
 
 const parsed = schema.parse(process.env);
@@ -29,5 +31,6 @@ export const env = {
   ...parsed,
   TRUST_PROXY: parseTrustProxy(parsed.TRUST_PROXY),
   SEED_DEMO_DATA: parsed.SEED_DEMO_DATA === 'true',
+  ADMIN_PHONES: parsed.ADMIN_PHONES.split(',').map((p) => p.trim()).filter(Boolean),
   TICKET_SECRET: parsed.TICKET_SECRET ?? 'dev-only-ticket-secret-do-not-use-in-production',
 };

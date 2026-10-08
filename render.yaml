@@ -21,6 +21,9 @@ services:
         value: "true"
       - key: TRUST_PROXY
         value: "true"
+      # Phones (comma-separated) whose accounts become admins on start; set it in the Environment tab.
+      - key: ADMIN_PHONES
+        sync: false
       - key: TICKET_SECRET
         generateValue: true
       - key: DATABASE_URL
