@@ -37,6 +37,10 @@ const validateBody = z.object({ code: z.string().min(1).max(200) });
 export const canManageStation = (user: AuthUser, stationId: string) =>
   user.role === 'ADMIN' || (user.role === 'STATION_PRO' && user.managedStationIds.includes(stationId));
 
+// Attendants see their station's tickets and validate them, nothing more.
+const canServeStation = (user: AuthUser, stationId: string) =>
+  canManageStation(user, stationId) || (user.role === 'ATTENDANT' && user.managedStationIds.includes(stationId));
+
 function sendError(res: Response, err: unknown) {
   if (!(err instanceof ReservationError)) throw err;
   res.status(err.status).json({ error: err.message, ...(err.reservation ? { reservation: err.reservation } : {}) });
@@ -79,8 +83,8 @@ export function reservationsRouter(db: Db, keys: TicketKeys) {
     }
   });
 
-  router.get('/stations/:id/reservations', requireRole('STATION_PRO', 'ADMIN'), async (req, res) => {
-    if (!canManageStation(req.user!, String(req.params.id))) {
+  router.get('/stations/:id/reservations', requireRole('STATION_PRO', 'ADMIN', 'ATTENDANT'), async (req, res) => {
+    if (!canServeStation(req.user!, String(req.params.id))) {
       res.status(403).json({ error: 'Cette station ne fait pas partie des vôtres' });
       return;
     }
@@ -89,8 +93,8 @@ export function reservationsRouter(db: Db, keys: TicketKeys) {
 
   // Each wrong code costs a try, so codes cannot be guessed from the pump terminal.
   const validateLimit = rateLimit({ max: 10, windowMs: 60_000, key: (req) => `validate:${req.user?.id}` });
-  router.post('/stations/:id/validate', requireRole('STATION_PRO', 'ADMIN'), validateLimit, async (req, res) => {
-    if (!canManageStation(req.user!, String(req.params.id))) {
+  router.post('/stations/:id/validate', requireRole('STATION_PRO', 'ADMIN', 'ATTENDANT'), validateLimit, async (req, res) => {
+    if (!canServeStation(req.user!, String(req.params.id))) {
       res.status(403).json({ error: 'Cette station ne fait pas partie des vôtres' });
       return;
     }

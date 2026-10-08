@@ -12,6 +12,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   CLIENT: 'Client',
   STATION_PRO: 'Gérant de station',
   ADMIN: 'Administrateur',
+  ATTENDANT: 'Pompiste',
 };
 
 // Accounts tab of the admin console: manager requests to answer, then every account with its role,
@@ -190,7 +191,8 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
               className="p-2 border border-neutral-700 bg-black text-white rounded-lg disabled:opacity-60"
             >
               {(Object.keys(ROLE_LABELS) as UserRole[]).map((role) => (
-                <option key={role} value={role}>
+                // Attendants are added by their station's manager, from the Espace Pro.
+                <option key={role} value={role} disabled={role === 'ATTENDANT'}>
                   {ROLE_LABELS[role]}
                 </option>
               ))}
@@ -211,6 +213,10 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
                   </option>
                 ))}
               </select>
+            ) : user.role === 'ATTENDANT' ? (
+              <span className="text-neutral-300">
+                Pompiste à {stations.find((s) => s.id === user.managedStationIds[0])?.name ?? 'une station'}
+              </span>
             ) : (
               <span className="text-neutral-500">—</span>
             )}

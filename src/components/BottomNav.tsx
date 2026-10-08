@@ -18,7 +18,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
     { id: 'history', label: 'Tickets', Icon: Ticket, badge: activeTicketCount },
     userRole === 'ADMIN'
       ? { id: 'admin', label: 'Admin', Icon: ShieldCheck }
-      : userRole === 'STATION_PRO'
+      : userRole === 'STATION_PRO' || userRole === 'ATTENDANT'
         ? { id: 'pro', label: 'Espace Pro', Icon: Store }
         : { id: 'premium', label: 'Premium', Icon: Crown },
     { id: 'profile', label: 'Profil', Icon: User },

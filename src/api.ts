@@ -1,4 +1,4 @@
-import type { AdminUser, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, Station } from './types';
+import type { AdminUser, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, Station } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -64,6 +64,22 @@ export const api = {
       'POST',
       `/stations/${encodeURIComponent(stationId)}/validate`,
       { code },
+    ),
+
+  attendants: (stationId: string) => request<Attendant[]>('GET', `/stations/${encodeURIComponent(stationId)}/attendants`),
+  // temporaryPassword is null when the number already had an account (it keeps its own password).
+  addAttendant: (stationId: string, data: { name: string; phone: string }) =>
+    request<{ attendant: Attendant; temporaryPassword: string | null }>(
+      'POST',
+      `/stations/${encodeURIComponent(stationId)}/attendants`,
+      data,
+    ),
+  removeAttendant: (stationId: string, userId: string) =>
+    request<void>('DELETE', `/stations/${encodeURIComponent(stationId)}/attendants/${encodeURIComponent(userId)}`),
+  resetAttendantPassword: (stationId: string, userId: string) =>
+    request<{ temporaryPassword: string }>(
+      'POST',
+      `/stations/${encodeURIComponent(stationId)}/attendants/${encodeURIComponent(userId)}/password`,
     ),
 
   updateStock: (

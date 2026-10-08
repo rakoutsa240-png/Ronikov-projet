@@ -16,7 +16,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
-export const userRoleEnum = pgEnum('user_role', ['CLIENT', 'STATION_PRO', 'ADMIN']);
+export const userRoleEnum = pgEnum('user_role', ['CLIENT', 'STATION_PRO', 'ADMIN', 'ATTENDANT']);
 
 export const reservationStatusEnum = pgEnum('reservation_status', ['PENDING', 'VALIDATED', 'EXPIRED', 'CANCELLED']);
 
@@ -101,7 +101,7 @@ export const users = pgTable(
   (t) => [uniqueIndex('users_phone_idx').on(t.phone)],
 );
 
-// Which stations a manager (STATION_PRO) runs.
+// Which stations a manager (STATION_PRO) runs, or the one station an attendant (ATTENDANT) works at.
 export const stationManagers = pgTable(
   'station_managers',
   {
