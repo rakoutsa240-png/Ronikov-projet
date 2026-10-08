@@ -1,11 +1,18 @@
 import { eq } from 'drizzle-orm';
-import { expect, it } from 'vitest';
+import { beforeAll, expect, it } from 'vitest';
+import type { Db } from './db/client';
 import { users } from './db/schema';
 import { promoteAdmins, upsertUser } from './db/users';
 import { createTestDb } from './test/db';
 
+let db: Db;
+
+// Starting the database is slow under a full parallel run, so it gets the setup timeout, not the test's.
+beforeAll(async () => {
+  db = await createTestDb();
+});
+
 it('promotes existing accounts listed by phone, in any format', async () => {
-  const db = await createTestDb();
   await upsertUser(db, { name: 'Akou', phone: '90123456', password: 'motdepasse', role: 'CLIENT' });
   await upsertUser(db, { name: 'Autre', phone: '90654321', password: 'motdepasse', role: 'CLIENT' });
 
