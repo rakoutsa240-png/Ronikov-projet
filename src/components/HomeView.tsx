@@ -9,7 +9,7 @@ import { StationSkeleton } from './Skeleton';
 import { useFavorites } from '../storage';
 import { StationFreshness } from './StationFreshness';
 import { enableAlerts, useAlertPermission } from '../alerts';
-import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart } from 'lucide-react';
+import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart, Fuel, Smartphone } from 'lucide-react';
 import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
 import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
 import customerBg from '../assets/images/happy_customer_refuel_1785888766342.webp';
@@ -157,63 +157,49 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* 4 Steps Section */}
-      <section className="bg-neutral-950 text-white py-16 border-t border-b border-neutral-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="space-y-2 border-b border-neutral-800 pb-6">
-            <span className="text-xs font-mono-code font-bold text-neutral-400 uppercase tracking-widest">
-              Fonctionnement Pleino
+      {/* 4 Steps Section: a journey in the green and gold of the brand, the same in both themes */}
+      <section className="theme-fixed bg-brand-900 text-white py-16 sm:py-20 relative overflow-hidden">
+        <div aria-hidden="true" className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative">
+          <div className="space-y-3 max-w-2xl">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
+              Comment ça marche
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono-code">
-              Réserver votre carburant en 4 étapes simples
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Votre carburant réservé en 4 étapes
             </h2>
+            <p className="text-sm text-brand-100/80 leading-relaxed">
+              De la recherche de station jusqu'à la pompe, sans faire la queue.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 font-mono-code">
-            {/* Step 1 */}
-            <div className="p-6 border border-neutral-800 bg-black space-y-4 relative">
-              <div className="w-10 h-10 bg-white text-black font-extrabold text-lg flex items-center justify-center border border-white">
-                01
-              </div>
-              <h3 className="text-lg font-bold tracking-tight">1. Localiser</h3>
-              <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-                Recherchez les stations partenaires à proximité disposant du carburant souhaité (Super, Gazole, Mélange) avec jauges de stock en temps réel.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="p-6 border border-neutral-800 bg-black space-y-4 relative">
-              <div className="w-10 h-10 bg-white text-black font-extrabold text-lg flex items-center justify-center border border-white">
-                02
-              </div>
-              <h3 className="text-lg font-bold tracking-tight">2. Réserver</h3>
-              <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-                Choisissez votre volume exact (litres ou montant en FCFA). Le carburant est immédiatement bloqué pour vous à la station.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="p-6 border border-neutral-800 bg-black space-y-4 relative">
-              <div className="w-10 h-10 bg-white text-black font-extrabold text-lg flex items-center justify-center border border-white">
-                03
-              </div>
-              <h3 className="text-lg font-bold tracking-tight">3. PAYER</h3>
-              <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-                Réglez via Mixx by Yas (ex-TMoney) ou Flooz (Moov Africa). Vous recevez un code sécurisé unique valide 2 heures.
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="p-6 border border-neutral-800 bg-black space-y-4 relative">
-              <div className="w-10 h-10 bg-white text-black font-extrabold text-lg flex items-center justify-center border border-white">
-                04
-              </div>
-              <h3 className="text-lg font-bold tracking-tight">4. Récupérer</h3>
-              <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-                Présentez votre code au pompiste. La pompe est débloquée instantanément. Servez-vous et repartez sans faire la queue !
-              </p>
-            </div>
-          </div>
+          <ol className="relative grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6">
+            {/* The road that links the steps: horizontal on large screens, one piece per step on phones */}
+            <span aria-hidden="true" className="hidden md:block absolute top-6 left-[12.5%] right-[12.5%] border-t-2 border-dashed border-amber-400/40" />
+            {[
+              { icon: MapPin, title: 'Localiser', text: 'Trouvez les stations proches qui ont votre carburant (Super, Gazole, Mélange), avec le niveau de stock en temps réel.' },
+              { icon: Fuel, title: 'Réserver', text: 'Choisissez votre volume en litres ou en FCFA. Le carburant est aussitôt mis de côté pour vous à la station.' },
+              { icon: Smartphone, title: 'Payer', text: 'Réglez avec Mixx by Yas (ex-TMoney) ou Flooz (Moov Africa). Vous recevez un code unique valable 2 heures.' },
+              { icon: CheckCircle2, title: 'Récupérer', text: 'Montrez votre code au pompiste, la pompe est débloquée. Servez-vous et repartez sans attendre !' },
+            ].map((step, i) => (
+              <li key={step.title} className="relative flex md:flex-col md:items-center md:text-center gap-5 md:gap-4">
+                {i < 3 && (
+                  <span aria-hidden="true" className="md:hidden absolute left-6 top-12 -bottom-8 border-l-2 border-dashed border-amber-400/40" />
+                )}
+                <div className="relative z-10 shrink-0 w-12 h-12 rounded-full bg-amber-400 text-black font-display font-extrabold text-xl flex items-center justify-center ring-8 ring-brand-900 shadow-lg shadow-black/20">
+                  {i + 1}
+                </div>
+                <div className="flex-1 rounded-2xl bg-white/5 border border-white/10 p-5 space-y-2 md:w-full">
+                  <div className="flex md:justify-center items-center gap-2 text-amber-400">
+                    <step.icon className="w-5 h-5" aria-hidden="true" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Étape {i + 1}</span>
+                  </div>
+                  <h3 className="text-xl font-bold tracking-tight">{step.title}</h3>
+                  <p className="text-sm text-brand-100/80 leading-relaxed">{step.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
