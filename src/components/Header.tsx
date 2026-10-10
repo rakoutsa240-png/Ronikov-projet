@@ -2,6 +2,7 @@ import React from 'react';
 import { Bell, User, LogOut, LogIn, Sun, Moon } from 'lucide-react';
 import { setTheme, useTheme } from '../theme';
 import { UserRole } from '../types';
+import { Logo } from './Logo';
 
 interface HeaderProps {
   activeTab: string;
@@ -40,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
 
 
   return (
-    <header className="sticky top-0 z-40 bg-black text-white border-b border-neutral-800">
+    <header className="theme-fixed sticky top-0 z-40 bg-brand-800 text-white border-b border-brand-900">
       {/* Main Nav Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -50,21 +51,11 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('home')}
               className="flex items-center gap-2.5 group text-left text-white focus:outline-none"
             >
-              <div className="w-9 h-9 bg-white text-black font-mono-code font-bold text-xl flex items-center justify-center border border-white tracking-tighter">
-                R
-              </div>
-              <div>
-                <span className="text-xl font-extrabold tracking-widest block uppercase leading-none font-mono-code">
-                  RONIKOV
-                </span>
-                <span className="text-[11px] text-neutral-400 font-mono-code tracking-widest block uppercase mt-0.5">
-                  Carburant Togo
-                </span>
-              </div>
+              <Logo subtitle="Carburant Togo" />
             </button>
 
             {/* Desktop Nav Items */}
-            <nav className="hidden xl:flex items-center space-x-1 ml-2 border-l border-neutral-800 pl-4">
+            <nav className="hidden xl:flex items-center space-x-1 ml-2 border-l border-white/20 pl-4">
               {navItems.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
@@ -74,8 +65,8 @@ export const Header: React.FC<HeaderProps> = ({
                     aria-current={isActive ? 'page' : undefined}
                     className={`px-3 py-1.5 text-sm font-semibold transition-all whitespace-nowrap rounded-md ${
                       isActive
-                        ? 'bg-white text-black border border-white'
-                        : 'text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent'
+                        ? 'bg-white text-brand-800 border border-white'
+                        : 'text-white/80 hover:text-white hover:bg-white/10 border border-transparent'
                     }`}
                   >
                     {item.label}
@@ -90,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Light theme for full sunlight, dark theme otherwise */}
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className="p-2 border border-neutral-800 hover:border-neutral-600 bg-neutral-900 text-white transition-colors"
+              className="p-2 rounded-md border border-white/20 hover:border-white/50 bg-white/10 text-white transition-colors"
               aria-label={theme === 'light' ? 'Passer en mode sombre' : 'Passer en mode clair (plein soleil)'}
               title={theme === 'light' ? 'Mode sombre' : 'Mode clair (plein soleil)'}
             >
@@ -100,12 +91,12 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Notifications Trigger */}
             <button
               onClick={onOpenNotifications}
-              className="relative p-2 border border-neutral-800 hover:border-neutral-600 bg-neutral-900 text-white transition-colors"
+              className="relative p-2 rounded-md border border-white/20 hover:border-white/50 bg-white/10 text-white transition-colors"
               aria-label="Notifications"
             >
               <Bell className="w-4 h-4" />
               {unreadNotifsCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-white text-black font-mono-code text-[11px] font-bold flex items-center justify-center border border-black">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 text-black font-mono-code text-[11px] font-bold flex items-center justify-center rounded-full">
                   {unreadNotifsCount}
                 </span>
               )}
@@ -114,10 +105,10 @@ export const Header: React.FC<HeaderProps> = ({
             {/* User Profile Button */}
             <button
               onClick={() => (isSignedIn ? setActiveTab('profile') : onOpenAuth())}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono-code font-bold transition-all border ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-mono-code font-bold transition-all border ${
                 activeTab === 'profile'
                   ? 'bg-amber-400 text-black border-amber-300 shadow-md'
-                  : 'bg-white text-black border-white hover:bg-neutral-200'
+                  : 'bg-white text-brand-800 border-white hover:bg-brand-50'
               }`}
               title={isSignedIn ? 'Ouvrir mon profil' : 'Se connecter ou créer un compte'}
             >
@@ -128,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
             {isSignedIn && (
               <button
                 onClick={onLogout}
-                className="p-2 border border-neutral-800 hover:border-neutral-600 bg-neutral-900 text-white transition-colors"
+                className="p-2 rounded-md border border-white/20 hover:border-white/50 bg-white/10 text-white transition-colors"
                 aria-label="Se déconnecter"
                 title="Se déconnecter"
               >

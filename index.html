@@ -1,17 +1,17 @@
 <!doctype html>
-<html lang="fr" class="h-full bg-white antialiased">
+<html lang="fr" class="h-full antialiased">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RONIKOV — Localisation, Réservation & Paiement de Carburant au Togo</title>
     <meta name="description" content="Trouvez une station avec du carburant en stock près de vous, réservez vos litres et payez par mobile money (TMoney, Flooz). Lomé et tout le Togo." />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#00553c" />
     <script>
-      // Light theme chosen on this phone: apply it before the page draws.
+      // The site is light by default (easy to read in the sun). Dark theme chosen on this phone:
+      // apply it before the page draws.
       try {
-        if (JSON.parse(localStorage.getItem('ronikov.theme')) === 'light') {
-          document.documentElement.dataset.theme = 'light';
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff');
+        if (JSON.parse(localStorage.getItem('ronikov.theme')) === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
         }
       } catch (e) {}
     </script>
@@ -34,9 +34,9 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   </head>
-  <body class="h-full bg-white text-slate-900 selection:bg-black selection:text-white font-sans">
+  <body class="h-full bg-black text-white selection:bg-amber-400 selection:text-black font-sans">
     <div id="root" class="min-h-full"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>

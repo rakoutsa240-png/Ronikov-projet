@@ -135,11 +135,11 @@ export const MapView: React.FC<MapViewProps> = ({
 
         <div className="flex items-center gap-2">
           {/* Layout Toggle Buttons */}
-          <div className="flex border border-black text-xs font-bold">
+          <div className="flex border border-neutral-700 rounded-md overflow-hidden text-xs font-bold">
             <button
               onClick={() => setViewLayout('split')}
               className={`px-3 py-1.5 ${
-                viewLayout === 'split' ? 'bg-black text-white' : 'bg-white text-black'
+                viewLayout === 'split' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
               Vue Mixte
@@ -147,7 +147,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <button
               onClick={() => setViewLayout('mapOnly')}
               className={`px-3 py-1.5 ${
-                viewLayout === 'mapOnly' ? 'bg-black text-white' : 'bg-white text-black'
+                viewLayout === 'mapOnly' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
               Carte Seule
@@ -155,7 +155,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <button
               onClick={() => setViewLayout('listOnly')}
               className={`px-3 py-1.5 ${
-                viewLayout === 'listOnly' ? 'bg-black text-white' : 'bg-white text-black'
+                viewLayout === 'listOnly' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
               Liste Seule

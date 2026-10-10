@@ -68,7 +68,7 @@ export const Gauge: React.FC<GaugeProps> = ({
             cx={dimensions.cx}
             cy={dimensions.cy}
             r={dimensions.r}
-            stroke={darkMode ? '#262626' : '#E5E5E5'}
+            style={{ stroke: darkMode ? 'var(--color-neutral-800)' : 'var(--color-neutral-200)' }}
             strokeWidth={dimensions.stroke}
             fill="transparent"
           />
@@ -77,7 +77,7 @@ export const Gauge: React.FC<GaugeProps> = ({
             cx={dimensions.cx}
             cy={dimensions.cy}
             r={dimensions.r}
-            stroke={darkMode ? '#F59E0B' : '#111111'}
+            style={{ stroke: darkMode ? 'var(--color-amber-500)' : 'var(--color-neutral-950)' }}
             strokeWidth={dimensions.stroke}
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
