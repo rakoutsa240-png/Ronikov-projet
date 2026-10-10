@@ -142,7 +142,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 viewLayout === 'split' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
-              Vue Mixte
+              Carte et liste
             </button>
             <button
               onClick={() => setViewLayout('mapOnly')}
@@ -150,7 +150,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 viewLayout === 'mapOnly' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
-              Carte Seule
+              Carte
             </button>
             <button
               onClick={() => setViewLayout('listOnly')}
@@ -158,7 +158,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 viewLayout === 'listOnly' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
-              Liste Seule
+              Liste
             </button>
           </div>
         </div>

@@ -34,7 +34,7 @@ export const Gauge: React.FC<GaugeProps> = ({
         )}
         <div className={`w-full border h-3 overflow-hidden p-0.5 relative rounded-full ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-slate-100 border-slate-300'}`}>
           <div
-            className={`h-full transition-all duration-500 ease-out rounded-full ${darkMode ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : 'bg-black'}`}
+            className={`gauge-fill h-full transition-all duration-500 ease-out rounded-full ${darkMode ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : 'bg-black'}`}
             style={{ width: `${percentage}%` }}
           />
         </div>

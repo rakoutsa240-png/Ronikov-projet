@@ -247,7 +247,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                       inputMode === 'liters' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-400 hover:text-white'
                     }`}
                   >
-                    En Litres
+                    En litres
                   </button>
                 </div>
               </div>
@@ -288,7 +288,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border border-neutral-800 p-4 bg-black/60 rounded-xl font-mono-code">
-                    <span className="text-xs text-neutral-400 font-bold">Montant Souhaité:</span>
+                    <span className="text-xs text-neutral-400 font-bold">Montant souhaité :</span>
                     <span className="text-2xl font-black text-amber-300">{fcfaAmount.toLocaleString('fr-FR')} FCFA</span>
                   </div>
 

@@ -137,7 +137,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition-all shadow-md"
             >
               <Copy className="w-4 h-4 text-amber-400" />
-              <span>{copied ? 'Code Copié !' : 'Copier Code'}</span>
+              <span>{copied ? 'Code copié !' : 'Copier le code'}</span>
             </button>
 
             <button
@@ -145,7 +145,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition-all shadow-md"
             >
               <Printer className="w-4 h-4 text-amber-400" />
-              <span>Imprimer Ticket</span>
+              <span>Imprimer le ticket</span>
             </button>
 
             <ReceiptButton reservation={reservation} />

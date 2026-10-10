@@ -38,13 +38,13 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono-code text-white">
       {/* Top Banner Card matching dark background */}
-      <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden space-y-6">
+      <div className="theme-fixed bg-brand-800 text-white rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden space-y-6">
         {/* Ambient Top Glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-neutral-800/80 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-white/15 pb-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-black text-xs font-black rounded-md shadow-md shadow-amber-400/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-black text-xs font-black rounded-full">
               <Star className="w-3.5 h-3.5 fill-black" /> Abonnement privilège Togo
             </div>
 
@@ -52,7 +52,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
               Pass prioritaire <span className="text-amber-400">Pleino Premium</span>
             </h1>
 
-            <p className="text-xs sm:text-sm text-neutral-300 font-sans max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-brand-100/85 font-sans max-w-3xl leading-relaxed">
               Garantissez votre accès au carburant même en période de forte tension ou de pénurie nationale. Profitez de la file prioritaire dans les stations du réseau et de zéro frais de réservation.
             </p>
           </div>
@@ -75,7 +75,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             {partnerBrands.map((brand) => (
               <div
                 key={brand}
-                className="bg-black/60 border border-neutral-800 p-2 rounded-xl flex items-center gap-2.5 shrink-0 hover:border-amber-400 transition-colors"
+                className="bg-white/10 border border-white/15 p-2 rounded-xl flex items-center gap-2.5 shrink-0 hover:border-amber-400 transition-colors"
               >
                 <StationBrandLogo brand={brand} size="sm" interactive={true} showBadge={false} />
                 <span className="text-xs font-extrabold text-neutral-200">{brand}</span>
@@ -218,7 +218,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             <thead>
               <tr className="border-b border-neutral-800 bg-neutral-900/90 text-amber-300 font-extrabold">
                 <th className="p-3.5">Fonctionnalité / Avantage</th>
-                <th className="p-3.5 text-neutral-400">Compte Standard</th>
+                <th className="p-3.5 text-neutral-400">Compte standard</th>
                 <th className="p-3.5 text-amber-400 font-black">Pass Premium Pleino</th>
               </tr>
             </thead>
@@ -231,17 +231,17 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Accès à la file prioritaire en station</td>
                 <td className="p-3.5 text-neutral-400">Non</td>
-                <td className="p-3.5 font-black text-amber-300">OUI (Accès Express Coupe-File)</td>
+                <td className="p-3.5 font-black text-amber-300">Oui, accès coupe-file</td>
               </tr>
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Réservation prioritaire en pénurie</td>
                 <td className="p-3.5 text-neutral-400">Quota standard</td>
-                <td className="p-3.5 font-black text-amber-300">OUI (Quota Réservé Garanti)</td>
+                <td className="p-3.5 font-black text-amber-300">Oui, quota réservé garanti</td>
               </tr>
               <tr className="hover:bg-neutral-900/50 transition-colors">
                 <td className="p-3.5 font-bold text-white">Assistance client téléphonique 24h/24</td>
                 <td className="p-3.5 text-neutral-400">Standard</td>
-                <td className="p-3.5 font-black text-amber-300">Ligne Prioritaire Dédiée</td>
+                <td className="p-3.5 font-black text-amber-300">Ligne prioritaire dédiée</td>
               </tr>
             </tbody>
           </table>
