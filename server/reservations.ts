@@ -233,7 +233,7 @@ export async function validateTicket(db: Db, keys: TicketKeys, staff: AuthUser, 
   if (!raw) {
     throw new ReservationError(
       isQr ? 400 : 404,
-      isQr ? 'QR code altéré ou illisible.' : 'Code invalide ou inexistant dans le système RONIKOV.',
+      isQr ? 'QR code altéré ou illisible.' : 'Code invalide ou inexistant dans le système Pleino.',
     );
   }
 
@@ -245,7 +245,7 @@ export async function validateTicket(db: Db, keys: TicketKeys, staff: AuthUser, 
       .for('update');
     // A ticket from another station gets the same answer as an unknown code.
     if (!row || row.stationId !== stationId) {
-      throw new ReservationError(404, 'Code invalide ou inexistant dans le système RONIKOV.');
+      throw new ReservationError(404, 'Code invalide ou inexistant dans le système Pleino.');
     }
 
     if (row.status === 'PENDING' && row.expiresAt <= new Date()) {

@@ -49,7 +49,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-              Pass prioritaire <span className="text-amber-400">RONIKOV Premium</span>
+              Pass prioritaire <span className="text-amber-400">Pleino Premium</span>
             </h1>
 
             <p className="text-xs sm:text-sm text-neutral-300 font-sans max-w-3xl leading-relaxed">
@@ -160,7 +160,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             </div>
 
             <p className="text-xs text-neutral-300 font-sans leading-relaxed">
-              Économisez 5 000 FCFA par an et profitez de la garantie absolue RONIKOV en toutes saisons sans interruption.
+              Économisez 5 000 FCFA par an et profitez de la garantie absolue Pleino en toutes saisons sans interruption.
             </p>
 
             <ul className="space-y-2 text-xs text-neutral-300 pt-2 font-sans">
@@ -219,7 +219,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
               <tr className="border-b border-neutral-800 bg-neutral-900/90 text-amber-300 font-extrabold">
                 <th className="p-3.5">Fonctionnalité / Avantage</th>
                 <th className="p-3.5 text-neutral-400">Compte Standard</th>
-                <th className="p-3.5 text-amber-400 font-black">Pass Premium RONIKOV</th>
+                <th className="p-3.5 text-amber-400 font-black">Pass Premium Pleino</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800/80 text-neutral-300">

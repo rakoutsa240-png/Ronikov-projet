@@ -347,7 +347,7 @@ export function adminRouter(db: Db) {
           userId,
           type: 'PREMIUM',
           title: 'Pass Premium Activé',
-          message: 'Votre pass prioritaire RONIKOV est actif : vos prochaines réservations sont sans frais de service.',
+          message: 'Votre pass prioritaire Pleino est actif : vos prochaines réservations sont sans frais de service.',
         });
       }
       await audit(tx, req.user!.id, 'user.update', `user:${userId}`, { role, isPremium, stationIds, isSuspended });
@@ -506,11 +506,11 @@ export function adminRouter(db: Db) {
         ...(decision === 'accept'
           ? {
               title: 'Espace Pro ouvert',
-              message: `Vous gérez maintenant ${station.name} sur RONIKOV. Ouvrez l’Espace Pro pour mettre à jour vos stocks.`,
+              message: `Vous gérez maintenant ${station.name} sur Pleino. Ouvrez l’Espace Pro pour mettre à jour vos stocks.`,
             }
           : {
               title: 'Demande de gérant refusée',
-              message: `Votre demande pour gérer ${station.name} n’a pas été acceptée. Contactez RONIKOV si c’est une erreur.`,
+              message: `Votre demande pour gérer ${station.name} n’a pas été acceptée. Contactez Pleino si c’est une erreur.`,
             }),
       });
       await audit(tx, req.user!.id, `manager.${decision}`, `user:${request.userId}`, { stationId: request.stationId });
@@ -543,7 +543,7 @@ export function adminRouter(db: Db) {
       );
     }
     await audit(db, user.id, 'premium.request', `user:${user.id}`);
-    res.status(202).json({ message: 'Demande envoyée : un administrateur RONIKOV va activer votre pass.' });
+    res.status(202).json({ message: 'Demande envoyée : un administrateur Pleino va activer votre pass.' });
   });
 
   return router;

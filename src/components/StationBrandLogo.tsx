@@ -181,7 +181,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
                   {brandInfo.name}
                 </h3>
                 <p className="text-xs text-amber-300 font-sans mt-0.5">
-                  Réseau Officiel Certifié RONIKOV
+                  Réseau Officiel Certifié Pleino
                 </p>
               </div>
             </div>

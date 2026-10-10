@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from 'react';
 import type { NotificationItem } from './types';
 
-// Phone alerts (system notifications) for new RONIKOV messages, once the visitor allowed them.
-// They show while RONIKOV is open or running in the background; a closed app gets them at its next opening.
+// Phone alerts (system notifications) for new Pleino messages, once the visitor allowed them.
+// They show while Pleino is open or running in the background; a closed app gets them at its next opening.
 
 export const alertsSupported = () => typeof window !== 'undefined' && 'Notification' in window;
 

@@ -54,7 +54,7 @@ describe('App', () => {
     localStorage.setItem('ronikov.stations', JSON.stringify([{...INITIAL_STATIONS[0], name: 'Station gardée sur le téléphone'}]));
     vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('Failed to fetch'))));
     render(<App />);
-    expect(await screen.findByText(/Le serveur RONIKOV ne répond pas/)).toBeTruthy();
+    expect(await screen.findByText(/Le serveur Pleino ne répond pas/)).toBeTruthy();
     expect(screen.getAllByText('Station gardée sur le téléphone').length).toBeGreaterThan(0);
     warn.mockRestore();
   });

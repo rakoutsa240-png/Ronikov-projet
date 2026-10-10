@@ -278,7 +278,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'notif-4',
-    title: 'Bienvenue sur RONIKOV Togo',
+    title: 'Bienvenue sur Pleino Togo',
     message: 'Trouvez, réservez et récupérez votre carburant sans faire la queue dans tout le Togo.',
     timestamp: 'Hier',
     read: true,

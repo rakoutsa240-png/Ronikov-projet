@@ -8,7 +8,7 @@ import { useWakeLock } from '../storage';
 
 export const ticketQrPayload = (r: Reservation) =>
   r.qrPayload ??
-  `RONIKOV-TICKET|CODE:${r.code}|STATION:${r.stationName}|FUEL:${r.fuelLabel}|LITERS:${r.liters}L|AMOUNT:${r.totalAmountXOF}FCFA|EXPIRES:${r.expiresAt}`;
+  `PLEINO-TICKET|CODE:${r.code}|STATION:${r.stationName}|FUEL:${r.fuelLabel}|LITERS:${r.liters}L|AMOUNT:${r.totalAmountXOF}FCFA|EXPIRES:${r.expiresAt}`;
 
 // Full-screen ticket for the pump: white background and the biggest QR code the screen allows, so the
 // attendant's camera reads it first time even in sunlight. The screen stays on while it is shown.

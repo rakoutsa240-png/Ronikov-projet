@@ -162,7 +162,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="space-y-2 border-b border-neutral-800 pb-6">
             <span className="text-xs font-mono-code font-bold text-neutral-400 uppercase tracking-widest">
-              Fonctionnement RONIKOV
+              Fonctionnement Pleino
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono-code">
               Réserver votre carburant en 4 étapes simples
@@ -379,7 +379,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Vous gérez une station-service au Togo ?
             </h2>
             <p className="text-xs sm:text-sm text-neutral-300 font-sans leading-relaxed">
-              Devenez station partenaire RONIKOV. Digitalisez vos ventes, optimisez l'affluence à vos pompes, éliminez les impayés et offrez une expérience fluide à vos clients grâce à notre terminal de validation par code.
+              Devenez station partenaire Pleino. Digitalisez vos ventes, optimisez l'affluence à vos pompes, éliminez les impayés et offrez une expérience fluide à vos clients grâce à notre terminal de validation par code.
             </p>
           </div>
 
@@ -418,7 +418,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Quels modes de paiement sont acceptés au Togo ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              RONIKOV accepte Mixx by Yas (ex-TMoney, Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.
+              Pleino accepte Mixx by Yas (ex-TMoney, Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.
             </p>
           </div>
 
@@ -427,16 +427,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Comment le pompiste valide-t-il ma réservation ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              Le pompiste saisit votre code (RNK-XXXX-XX) dans l'Espace Pro RONIKOV ou scanne votre QR Code avec la caméra. Chaque ticket ne peut être servi qu'une fois, pour exactement les litres réservés.
+              Le pompiste saisit votre code (RNK-XXXX-XX) dans l'Espace Pro Pleino ou scanne votre QR Code avec la caméra. Chaque ticket ne peut être servi qu'une fois, pour exactement les litres réservés.
             </p>
           </div>
 
           <div className="p-5 border border-neutral-800 space-y-2 bg-black/80 backdrop-blur-md rounded-xl">
             <h3 className="font-bold text-amber-300 text-sm">
-              Comment fonctionne le Pass Premium RONIKOV ?
+              Comment fonctionne le Pass Premium Pleino ?
             </h3>
             <p className="text-neutral-300 font-sans text-xs leading-relaxed">
-              Le Pass Premium supprime les frais de réservation (150 FCFA par ticket). Demandez-le depuis la page Pass Premium : un administrateur RONIKOV l'active sur votre compte.
+              Le Pass Premium supprime les frais de réservation (150 FCFA par ticket). Demandez-le depuis la page Pass Premium : un administrateur Pleino l'active sur votre compte.
             </p>
           </div>
         </div>

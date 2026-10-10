@@ -4,8 +4,8 @@ import type { CapacitorConfig } from '@capacitor/cli';
 // redeploys Render) updates the app at once, with no new store release. A store release
 // is only needed when something in android/ changes (icon, permissions, name, version).
 const config: CapacitorConfig = {
-  appId: 'com.ronikov.app',
-  appName: 'RONIKOV',
+  appId: 'com.pleino.app',
+  appName: 'Pleino',
   // Required by Capacitor even though the app loads server.url; holds the Vite build.
   webDir: 'dist',
   server: {

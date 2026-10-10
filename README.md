@@ -1,6 +1,6 @@
-# RONIKOV — Carburant Togo
+# Pleino — Carburant Togo
 
-RONIKOV is a web app for finding fuel stations in Togo, checking their prices and stock, reserving fuel and paying for it in advance. The interface is in French.
+Pleino is a web app for finding fuel stations in Togo, checking their prices and stock, reserving fuel and paying for it in advance. The interface is in French. It was called RONIKOV until October 2026; the Render service, database, live address (`ronikov.onrender.com`), session cookie, browser storage keys and `RNK-` ticket codes keep that name so accounts, saved data and issued tickets keep working.
 
 It was generated with Google AI Studio and now runs on its own backend: an API server in `server/` (Express + PostgreSQL) that the app calls through `src/api.ts`. Stations, stock, prices, accounts and roles, reservations, ticket codes, notifications and every change made from the Pro and Admin dashboards live in the database. The demo data in `src/data/mockData.ts` seeds the database and is shown only until the API answers. Payments are still simulated: every booking is marked paid. Mobile money and card payments (TMoney, Flooz, Moov, Visa/Mastercard) and the map are simulated.
 
@@ -109,9 +109,9 @@ Production settings read by `server/env.ts`: `STATIC_DIR` (folder with the built
 
 ## Android app
 
-`android/` is a [Capacitor](https://capacitorjs.com) project (app id `com.ronikov.app`, set in `capacitor.config.ts`). The app opens the live site (`server.url`), so it uses the same accounts and roles, and every deploy of `main` reaches it at once. A new Play Store release is only needed when `android/` changes: icon, permissions, name, or Capacitor upgrade. Raise `versionCode` and `versionName` in `android/app/build.gradle` before each upload.
+`android/` is a [Capacitor](https://capacitorjs.com) project (app id `com.pleino.app`, set in `capacitor.config.ts`). The app opens the live site (`server.url`), so it uses the same accounts and roles, and every deploy of `main` reaches it at once. A new Play Store release is only needed when `android/` changes: icon, permissions, name, or Capacitor upgrade. Raise `versionCode` and `versionName` in `android/app/build.gradle` before each upload.
 
-The **Appli Android** GitHub workflow builds it (Actions tab, or automatically when `android/` changes) and leaves two files under the run's **Artifacts**: `ronikov-test.apk` to install on a phone, and `ronikov-play-store.aab` to upload to the Play Console. Building locally needs Android Studio: `npm run build && npx cap sync android`, then open `android/`.
+The **Appli Android** GitHub workflow builds it (Actions tab, or automatically when `android/` changes) and leaves two files under the run's **Artifacts**: `pleino-test.apk` to install on a phone, and `pleino-play-store.aab` to upload to the Play Console. Building locally needs Android Studio: `npm run build && npx cap sync android`, then open `android/`.
 
 Play Store signing: create an upload key once (`keytool -genkeypair -v -keystore upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload`), keep the file and its passwords safe, and add four repository secrets: `ANDROID_KEYSTORE_BASE64` (`base64 -w0 upload.jks`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`upload`) and `ANDROID_KEY_PASSWORD`. Without them the `.aab` is unsigned and the Play Console refuses it.
 

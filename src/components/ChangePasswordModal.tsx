@@ -50,7 +50,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       setDone(true);
       onChanged(user);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Serveur RONIKOV injoignable. Réessayez plus tard.');
+      setError(err instanceof ApiError ? err.message : 'Serveur Pleino injoignable. Réessayez plus tard.');
     } finally {
       setIsSubmitting(false);
     }

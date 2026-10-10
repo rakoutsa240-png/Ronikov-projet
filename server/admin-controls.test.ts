@@ -62,7 +62,7 @@ describe('action log', () => {
     const res = await admin.get('/api/audit').expect(200);
     expect(res.body.length).toBeGreaterThan(0);
     const [latest] = res.body;
-    expect(latest).toMatchObject({ action: 'user.update', actorName: 'Admin RONIKOV', actorPhone: '+22890000003' });
+    expect(latest).toMatchObject({ action: 'user.update', actorName: 'Admin Pleino', actorPhone: '+22890000003' });
     const ids = res.body.map((e: { id: number }) => e.id);
     expect(ids).toEqual([...ids].sort((a, b) => b - a));
 

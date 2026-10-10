@@ -26,7 +26,7 @@ const app = createApp(db, {
   staticDir: env.STATIC_DIR ? path.resolve(env.STATIC_DIR) : undefined,
 });
 const server = app.listen(env.PORT, () => {
-  console.log(`RONIKOV sur http://localhost:${env.PORT}`);
+  console.log(`Pleino sur http://localhost:${env.PORT}`);
 });
 
 // Pending tickets past their 2 hours become EXPIRED and give their litres back.

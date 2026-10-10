@@ -18,5 +18,5 @@ jobs:
           SITE: https://ronikov.onrender.com
         run: |
           curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 20 --retry-all-errors "$SITE/api/health" | grep -q '"ok":true'
-          curl --fail --silent --show-error --max-time 60 --retry 2 --retry-delay 10 "$SITE/" | grep -q 'RONIKOV'
+          curl --fail --silent --show-error --max-time 60 --retry 2 --retry-delay 10 "$SITE/" | grep -q 'Pleino'
           echo "Le site répond."

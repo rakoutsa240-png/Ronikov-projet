@@ -125,7 +125,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
           <p className="text-sm text-neutral-300 font-sans">
             {isAttendant
               ? "Votre compte pompiste n'est relié à aucune station. Demandez au gérant de votre station de vous ajouter."
-              : "Votre compte gérant n'est relié à aucune station. Demandez à un administrateur RONIKOV de vous l'attribuer."}
+              : "Votre compte gérant n'est relié à aucune station. Demandez à un administrateur Pleino de vous l'attribuer."}
           </p>
         </div>
       </div>
@@ -438,7 +438,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                           type="number"
                           value={currentFuelStock.pricePerLiter}
                           readOnly={!canEditPrice}
-                          title={canEditPrice ? undefined : 'Prix fixé par l’administrateur RONIKOV'}
+                          title={canEditPrice ? undefined : 'Prix fixé par l’administrateur Pleino'}
                           onChange={(e) =>
                             setStockState({
                               ...stockState,

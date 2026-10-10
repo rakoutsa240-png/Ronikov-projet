@@ -1,6 +1,6 @@
 import React from 'react';
 
-// RONIKOV mark: a gold fuel drop carrying the red star of the Togolese flag.
+// Pleino mark: a gold fuel drop carrying the red star of the Togolese flag.
 // The same drawing is used for the app icons (public/icons, android/) and the share image.
 export const LogoMark: React.FC<{ className?: string }> = ({ className = 'w-9 h-9' }) => (
   <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
@@ -17,7 +17,7 @@ export const Logo: React.FC<{ subtitle?: string }> = ({ subtitle }) => (
   <span className="flex items-center gap-2">
     <LogoMark className="w-9 h-9 shrink-0" />
     <span className="leading-none">
-      <span className="font-display block text-[22px] font-extrabold tracking-wide text-white">RONIKOV</span>
+      <span className="font-display block text-[22px] font-extrabold tracking-wide text-white">Pleino</span>
       {subtitle && <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70 mt-1">{subtitle}</span>}
     </span>
   </span>

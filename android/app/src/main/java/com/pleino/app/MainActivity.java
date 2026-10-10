@@ -1,4 +1,4 @@
-package com.ronikov.app;
+package com.pleino.app;
 
 import com.getcapacitor.BridgeActivity;
 

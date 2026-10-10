@@ -54,7 +54,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
             <Check className="w-3.5 h-3.5 text-amber-400" /> Paiement confirmé & stock réservé
           </div>
           <h2 className="text-xl font-black tracking-tight text-black">
-            Ticket de carburant RONIKOV
+            Ticket de carburant Pleino
           </h2>
           <p className="text-xs text-black/80 font-medium font-sans">
             Présentez ce code ou scannez le QR Code directement au guichet/pompiste.

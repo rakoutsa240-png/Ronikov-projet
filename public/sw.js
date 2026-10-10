@@ -1,6 +1,6 @@
-// RONIKOV service worker: lets the app be installed and open without network.
+// Pleino service worker: lets the app be installed and open without network.
 // Pages always come from the network first (fresh stocks and prices); the API is never cached.
-const CACHE = 'ronikov-v2';
+const CACHE = 'pleino-v3';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.add('/')));
@@ -51,7 +51,7 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Tapping an alert (fuel back, new price, ticket) opens RONIKOV, or brings its open tab forward.
+// Tapping an alert (fuel back, new price, ticket) opens Pleino, or brings its open tab forward.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const target = event.notification.data?.url || '/';
