@@ -99,7 +99,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
           <div className="lg:col-span-3">
             {loading ? (
-              <StationSkeleton />
+              // As tall as the card that replaces it, so the page does not jump when stations arrive.
+              <div className="min-h-[496px] lg:min-h-[448px] [&>div]:h-full [&>div]:min-h-[inherit]">
+                <StationSkeleton />
+              </div>
             ) : (
               <NearestStationCard stations={stations} onBook={onBookStation} onView={onViewStation} />
             )}

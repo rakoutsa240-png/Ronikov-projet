@@ -8,8 +8,8 @@
    - neutral-*: greys tinted very slightly green, so they sit with the brand
    --------------------------------------------------------------------------- */
 @theme {
-  --font-sans: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Bricolage Grotesque', 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Figtree Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Figtree Variable', -apple-system, BlinkMacSystemFont, sans-serif;
 
   --color-brand-50: #e9f6f0;
   --color-brand-100: #cdeadc;
