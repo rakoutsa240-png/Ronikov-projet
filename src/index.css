@@ -1,16 +1,67 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   RONIKOV identity "Vert et or": Togo green, gold and a touch of red.
+   Every brand colour is set here, so a later change of palette happens in this one file.
+   - brand-*  : the green (header, footer, links and accents on the light theme)
+   - amber-*  : redefined as the gold of the flag (buttons, chips, accents on the dark theme)
+   - neutral-*: greys tinted very slightly green, so they sit with the brand
+   --------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --color-brand-50: #e9f6f0;
+  --color-brand-100: #cdeadc;
+  --color-brand-200: #9dd5bb;
+  --color-brand-300: #62bb94;
+  --color-brand-400: #2f9e70;
+  --color-brand-500: #12865b;
+  --color-brand-600: #007049;
+  --color-brand-700: #006141;
+  --color-brand-800: #00553c;
+  --color-brand-900: #003f2c;
+  --color-brand-950: #032a1e;
+  --color-flag-red: #d21034;
+
+  --color-amber-50: #fffaeb;
+  --color-amber-100: #fff1c7;
+  --color-amber-200: #ffe594;
+  --color-amber-300: #ffd657;
+  --color-amber-400: #ffc81e;
+  --color-amber-500: #f2b300;
+  --color-amber-600: #c98f00;
+  --color-amber-700: #9a6b00;
+  --color-amber-800: #7a5400;
+  --color-amber-900: #5c3f00;
+
+  --color-black: #06120d;
+  --color-neutral-50: oklch(98.5% 0.003 165);
+  --color-neutral-100: oklch(97% 0.004 165);
+  --color-neutral-200: oklch(92.2% 0.006 165);
+  --color-neutral-300: oklch(87% 0.008 165);
+  --color-neutral-400: oklch(70.8% 0.01 165);
+  --color-neutral-500: oklch(55.6% 0.012 165);
+  --color-neutral-600: oklch(43.9% 0.012 165);
+  --color-neutral-700: oklch(37.1% 0.013 165);
+  --color-neutral-800: oklch(26.9% 0.013 165);
+  --color-neutral-900: oklch(20.5% 0.012 165);
+  --color-neutral-950: oklch(15.5% 0.011 165);
+}
+
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #111111;
-    background-color: #FFFFFF;
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }
 
 .font-mono-code {
   /* Was a typewriter font across the whole site; the plain site font reads better on phones. */
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 
@@ -20,20 +71,16 @@
   letter-spacing: 0.05em;
 }
 
-/* Custom minimal monochrome scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAFAFA;
+  background: var(--color-neutral-950);
 }
 ::-webkit-scrollbar-thumb {
-  background: #111111;
-  border-radius: 0px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: var(--color-neutral-600);
+  border-radius: 3px;
 }
 
 /* High-quality print styling for fuel receipt tickets */
@@ -93,69 +140,78 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Light theme ("Mode clair"), easier to read in full sunlight.
-   The site is drawn dark; in light mode black/white and the grey scale swap places.
-   Coloured buttons and the pump screen keep their own black and white so their text stays readable.
+   Light theme, the default: easy to read in full sunlight.
+   The components are drawn dark; in light mode black/white and the grey scale swap places.
+   "Mode sombre" (data-theme="dark") keeps the drawn look.
+   Coloured buttons, the header, the footer and the pump screen keep their own black and white
+   so their text stays readable.
    --------------------------------------------------------------------------- */
-:root[data-theme='light'] {
+:root:not([data-theme='dark']) {
   color-scheme: light;
   --color-black: #fff;
-  --color-white: oklch(14.5% 0 0);
-  --color-neutral-50: oklch(15% 0 0);
-  --color-neutral-100: oklch(20% 0 0);
-  --color-neutral-200: oklch(26% 0 0);
-  --color-neutral-300: oklch(33% 0 0);
-  --color-neutral-400: oklch(42% 0 0);
-  --color-neutral-500: oklch(50% 0 0);
-  --color-neutral-600: oklch(62% 0 0);
-  --color-neutral-700: oklch(80% 0 0);
-  --color-neutral-800: oklch(88% 0 0);
-  --color-neutral-900: oklch(94.5% 0 0);
-  --color-neutral-950: oklch(96% 0 0);
+  --color-white: #0f1f18;
+  --color-neutral-50: oklch(17% 0.012 165);
+  --color-neutral-100: oklch(22% 0.012 165);
+  --color-neutral-200: oklch(28% 0.012 165);
+  --color-neutral-300: oklch(35% 0.012 165);
+  --color-neutral-400: oklch(44% 0.012 165);
+  --color-neutral-500: oklch(52% 0.011 165);
+  --color-neutral-600: oklch(64% 0.01 165);
+  --color-neutral-700: oklch(82% 0.008 165);
+  --color-neutral-800: oklch(89.5% 0.007 165);
+  --color-neutral-900: oklch(95% 0.005 165);
+  --color-neutral-950: oklch(97% 0.004 165);
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
-:root[data-theme='light'] :is(
+:root:not([data-theme='dark']) :is(
     .theme-fixed,
     .bg-amber-300, .bg-amber-400, .bg-amber-500, .bg-yellow-400,
     .bg-emerald-400, .bg-emerald-500, .bg-blue-500, .bg-blue-600, .bg-red-500, .bg-rose-500,
     .bg-orange-500, .bg-sky-600, .bg-teal-600, .bg-purple-600,
     .hover\:bg-amber-300:hover, .hover\:bg-amber-400:hover, .hover\:bg-rose-500:hover
   ) {
-  --color-black: #000;
+  --color-black: #06120d;
   --color-white: #fff;
-  --color-neutral-50: oklch(98.5% 0 0);
-  --color-neutral-100: oklch(97% 0 0);
-  --color-neutral-200: oklch(92.2% 0 0);
-  --color-neutral-300: oklch(87% 0 0);
-  --color-neutral-400: oklch(70.8% 0 0);
-  --color-neutral-500: oklch(55.6% 0 0);
-  --color-neutral-600: oklch(43.9% 0 0);
-  --color-neutral-700: oklch(37.1% 0 0);
-  --color-neutral-800: oklch(26.9% 0 0);
-  --color-neutral-900: oklch(20.5% 0 0);
-  --color-neutral-950: oklch(14.5% 0 0);
+  --color-neutral-50: oklch(98.5% 0.003 165);
+  --color-neutral-100: oklch(97% 0.004 165);
+  --color-neutral-200: oklch(92.2% 0.006 165);
+  --color-neutral-300: oklch(87% 0.008 165);
+  --color-neutral-400: oklch(70.8% 0.01 165);
+  --color-neutral-500: oklch(55.6% 0.012 165);
+  --color-neutral-600: oklch(43.9% 0.012 165);
+  --color-neutral-700: oklch(37.1% 0.013 165);
+  --color-neutral-800: oklch(26.9% 0.013 165);
+  --color-neutral-900: oklch(20.5% 0.012 165);
+  --color-neutral-950: oklch(15.5% 0.011 165);
 }
 
-/* Pale yellow, green and red text is made for a dark background: darker shades on a light one. */
-:root[data-theme='light'] :is(.text-amber-200, .text-amber-300, .text-amber-400, .text-yellow-300, .text-yellow-400) {
-  color: var(--color-amber-700);
+/* Gold text and outlines are made for a dark background: the brand green on a light one.
+   Pale green and red text get darker shades too. */
+:root:not([data-theme='dark']) :is(.text-amber-100, .text-amber-200, .text-amber-300, .text-amber-400, .text-yellow-300, .text-yellow-400) {
+  color: var(--color-brand-700);
 }
-:root[data-theme='light'] :is(.text-sky-300, .text-blue-300, .text-blue-400) {
+:root:not([data-theme='dark']) :is(.border-amber-300, .border-amber-400) {
+  border-color: var(--color-brand-600);
+}
+:root:not([data-theme='dark']) :is(.text-sky-300, .text-blue-300, .text-blue-400) {
   color: var(--color-blue-700);
 }
-:root[data-theme='light'] :is(.text-emerald-300, .text-emerald-400) {
+:root:not([data-theme='dark']) :is(.text-emerald-300, .text-emerald-400) {
   color: var(--color-emerald-700);
 }
-:root[data-theme='light'] :is(.text-red-300, .text-red-400, .text-rose-300, .text-rose-400) {
+:root:not([data-theme='dark']) :is(.text-red-300, .text-red-400, .text-rose-300, .text-rose-400) {
   color: var(--color-red-700);
 }
-:root[data-theme='light'] :is(.theme-fixed, .bg-amber-300, .bg-amber-400, .bg-yellow-400)
-  :is(.text-amber-200, .text-amber-300, .text-amber-400, .text-yellow-300, .text-yellow-400, .text-emerald-300, .text-emerald-400, .text-red-300, .text-red-400, .text-rose-300, .text-rose-400, .text-sky-300, .text-blue-300, .text-blue-400) {
+:root:not([data-theme='dark']) :is(.theme-fixed, .bg-amber-300, .bg-amber-400, .bg-yellow-400)
+  :is(.text-amber-100, .text-amber-200, .text-amber-300, .text-amber-400, .text-yellow-300, .text-yellow-400, .text-emerald-300, .text-emerald-400, .text-red-300, .text-red-400, .text-rose-300, .text-rose-400, .text-sky-300, .text-blue-300, .text-blue-400) {
   color: revert-layer;
 }
-:root[data-theme='light'] ::-webkit-scrollbar-track {
-  background: #f0f0f0;
+:root:not([data-theme='dark']) :is(.theme-fixed, .bg-amber-300, .bg-amber-400, .bg-yellow-400) :is(.border-amber-300, .border-amber-400) {
+  border-color: revert-layer;
 }
-:root[data-theme='light'] ::-webkit-scrollbar-thumb {
-  background: #9a9a9a;
+:root:not([data-theme='dark']) :is(.bg-amber-300, .bg-amber-400):is(.border-amber-300, .border-amber-400) {
+  border-color: revert-layer;
 }

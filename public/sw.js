@@ -1,6 +1,6 @@
 // RONIKOV service worker: lets the app be installed and open without network.
 // Pages always come from the network first (fresh stocks and prices); the API is never cached.
-const CACHE = 'ronikov-v1';
+const CACHE = 'ronikov-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.add('/')));

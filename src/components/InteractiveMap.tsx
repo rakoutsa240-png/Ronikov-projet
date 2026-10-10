@@ -129,7 +129,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           <button
             onClick={onLocate}
             disabled={locating}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded flex items-center gap-1.5 disabled:opacity-60"
+            className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold rounded flex items-center gap-1.5 disabled:opacity-60"
           >
             <Crosshair className="w-3.5 h-3.5" />
             {locating ? 'Localisation…' : userLocation ? 'Me relocaliser' : 'Me localiser'}

@@ -24,7 +24,7 @@ const FUEL_CONFIG: Record<
 > = {
   SUPER: {
     label: 'Super Sans Plomb',
-    color: '#f59e0b', // Amber
+    color: '#e0a800', // Gold
     gradientId: 'colorSuper',
   },
   GAZOLE: {

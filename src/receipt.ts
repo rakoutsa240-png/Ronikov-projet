@@ -77,7 +77,7 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
   const W = 720;
   const pad = 48;
   const valueX = 290;
-  const font = (weight: number, size: number) => `${weight} ${size}px 'Plus Jakarta Sans', Arial, sans-serif`;
+  const font = (weight: number, size: number) => `${weight} ${size}px 'Figtree', Arial, sans-serif`;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
 
@@ -87,9 +87,11 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
     if (draw) {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = '#00553c';
       ctx.fillRect(0, 0, W, 150);
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = '#ffc81e';
+      ctx.fillRect(0, 150, W, 8);
+      ctx.fillStyle = '#ffffff';
       ctx.font = font(800, 44);
       ctx.fillText('RONIKOV', pad, 78);
       ctx.font = font(600, 24);
