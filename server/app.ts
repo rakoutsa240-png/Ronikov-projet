@@ -1,3 +1,4 @@
+import compression from 'compression';
 import express, { type ErrorRequestHandler } from 'express';
 import path from 'node:path';
 import { z } from 'zod';
@@ -30,6 +31,8 @@ export interface AppOptions {
 export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProxy = 'loopback', staticDir }: AppOptions) {
   const app = express();
   app.set('trust proxy', trustProxy);
+  // Gzip pages, code and API answers: about three times less to download on a mobile connection.
+  app.use(compression());
   app.use(express.json({ limit: '20kb' }));
   app.use('/api', loadUser(db));
   app.use('/api', authRouter(db, { secureCookies }));
