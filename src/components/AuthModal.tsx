@@ -125,7 +125,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold block text-black">Code Secret / Mot de Passe</label>
+            <label className="text-xs font-bold block text-black">Mot de passe</label>
             <div className="flex border border-black">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -176,7 +176,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             disabled={isSubmitting}
             className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
           >
-            <span>{mode === 'login' ? 'Se Connecter' : 'Créer Mon Compte'}</span>
+            <span>{mode === 'login' ? 'Se connecter' : 'Créer mon compte'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>

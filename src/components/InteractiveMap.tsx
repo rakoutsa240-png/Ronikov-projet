@@ -180,40 +180,40 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       </div>
 
       {selectedStation && (
-        <div className="bg-white text-black p-4 sm:p-5 border-t-2 border-black flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-black text-white p-4 sm:p-5 border-t border-neutral-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 bg-black text-white text-xs font-mono-code font-extrabold uppercase rounded-sm">
+              <span className="px-2.5 py-0.5 bg-brand-800 text-white text-xs font-extrabold rounded-full theme-fixed">
                 {selectedStation.brand}
               </span>
-              <span className="text-xs font-mono-code text-neutral-600 font-bold">
+              <span className="text-xs text-neutral-400 font-semibold">
                 {selectedStation.district}, {selectedStation.city}
               </span>
               {selectedStation.isPartner && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-mono-code bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 font-extrabold rounded-full">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> Partenaire
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono-code bg-brand-500/15 text-brand-400 px-2 py-0.5 font-bold rounded-full">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Partenaire
                 </span>
               )}
             </div>
             <h3 className="text-xl font-extrabold tracking-tight font-mono-code">{selectedStation.name}</h3>
-            <p className="text-xs text-neutral-600">
+            <p className="text-xs text-neutral-400">
               {selectedStation.address}
               {selectedDistance !== null && (
-                <strong className="text-black"> • à {formatDistance(selectedDistance)} à vol d'oiseau</strong>
+                <strong className="text-white"> • à {formatDistance(selectedDistance)} à vol d'oiseau</strong>
               )}
             </p>
             <a
               href={directionsUrl(selectedStation, userLocation)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white font-extrabold text-xs rounded hover:bg-neutral-800"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 text-white font-bold text-xs rounded-full hover:bg-neutral-900"
             >
               <Navigation className="w-4 h-4" />
               Itinéraire
             </a>
           </div>
 
-          <div className="flex items-center gap-6 w-full md:w-auto border-t md:border-t-0 md:border-l border-neutral-200 pt-3 md:pt-0 md:pl-6">
+          <div className="flex items-center gap-6 w-full md:w-auto border-t md:border-t-0 md:border-l border-neutral-800 pt-3 md:pt-0 md:pl-6">
             <Gauge
               value={
                 selectedStation.stock.SUPER.maxCapacityLiters > 0
@@ -221,15 +221,15 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                   : 0
               }
               size="sm"
-              label="Stock Super"
+              label="Stock super"
               sublabel={`${selectedStation.stock.SUPER.availableLiters}L`}
             />
             <button
               onClick={() => onBookStation(selectedStation)}
-              className="flex-1 md:flex-none px-7 py-3.5 bg-black text-white font-mono-code font-extrabold text-xs tracking-wider border-2 border-black hover:bg-neutral-800 flex items-center justify-center gap-2"
+              className="flex-1 md:flex-none px-7 py-3.5 bg-amber-400 text-black font-extrabold text-sm rounded-full hover:bg-amber-300 shadow-md shadow-amber-400/20 flex items-center justify-center gap-2"
             >
               <span>Réserver le carburant</span>
-              <ChevronRight className="w-4 h-4 text-emerald-400" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

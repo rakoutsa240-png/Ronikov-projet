@@ -142,7 +142,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
             </span>
             <span className="text-[9px] text-neutral-400 font-mono-code flex items-center gap-1 mt-0.5">
               <ShieldCheck className="w-3 h-3 text-amber-400" />
-              <span>Station Certifiée</span>
+              <span>Station certifiée</span>
             </span>
           </div>
         )}

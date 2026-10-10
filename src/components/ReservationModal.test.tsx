@@ -75,7 +75,7 @@ describe('ReservationModal', () => {
     vi.stubGlobal('fetch', fetchMock);
     const props = {station, onClose: () => {}, onCompleteReservation: () => {}};
     const {rerender} = render(<ReservationModal {...props} isOpen />);
-    fireEvent.click(screen.getByText('En Litres'));
+    fireEvent.click(screen.getByText('En litres'));
     fireEvent.click(screen.getByText('20 L'));
     goToPayment();
     fireEvent.click(screen.getByText('Flooz').closest('button')!);

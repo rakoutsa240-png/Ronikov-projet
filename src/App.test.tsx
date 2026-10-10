@@ -78,7 +78,8 @@ describe('App', () => {
     fireEvent.click(screen.getAllByText('Se connecter')[0]);
     fireEvent.change(screen.getByPlaceholderText('90 00 00 00'), {target: {value: '90000002'}});
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {target: {value: 'ronikov-demo'}});
-    fireEvent.click(screen.getByRole('button', {name: /Se Connecter/}));
+    // The header has its own « Se connecter » button: the form's submit comes last.
+    fireEvent.click(screen.getAllByRole('button', {name: /Se connecter/}).at(-1)!);
 
     expect((await screen.findAllByText('Espace Pro')).length).toBeGreaterThan(0);
     expect(screen.getAllByText('Ama Gérante').length).toBeGreaterThan(0);
@@ -94,7 +95,8 @@ describe('App', () => {
     fireEvent.click(screen.getAllByText('Se connecter')[0]);
     fireEvent.change(screen.getByPlaceholderText('90 00 00 00'), {target: {value: '90000002'}});
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {target: {value: 'faux'}});
-    fireEvent.click(screen.getByRole('button', {name: /Se Connecter/}));
+    // The header has its own « Se connecter » button: the form's submit comes last.
+    fireEvent.click(screen.getAllByRole('button', {name: /Se connecter/}).at(-1)!);
     expect((await screen.findByRole('alert')).textContent).toBe('Numéro ou mot de passe incorrect');
     expect(screen.queryByText('Espace Pro')).toBeNull();
   });

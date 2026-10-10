@@ -393,7 +393,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
               <div className="flex justify-between text-[11px] text-neutral-400 font-bold">
                 <span>0 MIN (Fluide)</span>
                 <span>30 MIN (Modéré)</span>
-                <span>60 MIN (Forte Affluence)</span>
+                <span>60 min (forte affluence)</span>
               </div>
             </div>
 

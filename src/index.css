@@ -215,3 +215,53 @@
 :root:not([data-theme='dark']) :is(.bg-amber-300, .bg-amber-400):is(.border-amber-300, .border-amber-400) {
   border-color: revert-layer;
 }
+
+/* ---------------------------------------------------------------------------
+   Gentle motion. Cards rise into place as they scroll into view (browsers that support
+   scroll-driven animations; others simply show them), stock bars fill up when they appear.
+   Nothing moves for people who asked their phone for less motion.
+   --------------------------------------------------------------------------- */
+@keyframes pleino-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pleino-fill {
+  from { transform: scaleX(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: pleino-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+  .gauge-fill {
+    transform-origin: left;
+    animation: pleino-fill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* Sliders in the brand colours: a soft track and a gold knob, on both themes. */
+input[type='range'] {
+  appearance: none;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-neutral-800);
+}
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--color-amber-400);
+  border: 3px solid var(--color-brand-800);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--color-amber-400);
+  border: 3px solid var(--color-brand-800);
+}

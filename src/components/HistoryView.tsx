@@ -177,7 +177,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono-code text-white">
       {/* Page Header Container */}
-      <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="bg-black border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/5 space-y-6">
         <div className="border-b border-neutral-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-xs text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-1">
@@ -198,35 +198,35 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex flex-wrap border border-neutral-700 bg-neutral-900 rounded-lg p-1 text-xs font-bold text-neutral-300">
+          <div className="flex gap-1 overflow-x-auto border border-neutral-800 bg-neutral-900 rounded-full p-1 text-xs font-bold text-neutral-300 max-w-full">
             <button
               onClick={() => setFilterStatus('ALL')}
-              className={`px-3.5 py-2 rounded-md transition-all ${
-                filterStatus === 'ALL' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+                filterStatus === 'ALL' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
               }`}
             >
               Toutes ({reservations.length})
             </button>
             <button
               onClick={() => setFilterStatus('PENDING')}
-              className={`px-3.5 py-2 rounded-md transition-all ${
-                filterStatus === 'PENDING' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+                filterStatus === 'PENDING' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
               }`}
             >
               Actives ({reservations.filter((r) => r.status === 'PENDING').length})
             </button>
             <button
               onClick={() => setFilterStatus('VALIDATED')}
-              className={`px-3.5 py-2 rounded-md transition-all ${
-                filterStatus === 'VALIDATED' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+                filterStatus === 'VALIDATED' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
               }`}
             >
               Servies ({reservations.filter((r) => r.status === 'VALIDATED').length})
             </button>
             <button
               onClick={() => setFilterStatus('ENDED')}
-              className={`px-3.5 py-2 rounded-md transition-all ${
-                filterStatus === 'ENDED' ? 'bg-amber-400 text-black font-extrabold shadow-md' : 'hover:text-white'
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+                filterStatus === 'ENDED' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
               }`}
             >
               Annulées / expirées ({reservations.filter((r) => r.status === 'EXPIRED' || r.status === 'CANCELLED').length})
@@ -387,7 +387,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
                       >
                         <Copy className="w-3.5 h-3.5" />
-                        <span>{copiedId === res.id ? 'Code Copié !' : 'Copier Code'}</span>
+                        <span>{copiedId === res.id ? 'Code copié !' : 'Copier le code'}</span>
                       </button>
 
                       <button
@@ -395,7 +395,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition-all flex items-center gap-2 text-amber-300 shadow-md"
                       >
                         <Printer className="w-3.5 h-3.5" />
-                        <span>Imprimer Reçu / QR Code</span>
+                        <span>Imprimer le reçu et le QR code</span>
                       </button>
                     </div>
 

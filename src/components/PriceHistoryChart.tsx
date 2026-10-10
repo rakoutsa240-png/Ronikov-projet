@@ -178,13 +178,13 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
           <div className="text-[11px] text-neutral-400 font-bold uppercase flex items-center gap-1">
             <Fuel className="w-3 h-3 text-amber-400" />
-            <span>Carburant Affiché</span>
+            <span>Carburant affiché</span>
           </div>
           <div className="text-sm font-black text-amber-400 truncate">{stats.activeLabel}</div>
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[11px] text-neutral-400 font-bold uppercase">Prix Actuel</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">Prix actuel</div>
           <div className="text-base font-black text-white">{stats.currentPrice} FCFA / L</div>
         </div>
 

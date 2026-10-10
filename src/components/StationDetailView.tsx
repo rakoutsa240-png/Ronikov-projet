@@ -52,7 +52,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 bg-black/80 backdrop-blur-md text-neutral-300 hover:text-white hover:border-amber-400 transition-all text-xs font-bold rounded-xl shadow-lg"
       >
         <ArrowLeft className="w-4 h-4 text-amber-400" />
-        <span>Retour au Réseau de Stations</span>
+        <span>Retour aux stations</span>
       </button>
 
       {/* Main Station Header Banner */}
@@ -65,7 +65,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
             <div className="flex items-center gap-2.5 flex-wrap">
               <StationBrandLogo brand={station.brand} size="md" interactive={true} showBadge={false} className="p-1 bg-black border border-neutral-700 rounded-lg" />
               <span className="px-2.5 py-1 bg-amber-400 text-black text-xs font-black rounded shadow">
-                ENSEIGNE {station.brand}
+                {station.brand}
               </span>
               <span className="text-xs text-neutral-400 font-bold">
                 {station.district} • {station.city}
@@ -96,7 +96,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
             onClick={() => onBook(station)}
             className="hidden md:flex px-8 py-4 bg-amber-400 text-black font-black text-xs tracking-wider hover:bg-amber-300 transition-all items-center justify-center gap-2 rounded-xl shadow-lg shadow-amber-400/20 shrink-0 border border-amber-300"
           >
-            <span>Réserver à cette station</span>
+            <span>Réserver dans cette station</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -104,7 +104,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         {/* Quick Info Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs relative z-10">
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">Attente Estimée</div>
+            <div className="text-neutral-400 uppercase text-[11px] font-bold">Attente estimée</div>
             <div className="text-lg font-black text-amber-400 flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-400" />
               <span>{station.queueTimeMinutes} min</span>
@@ -117,7 +117,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">Téléphone Station</div>
+            <div className="text-neutral-400 uppercase text-[11px] font-bold">Téléphone de la station</div>
             <div className="text-sm font-bold text-white flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
               <a href={`tel:${station.phone.replace(/\s/g, '')}`} className="whitespace-nowrap text-[13px] sm:text-sm hover:text-amber-300">
@@ -230,11 +230,11 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
 
                 <div className="border-t border-neutral-800/80 pt-3 text-xs space-y-1.5 text-neutral-300">
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Prix Officiel Togo:</span>
+                    <span className="text-neutral-400">Prix officiel :</span>
                     <span className="font-bold text-white">{stock.pricePerLiter} FCFA / L</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Statut Pompe:</span>
+                    <span className="text-neutral-400">État de la pompe :</span>
                     <span
                       className={`font-bold ${
                         stock.status === 'AVAILABLE'
@@ -245,9 +245,9 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                       }`}
                     >
                       {stock.status === 'AVAILABLE'
-                        ? 'En Stock'
+                        ? 'En stock'
                         : stock.status === 'LOW'
-                        ? 'Stock Limité'
+                        ? 'Stock limité'
                         : 'Épuisé'}
                     </span>
                   </div>
@@ -262,7 +262,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                       : 'bg-neutral-900 text-neutral-500 border border-neutral-800 cursor-not-allowed'
                   }`}
                 >
-                  {stock.availableLiters > 0 ? 'Réserver ce Carburant' : 'Rupture'}
+                  {stock.availableLiters > 0 ? 'Réserver ce carburant' : 'Rupture'}
                 </button>
               </div>
             );
@@ -279,7 +279,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="border border-neutral-800 p-6 space-y-4 bg-black/85 backdrop-blur-xl rounded-2xl text-white shadow-2xl">
           <h3 className="text-base font-black border-b border-neutral-800 pb-2 text-white flex items-center gap-2">
             <Fuel className="w-4 h-4 text-amber-400" />
-            <span>Services & équipements de la station</span>
+            <span>Services et équipements</span>
           </h3>
           <ul className="grid grid-cols-2 gap-3 text-xs">
             {station.amenities.map((item, idx) => (
@@ -295,7 +295,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="border border-neutral-800 p-6 space-y-4 bg-black/85 backdrop-blur-xl rounded-2xl text-white shadow-2xl">
           <h3 className="text-base font-black border-b border-neutral-800 pb-2 text-white flex items-center gap-2">
             <Navigation className="w-4 h-4 text-amber-400" />
-            <span>Accès & itinéraire détaillé</span>
+            <span>Accès et itinéraire</span>
           </h3>
           <div className="space-y-3 text-xs text-neutral-300">
             <p className="font-bold text-amber-300">{station.address}</p>
@@ -310,7 +310,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                 className="px-4 py-3 bg-amber-400 text-black font-black text-xs inline-flex items-center gap-2 rounded-xl hover:bg-amber-300 transition-all shadow-lg shadow-amber-400/20"
               >
                 <Navigation className="w-4 h-4" />
-                <span>Lancer le GPS vers cette station</span>
+                <span>Lancer le GPS</span>
               </a>
             </div>
           </div>

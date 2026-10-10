@@ -31,9 +31,9 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems = [
     { id: 'home', label: 'Accueil' },
     { id: 'map', label: 'Stations & Carte' },
-    { id: 'history', label: 'Mes Réservations' },
+    { id: 'history', label: 'Mes réservations' },
     { id: 'premium', label: 'Pass Premium' },
-    { id: 'profile', label: 'Mon Profil' },
+    { id: 'profile', label: 'Mon profil' },
     ...(userRole === 'STATION_PRO' || userRole === 'ATTENDANT' || userRole === 'ADMIN' ? [{ id: 'pro', label: 'Espace Pro' }] : []),
     ...(userRole === 'ADMIN' ? [{ id: 'admin', label: 'Admin' }] : []),
   ];
