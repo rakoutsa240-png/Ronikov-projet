@@ -26,7 +26,7 @@ const toAttendant = (row: typeof users.$inferSelect): Attendant => ({
 });
 
 // A station's attendants (pompistes) only validate tickets at that station. Its manager, or an
-// admin, adds and removes them here without going through the RONIKOV team.
+// admin, adds and removes them here without going through the Pleino team.
 export function attendantsRouter(db: Db) {
   const router = Router();
   const staff = requireRole('STATION_PRO', 'ADMIN');

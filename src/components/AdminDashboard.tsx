@@ -83,7 +83,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </span>
             <span className="text-xs text-neutral-400 font-bold flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              RONIKOV Togo s.a.
+              Pleino Togo
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">

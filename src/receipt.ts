@@ -93,7 +93,7 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
       ctx.fillRect(0, 150, W, 8);
       ctx.fillStyle = '#ffffff';
       ctx.font = font(800, 44);
-      ctx.fillText('RONIKOV', pad, 78);
+      ctx.fillText('Pleino', pad, 78);
       ctx.font = font(600, 24);
       ctx.fillText('Reçu de paiement carburant', pad, 118);
     }
@@ -127,7 +127,7 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
     }
     y += 20;
     ctx.font = font(500, 19);
-    const note = wrap(ctx, 'Ce reçu ne permet pas de se servir : le code complet reste dans l’application RONIKOV. ronikov.onrender.com', W - 2 * pad);
+    const note = wrap(ctx, 'Ce reçu ne permet pas de se servir : le code complet reste dans l’application Pleino. ronikov.onrender.com', W - 2 * pad);
     if (draw) {
       ctx.fillStyle = '#737373';
       note.forEach((line, i) => ctx.fillText(line, pad, y + i * 28));
@@ -147,12 +147,12 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
 // Opens the phone's share menu (WhatsApp, SMS...) or, on a computer, downloads the picture.
 export async function shareReceipt(r: Reservation): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const blob = await drawReceipt(r);
-  const name = `recu-ronikov-${r.id.slice(0, 8)}.png`;
+  const name = `recu-pleino-${r.id.slice(0, 8)}.png`;
   const file = new File([blob], name, { type: 'image/png' });
   const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
   if (nav.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: 'Reçu RONIKOV', text: `Reçu RONIKOV : ${r.liters} L de ${r.fuelLabel} à ${r.stationName}` });
+      await navigator.share({ files: [file], title: 'Reçu Pleino', text: `Reçu Pleino : ${r.liters} L de ${r.fuelLabel} à ${r.stationName}` });
       return 'shared';
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled';

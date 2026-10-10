@@ -54,7 +54,7 @@ export const Footer: React.FC = () => {
             </h4>
             <div className="space-y-2 text-white/85">
               <p>Service Client Togo: +228 90 00 00 00</p>
-              <p>Email: contact@ronikov.tg</p>
+              <p>Email: contact@pleino.tg</p>
               <p className="text-[11px] text-white/55 font-sans pt-1">
                 Paiements via Mixx by Yas (Togocom) et Flooz (Moov Africa).
               </p>
@@ -64,7 +64,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright & legal */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/55">
-          <div>© {new Date().getFullYear()} RONIKOV. Tous droits réservés.</div>
+          <div>© {new Date().getFullYear()} Pleino. Tous droits réservés.</div>
           <div className="flex flex-wrap justify-center gap-4">
             <a href="#/carte" className="hover:text-white">Stations & carte</a>
             <a href="#/premium" className="hover:text-white">Pass Premium</a>

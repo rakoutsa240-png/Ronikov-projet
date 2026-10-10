@@ -99,7 +99,7 @@ export function authRouter(db: Db, { secureCookies }: { secureCookies: boolean }
       return;
     }
     if (user.suspendedAt) {
-      res.status(403).json({ error: 'Ce compte est suspendu. Contactez RONIKOV pour en savoir plus.' });
+      res.status(403).json({ error: 'Ce compte est suspendu. Contactez Pleino pour en savoir plus.' });
       return;
     }
     res.cookie(SESSION_COOKIE, await createSession(db, user.id), cookieOptions);

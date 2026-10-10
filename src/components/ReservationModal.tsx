@@ -132,7 +132,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
       } satisfies LastBooking);
       setStep(4);
     } catch (e) {
-      setPaymentError(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+      setPaymentError(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
     } finally {
       setIsProcessing(false);
     }
@@ -165,7 +165,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         <div className="border-b border-neutral-800 pb-4 space-y-3 relative z-10 pr-12">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-1 bg-amber-400 text-black text-[11px] font-mono-code font-black uppercase rounded shadow">
-              Réservation RONIKOV
+              Réservation Pleino
             </span>
             <span className="text-xs font-mono-code text-neutral-400 font-bold">
               {station.name} ({station.district})

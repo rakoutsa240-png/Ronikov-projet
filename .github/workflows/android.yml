@@ -1,6 +1,6 @@
 # Builds the Android app. Every run leaves, under "Artifacts" on its page:
-# - ronikov-test.apk: install it directly on an Android phone to try the app;
-# - ronikov-play-store.aab: the file to upload to the Play Store, signed only once the
+# - pleino-test.apk: install it directly on an Android phone to try the app;
+# - pleino-play-store.aab: the file to upload to the Play Store, signed only once the
 #   ANDROID_KEYSTORE_* secrets exist (see README, "Application Android").
 # The app shows the live site, so ordinary site changes need no new build.
 name: Appli Android
@@ -50,13 +50,13 @@ jobs:
       - name: Renommer
         run: |
           mkdir -p sortie
-          cp android/app/build/outputs/apk/debug/app-debug.apk sortie/ronikov-test.apk
-          cp android/app/build/outputs/bundle/release/app-release.aab sortie/ronikov-play-store.aab
+          cp android/app/build/outputs/apk/debug/app-debug.apk sortie/pleino-test.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab sortie/pleino-play-store.aab
       - uses: actions/upload-artifact@v4
         with:
-          name: ronikov-test.apk
-          path: sortie/ronikov-test.apk
+          name: pleino-test.apk
+          path: sortie/pleino-test.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: ronikov-play-store.aab
-          path: sortie/ronikov-play-store.aab
+          name: pleino-play-store.aab
+          path: sortie/pleino-play-store.aab

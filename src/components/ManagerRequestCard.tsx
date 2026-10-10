@@ -51,7 +51,7 @@ export const ManagerRequestCard: React.FC<ManagerRequestCardProps> = ({ stations
         <Clock className="w-5 h-5 text-amber-400 shrink-0" />
         <span className="font-sans text-neutral-200">
           <span className="block font-bold text-white font-mono-code">Demande de gérant envoyée</span>
-          Vous avez demandé à gérer {latest.stationName}. RONIKOV va vous appeler pour vérifier, puis ouvrir votre Espace Pro.
+          Vous avez demandé à gérer {latest.stationName}. Pleino va vous appeler pour vérifier, puis ouvrir votre Espace Pro.
         </span>
       </div>
     );

@@ -84,7 +84,7 @@ export const StationCard: React.FC<StationCardProps> = ({
           {station.isPartner && (
             <span
               className="inline-flex items-center gap-1 text-[11px] font-mono-code border border-amber-400/80 bg-amber-400/10 text-amber-300 px-2 py-0.5 font-bold uppercase whitespace-nowrap rounded"
-              title="Station partenaire vérifiée RONIKOV"
+              title="Station partenaire vérifiée Pleino"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               Partenaire

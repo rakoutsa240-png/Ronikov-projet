@@ -54,5 +54,5 @@ export const DEMO_PASSWORD = 'ronikov-demo';
 export const DEMO_USERS: NewUser[] = [
   { name: 'Kofi Mensah', phone: '90000001', password: DEMO_PASSWORD, role: 'CLIENT' },
   { name: 'Ama Gérante', phone: '90000002', password: DEMO_PASSWORD, role: 'STATION_PRO', stationIds: ['st-01'] },
-  { name: 'Admin RONIKOV', phone: '90000003', password: DEMO_PASSWORD, role: 'ADMIN' },
+  { name: 'Admin Pleino', phone: '90000003', password: DEMO_PASSWORD, role: 'ADMIN' },
 ];

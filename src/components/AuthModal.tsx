@@ -42,7 +42,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onAuthenticated(user, password);
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Serveur RONIKOV injoignable. Réessayez plus tard.');
+      setError(err instanceof ApiError ? err.message : 'Serveur Pleino injoignable. Réessayez plus tard.');
     } finally {
       setIsSubmitting(false);
     }
@@ -67,7 +67,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             Accès espace sécurisé Togo
           </span>
           <h2 className="text-2xl font-extrabold tracking-tight">
-            {mode === 'login' ? 'CONNEXION RONIKOV' : 'CRÉATION DE COMPTE'}
+            {mode === 'login' ? 'CONNEXION PLEINO' : 'CRÉATION DE COMPTE'}
           </h2>
         </div>
 
@@ -159,7 +159,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
             {mode === 'login' && showForgotHelp && (
               <p className="text-[11px] text-neutral-700 font-sans bg-neutral-100 border border-neutral-300 p-2.5">
-                Contactez l'équipe RONIKOV depuis le numéro de votre compte. Un administrateur vous donnera un mot de
+                Contactez l'équipe Pleino depuis le numéro de votre compte. Un administrateur vous donnera un mot de
                 passe temporaire ; à la connexion suivante, vous choisirez le vôtre.
               </p>
             )}

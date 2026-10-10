@@ -144,7 +144,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
             </>
           ) : (
             <p>
-              {notice.name} avait déjà un compte RONIKOV : il se connecte avec son mot de passe habituel et trouve l'Espace Pro dans le
+              {notice.name} avait déjà un compte Pleino : il se connecte avec son mot de passe habituel et trouve l'Espace Pro dans le
               menu.
             </p>
           )}

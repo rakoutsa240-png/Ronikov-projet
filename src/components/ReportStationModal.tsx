@@ -35,7 +35,7 @@ export const ReportStationModal: React.FC<ReportStationModalProps> = ({ station,
       onReported(await api.reportStation(station.id, reportKind, fuelType));
       setMessage({ ok: true, text: 'Merci ! Les autres clients le voient maintenant sur la fiche, et la station est prévenue.' });
     } catch (e) {
-      setMessage({ ok: false, text: e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.' });
+      setMessage({ ok: false, text: e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.' });
     } finally {
       setSending(false);
     }

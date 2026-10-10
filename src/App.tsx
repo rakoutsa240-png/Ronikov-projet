@@ -247,7 +247,7 @@ export default function App() {
   }, [currentUser?.id]);
 
   // New messages (fuel back at a favourite, new price, ticket news) are checked every minute and,
-  // when the visitor allowed it, shown as a phone alert while RONIKOV is in the background.
+  // when the visitor allowed it, shown as a phone alert while Pleino is in the background.
   useEffect(() => {
     if (!currentUser) return;
     let known: Set<string> | null = null;
@@ -365,7 +365,7 @@ export default function App() {
         if (reservation) setStaffReservations((prev) => prev.map((r) => (r.id === reservation.id ? reservation : r)));
         return { success: false, message: e.message, reservation };
       }
-      return { success: false, message: 'Serveur RONIKOV injoignable. Réessayez.' };
+      return { success: false, message: 'Serveur Pleino injoignable. Réessayez.' };
     }
   };
 
@@ -390,7 +390,7 @@ export default function App() {
         if (Object.keys(changes).length > 0) replaceStation(await api.updateStock(stationId, fuel, changes), stationId);
       }
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
     }
   };
 
@@ -399,7 +399,7 @@ export default function App() {
     try {
       replaceStation(await api.updateStation(stationId, { queueTimeMinutes: newQueueTime }), stationId);
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
     }
   };
 
@@ -408,7 +408,7 @@ export default function App() {
       const updated = await api.confirmStation(stationId);
       if (updated) replaceStation(updated, stationId);
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
     }
   };
 
@@ -435,7 +435,7 @@ export default function App() {
       );
       if (updateAllStations) refreshStations();
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
     }
   };
 
@@ -448,7 +448,7 @@ export default function App() {
     try {
       return { ok: true, message: (await api.requestPremium()).message };
     } catch (e) {
-      return { ok: false, message: e instanceof ApiError ? e.message : 'Serveur RONIKOV injoignable. Réessayez.' };
+      return { ok: false, message: e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.' };
     }
   };
 
@@ -483,7 +483,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3">
             <WifiOff className="w-4 h-4 shrink-0" />
             <span className="flex-1">
-              {!isOnline ? 'Pas de connexion internet.' : 'Le serveur RONIKOV ne répond pas.'} Les stocks affichés peuvent ne pas être à jour
+              {!isOnline ? 'Pas de connexion internet.' : 'Le serveur Pleino ne répond pas.'} Les stocks affichés peuvent ne pas être à jour
               {reservations.length > 0 ? ', vos tickets restent visibles dans « Tickets ».' : '.'}
             </span>
             {isOnline && (
