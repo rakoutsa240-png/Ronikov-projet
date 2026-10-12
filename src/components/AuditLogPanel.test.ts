@@ -32,6 +32,7 @@ describe('describeEntry', () => {
     expect(describeEntry(entry('manager.accept', 'user:u1', { stationId: 'st-01' }), station, user)).toBe(
       'Ama (+22890000002) accepté comme gérant de Total Bè',
     );
+    expect(describeEntry(entry('review.hide', 'review:7', { stationId: 'st-01' }), station, user)).toBe('Avis client masqué à Total Bè');
     expect(describeEntry(entry('something.new', 'x:1', {}), station, user)).toBe('something.new (x:1)');
   });
 });

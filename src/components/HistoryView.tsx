@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Reservation } from '../types';
-import { Ticket, Clock, CheckCircle2, AlertOctagon, Printer, Copy, XCircle, MapPin, Sparkles, ShieldCheck, QrCode, Fuel, Maximize2, X } from 'lucide-react';
+import { Reservation, TicketReview } from '../types';
+import { Ticket, Clock, CheckCircle2, MessageSquareHeart, AlertOctagon, Printer, Copy, XCircle, MapPin, Sparkles, ShieldCheck, QrCode, Fuel, Maximize2, X } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { PaymentMethodLabel } from './PaymentLogos';
 import { QRCodeImage } from './QRCodeImage';
 import { TicketCard } from './TicketCard';
 import { ReceiptButton } from './ReceiptButton';
 import { PumpScreen } from './PumpScreen';
+import { ReviewModal } from './ReviewModal';
+import { Stars } from './StarRating';
+import { REVIEW_WINDOW_DAYS } from '../../shared/reviews';
 
 interface HistoryViewProps {
   reservations: Reservation[];
@@ -15,7 +18,14 @@ interface HistoryViewProps {
   offline?: boolean; // showing the tickets saved on the phone, the server can't be reached
   onOpenAuth: () => void;
   onNavigateToMap: () => void;
+  onReviewed?: (reservationId: string, review: TicketReview) => void;
 }
+
+// A served ticket can still be reviewed for a while after the pump.
+const canReview = (r: Reservation) =>
+  r.status === 'VALIDATED' &&
+  r.review === null &&
+  Date.now() - new Date(r.validatedAt ?? r.createdAt).getTime() < REVIEW_WINDOW_DAYS * 86_400_000;
 
 // "14:05" today, "3 oct. 14:05" otherwise.
 const formatWhen = (iso: string) => {
@@ -33,7 +43,9 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   offline = false,
   onOpenAuth,
   onNavigateToMap,
+  onReviewed,
 }) => {
+  const [reviewTicket, setReviewTicket] = useState<Reservation | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'VALIDATED' | 'ENDED'>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTicketModal, setActiveTicketModal] = useState<Reservation | null>(null);
@@ -371,10 +383,35 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Served, cancelled or expired tickets keep their receipt */}
+                  {/* Served, cancelled or expired tickets keep their receipt; served ones can be reviewed */}
                   {res.status !== 'PENDING' && (
-                    <div className="flex pt-1">
+                    <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
                       <ReceiptButton reservation={res} />
+                      {res.review ? (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-neutral-300">
+                          <span className="font-bold whitespace-nowrap">Votre avis :</span>
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                            Station <Stars value={res.review.stationRating} />
+                          </span>
+                          {res.review.attendantRating !== null && res.servedBy && (
+                            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                              {res.servedBy} <Stars value={res.review.attendantRating} />
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        canReview(res) &&
+                        !offline &&
+                        onReviewed && (
+                          <button
+                            onClick={() => setReviewTicket(res)}
+                            className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition-all flex items-center gap-2 text-amber-300"
+                          >
+                            <MessageSquareHeart className="w-4 h-4" />
+                            <span>Donner mon avis{res.servedBy ? ` sur la station et ${res.servedBy}` : ''}</span>
+                          </button>
+                        )
+                      )}
                     </div>
                   )}
 
@@ -414,6 +451,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         )}
       </div>
 
+      {onReviewed && <ReviewModal reservation={reviewTicket} onClose={() => setReviewTicket(null)} onReviewed={onReviewed} />}
       {pumpTicket && <PumpScreen reservation={pumpTicket} onClose={() => setPumpTicket(null)} />}
 
       {/* Ticket Modal for Viewing & Printing */}

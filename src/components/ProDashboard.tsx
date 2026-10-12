@@ -6,6 +6,7 @@ import { StationBrandLogo } from './StationBrandLogo';
 import { QrScanner } from './QrScanner';
 import { StationFreshness } from './StationFreshness';
 import { AttendantsPanel } from './AttendantsPanel';
+import { ReviewsPanel } from './ReviewsPanel';
 
 interface ProDashboardProps {
   managedStation: Station;
@@ -467,6 +468,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
       </div>
 
       {!isAttendant && <AttendantsPanel stationId={managedStation.id} stationName={managedStation.name} />}
+      {!isAttendant && <ReviewsPanel stationId={managedStation.id} />}
     </div>
   );
 };

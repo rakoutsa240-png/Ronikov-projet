@@ -25,6 +25,13 @@ export interface Station {
   stock: Record<FuelType, FuelStock>;
   checkedAt?: string; // ISO date the staff last updated or confirmed stock, prices or waiting time (API only)
   reports?: StationReport[]; // client reports since then, within the last few hours (API only)
+  rating?: StationRating | null; // clients' average mark, null before the first review (API only)
+}
+
+// Average of the clients' marks for a station (1 to 5 stars).
+export interface StationRating {
+  average: number; // one decimal, e.g. 4.3
+  count: number;
 }
 
 export type PaymentMethod = 'MIXX_BY_YAS' | 'MOOV_MONEY' | 'CARD' | 'TMONEY' | 'FLOOZ';
@@ -53,6 +60,44 @@ export interface Reservation {
   userName: string;
   userPhone: string;
   qrPayload?: string; // signed QR content, only sent to the ticket's owner
+  servedBy?: string | null; // first name of whoever validated the ticket, only sent to its owner
+  review?: TicketReview | null; // the owner's review of a served ticket, only sent to its owner
+}
+
+// What a client said about a served ticket: the station, and the person who served them.
+export interface TicketReview {
+  stationRating: number; // 1 to 5
+  attendantRating: number | null; // 1 to 5, null when nobody is known to have served
+  comment: string | null;
+  createdAt: string; // ISO date
+}
+
+// A review as the station's manager or an admin sees it (GET /api/stations/:id/reviews, /api/reviews).
+export interface StationReview extends TicketReview {
+  id: number;
+  stationId: string;
+  stationName: string;
+  clientName: string; // "Afi K." for a manager, the full name for an admin
+  attendantId: string | null;
+  attendantName: string | null;
+  fuelLabel: string;
+  liters: number;
+  servedAt: string | null; // ISO date the ticket was validated
+  isHidden: boolean; // hidden by an admin: only admins still see it
+}
+
+// One staff member's marks from the clients they served.
+export interface AttendantRating {
+  attendantId: string;
+  attendantName: string;
+  average: number;
+  count: number;
+  lowCount: number; // marks of 1 or 2 stars
+}
+
+export interface ReviewsSummary {
+  reviews: StationReview[];
+  attendants: AttendantRating[];
 }
 
 // ATTENDANT: a pump attendant, who only validates tickets at their station (added by its manager).

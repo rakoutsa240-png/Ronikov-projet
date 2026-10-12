@@ -1,4 +1,4 @@
-import type { AdminUser, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, Station } from './types';
+import type { AdminUser, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, ReviewsSummary, Station, StationReview, TicketReview } from './types';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -125,6 +125,11 @@ export const api = {
   reportStation: (stationId: string, kind: ReportKind, fuelType?: FuelType) =>
     request<Station>('POST', `/stations/${encodeURIComponent(stationId)}/reports`, { kind, fuelType: fuelType ?? null }),
   confirmStation: (stationId: string) => request<Station | null>('POST', `/stations/${encodeURIComponent(stationId)}/check`),
+  reviewTicket: (reservationId: string, data: { stationRating: number; attendantRating?: number | null; comment?: string }) =>
+    request<TicketReview>('POST', `/reservations/${encodeURIComponent(reservationId)}/review`, data),
+  stationReviews: (stationId: string) => request<ReviewsSummary>('GET', `/stations/${encodeURIComponent(stationId)}/reviews`),
+  allReviews: () => request<ReviewsSummary>('GET', '/reviews'),
+  hideReview: (id: number, hidden: boolean) => request<StationReview>('PATCH', `/reviews/${id}`, { hidden }),
   favorites: () => request<string[]>('GET', '/favorites'),
   saveFavorites: (stationIds: string[]) => request<string[]>('PUT', '/favorites', { stationIds }),
 

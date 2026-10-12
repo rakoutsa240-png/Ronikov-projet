@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
-import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal, AuthUser } from './types';
+import { Station, Reservation, UserRole, NotificationItem, FuelPriceGlobal, AuthUser, TicketReview } from './types';
 import { INITIAL_STATIONS, GLOBAL_FUEL_PRICES } from './data/mockData';
 import { api, ApiError } from './api';
 import { Header } from './components/Header';
@@ -352,6 +352,16 @@ export default function App() {
     }
   };
 
+  // The client reviewed a served ticket: keep it on the ticket and refresh the stations' marks.
+  const handleReviewed = (resId: string, review: TicketReview) => {
+    setReservations((prev) => {
+      const next = prev.map((r) => (r.id === resId ? { ...r, review } : r));
+      saveJSON(TICKETS_KEY, next);
+      return next;
+    });
+    refreshStations();
+  };
+
   // Validate a code at the pump (manager of the station, or admin).
   const handleValidateCodePro = async (stationId: string, code: string) => {
     try {
@@ -544,6 +554,7 @@ export default function App() {
             offline={showingSavedTickets}
             onOpenAuth={() => setIsAuthModalOpen(true)}
             onNavigateToMap={() => setActiveTab('map')}
+            onReviewed={handleReviewed}
           />
         )}
 
