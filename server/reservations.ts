@@ -1,14 +1,15 @@
-import { and, desc, eq, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, lte, sql } from 'drizzle-orm';
 import {
   MAX_LITERS_PER_RESERVATION,
   RESERVATION_VALIDITY_MINUTES,
   SERVICE_FEE_XOF,
 } from '../shared/reservations';
+import { firstName } from '../shared/reviews';
 import { FUEL_LABELS } from '../shared/stock';
 import type { AuthUser, FuelType, NotificationItem, PaymentMethod, Reservation } from '../shared/types';
 import { audit } from './audit';
 import type { Db } from './db/client';
-import { fuelStocks, notifications, reservations, stations, users } from './db/schema';
+import { fuelStocks, notifications, reservations, reviews, stations, users } from './db/schema';
 import {
   createQrPayload,
   decryptTicketCode,
@@ -191,7 +192,35 @@ export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser
 
 export async function listUserReservations(db: Db, keys: TicketKeys, userId: string) {
   const rows = await joined(db).where(eq(reservations.userId, userId)).orderBy(desc(reservations.createdAt));
-  return rows.map((row) => forOwner(keys, row));
+  // Served tickets also say who served them and what the client thought of it.
+  const served = rows.filter((row) => row.reservation.status === 'VALIDATED');
+  const serverIds = [...new Set(served.map((row) => row.reservation.validatedBy).filter((id): id is string => id !== null))];
+  const ownReviews =
+    served.length === 0
+      ? []
+      : await db.select().from(reviews).where(inArray(reviews.reservationId, served.map((row) => row.reservation.id)));
+  const servers =
+    serverIds.length === 0 ? [] : await db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, serverIds));
+  const reviewByTicket = new Map(ownReviews.map((r) => [r.reservationId, r] as const));
+  const serverName = new Map(servers.map((s) => [s.id, firstName(s.name)] as const));
+
+  return rows.map((row) => {
+    const ticket = forOwner(keys, row);
+    if (row.reservation.status !== 'VALIDATED') return ticket;
+    const review = reviewByTicket.get(row.reservation.id);
+    return {
+      ...ticket,
+      servedBy: row.reservation.validatedBy ? (serverName.get(row.reservation.validatedBy) ?? null) : null,
+      review: review
+        ? {
+            stationRating: review.stationRating,
+            attendantRating: review.attendantRating,
+            comment: review.comment,
+            createdAt: review.createdAt.toISOString(),
+          }
+        : null,
+    };
+  });
 }
 
 export async function listStationReservations(db: Db, stationId?: string) {

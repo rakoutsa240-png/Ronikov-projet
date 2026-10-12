@@ -271,3 +271,36 @@ export const managerRequests = pgTable(
     uniqueIndex('manager_requests_pending_user_idx').on(t.userId).where(sql`${t.status} = 'PENDING'`),
   ],
 );
+
+// A client's opinion after a served ticket: one per ticket, on the station and on the person who
+// served them (validatedBy). An admin can hide an abusive one; hidden reviews count nowhere.
+export const reviews = pgTable(
+  'reviews',
+  {
+    id: serial('id').primaryKey(),
+    reservationId: uuid('reservation_id')
+      .notNull()
+      .references(() => reservations.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    stationId: text('station_id')
+      .notNull()
+      .references(() => stations.id, { onDelete: 'cascade' }),
+    attendantId: uuid('attendant_id').references(() => users.id, { onDelete: 'set null' }),
+    stationRating: integer('station_rating').notNull(),
+    attendantRating: integer('attendant_rating'),
+    comment: text('comment'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    hiddenAt: timestamp('hidden_at', { withTimezone: true }),
+    hiddenBy: uuid('hidden_by').references(() => users.id, { onDelete: 'set null' }),
+  },
+  (t) => [
+    uniqueIndex('reviews_reservation_idx').on(t.reservationId),
+    index('reviews_station_created_idx').on(t.stationId, t.createdAt),
+    check(
+      'reviews_ratings_check',
+      sql`${t.stationRating} BETWEEN 1 AND 5 AND (${t.attendantRating} IS NULL OR ${t.attendantRating} BETWEEN 1 AND 5)`,
+    ),
+  ],
+);

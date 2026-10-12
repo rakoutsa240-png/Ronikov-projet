@@ -68,6 +68,10 @@ export function describeEntry(entry: AuditEntry, stationName: (id: string) => st
       return 'Demande de Pass Premium';
     case 'ticket.validate':
       return `Ticket servi à ${station} : ${d.liters} L de ${fuelName(d.fuelType)}`;
+    case 'review.hide':
+      return `Avis client masqué à ${station}`;
+    case 'review.show':
+      return `Avis client réaffiché à ${station}`;
     default:
       return `${entry.action} (${entry.target})`;
   }

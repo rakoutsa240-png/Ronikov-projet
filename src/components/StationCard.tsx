@@ -4,6 +4,7 @@ import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { formatDistance } from '../geo';
 import { FavoriteButton } from './FavoriteButton';
 import { StationFreshness } from './StationFreshness';
+import { RatingBadge } from './StarRating';
 import { ShieldCheck, MapPin, Clock, ChevronRight } from 'lucide-react';
 
 interface StationCardProps {
@@ -58,6 +59,7 @@ export const StationCard: React.FC<StationCardProps> = ({
             {formatDistance(distanceKm)}
           </span>
         )}
+        <RatingBadge rating={station.rating} />
         {station.isPartner && (
           <span
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-500/15 text-brand-400 font-semibold"

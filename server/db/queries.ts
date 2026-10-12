@@ -1,9 +1,9 @@
-import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, lt, sql } from 'drizzle-orm';
 import { REPORT_WINDOW_HOURS } from '../../shared/reports';
 import { computeStockStatus, FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
-import type { FuelPriceGlobal, FuelStock, FuelType, PriceChange, Station, StationReport } from '../../shared/types';
+import type { FuelPriceGlobal, FuelStock, FuelType, PriceChange, Station, StationRating, StationReport } from '../../shared/types';
 import type { Db } from './client';
-import { fuelPrices, fuelStocks, stationPrices, stationReports, stations } from './schema';
+import { fuelPrices, fuelStocks, reviews, stationPrices, stationReports, stations } from './schema';
 
 type StockRow = typeof fuelStocks.$inferSelect;
 
@@ -41,11 +41,24 @@ export function summarizeReports(rows: ReportRow[], checkedAt: Date): StationRep
 export const reportWindowStart = () => new Date(Date.now() - REPORT_WINDOW_HOURS * 3_600_000);
 
 export async function listStations(db: Db): Promise<Station[]> {
-  const [stationRows, stockRows, reportRows] = await Promise.all([
+  const [stationRows, stockRows, reportRows, ratingRows] = await Promise.all([
     db.select().from(stations).orderBy(asc(stations.id)),
     db.select().from(fuelStocks),
     db.select().from(stationReports).where(gte(stationReports.createdAt, reportWindowStart())),
+    // Hidden (abusive) reviews do not count.
+    db
+      .select({
+        stationId: reviews.stationId,
+        average: sql<number>`avg(${reviews.stationRating})`.mapWith(Number),
+        count: sql<number>`count(*)`.mapWith(Number),
+      })
+      .from(reviews)
+      .where(isNull(reviews.hiddenAt))
+      .groupBy(reviews.stationId),
   ]);
+  const ratingByStation = new Map<string, StationRating>(
+    ratingRows.map((r) => [r.stationId, { average: Math.round(r.average * 10) / 10, count: r.count }]),
+  );
 
   const stockByStation = new Map<string, Partial<Record<FuelType, FuelStock>>>();
   for (const row of stockRows) {
@@ -73,6 +86,7 @@ export async function listStations(db: Db): Promise<Station[]> {
         queueTimeMinutes: s.queueTimeMinutes,
         isPartner: s.isPartner,
         checkedAt: s.checkedAt.toISOString(),
+        rating: ratingByStation.get(s.id) ?? null,
         reports: summarizeReports(
           reportRows.filter((r) => r.stationId === s.id),
           s.checkedAt,

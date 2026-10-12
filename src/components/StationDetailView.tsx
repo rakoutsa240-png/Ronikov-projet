@@ -7,6 +7,7 @@ import { PriceHistoryChart } from './PriceHistoryChart';
 import { directionsUrl } from '../geo';
 import { FavoriteButton } from './FavoriteButton';
 import { StationFreshness, useNow } from './StationFreshness';
+import { RatingBadge } from './StarRating';
 import { reportLabel } from '../../shared/reports';
 import { timeAgo } from '../time';
 
@@ -88,6 +89,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
               <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
               <span>{station.address}</span>
             </p>
+            <RatingBadge rating={station.rating} className="text-xs self-start" />
             <StationFreshness station={station} maxReports={0} className="text-sm" />
           </div>
 

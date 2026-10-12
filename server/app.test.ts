@@ -39,6 +39,7 @@ describe('GET /api/stations', () => {
       ...expected,
       checkedAt: expect.any(String),
       reports: [],
+      rating: null,
       stock: Object.fromEntries(
         Object.entries(expected.stock).map(([fuel, stock]) => [fuel, { ...stock, reservedLiters: 0 }]),
       ),
