@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { KeyRound, UserMinus, UserPlus, Users } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { Attendant } from '../types';
+import { Avatar } from './Avatar';
 
 interface AttendantsPanelProps {
   stationId: string;
@@ -165,11 +166,15 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
         <ul className="space-y-2.5 text-xs">
           {attendants.map((a) => (
             <li key={a.id} className="p-3.5 border border-neutral-800 rounded-xl bg-black/60 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="font-black text-white">{a.name}</div>
-                <div className="text-[11px] text-neutral-400">
-                  {formatPhone(a.phone)}
-                  {a.isSuspended ? ' • compte suspendu' : a.mustChangePassword ? ' • mot de passe temporaire' : ''}
+              <div className="flex items-center gap-3">
+                <Avatar name={a.name} photoUrl={a.photoUrl} className="w-10 h-10 rounded-full text-base" />
+                <div>
+                  <div className="font-black text-white">{a.name}</div>
+                  <div className="text-[11px] text-neutral-400">
+                    {formatPhone(a.phone)}
+                    {a.isSuspended ? ' • compte suspendu' : a.mustChangePassword ? ' • mot de passe temporaire' : ''}
+                    {!a.photoUrl && ' • sans photo'}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-3">

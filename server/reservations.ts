@@ -4,6 +4,7 @@ import {
   RESERVATION_VALIDITY_MINUTES,
   SERVICE_FEE_XOF,
 } from '../shared/reservations';
+import { photoUrl } from '../shared/photos';
 import { firstName } from '../shared/reviews';
 import { FUEL_LABELS } from '../shared/stock';
 import type { AuthUser, FuelType, NotificationItem, PaymentMethod, Reservation } from '../shared/types';
@@ -43,6 +44,7 @@ const reservationColumns = {
   stationAddress: stations.address,
   userName: users.name,
   userPhone: users.phone,
+  userPhotoAt: users.photoUpdatedAt,
 };
 
 type JoinedRow = {
@@ -52,6 +54,7 @@ type JoinedRow = {
   stationAddress: string;
   userName: string;
   userPhone: string;
+  userPhotoAt: Date | null;
 };
 
 function toReservation(row: JoinedRow, code: string, qrPayload?: string): Reservation {
@@ -86,7 +89,11 @@ const forOwner = (keys: TicketKeys, row: JoinedRow) => {
   const code = decryptTicketCode(keys, row.reservation.codeEncrypted);
   return toReservation(row, code, createQrPayload(keys, row.reservation.id, code));
 };
-const forStaff = (row: JoinedRow) => toReservation(row, maskTicketCode(row.reservation.codeLast4));
+// Staff also see the client's photo, to hand the fuel to the right person.
+const forStaff = (row: JoinedRow): Reservation => ({
+  ...toReservation(row, maskTicketCode(row.reservation.codeLast4)),
+  userPhotoUrl: photoUrl(row.reservation.userId, row.userPhotoAt),
+});
 
 function joined(db: Db | Tx) {
   return db
@@ -200,17 +207,19 @@ export async function listUserReservations(db: Db, keys: TicketKeys, userId: str
       ? []
       : await db.select().from(reviews).where(inArray(reviews.reservationId, served.map((row) => row.reservation.id)));
   const servers =
-    serverIds.length === 0 ? [] : await db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, serverIds));
+    serverIds.length === 0 ? [] : await db.select({ id: users.id, name: users.name, photoUpdatedAt: users.photoUpdatedAt }).from(users).where(inArray(users.id, serverIds));
   const reviewByTicket = new Map(ownReviews.map((r) => [r.reservationId, r] as const));
-  const serverName = new Map(servers.map((s) => [s.id, firstName(s.name)] as const));
+  const serverById = new Map(servers.map((s) => [s.id, s] as const));
 
   return rows.map((row) => {
     const ticket = forOwner(keys, row);
     if (row.reservation.status !== 'VALIDATED') return ticket;
     const review = reviewByTicket.get(row.reservation.id);
+    const server = row.reservation.validatedBy ? serverById.get(row.reservation.validatedBy) : undefined;
     return {
       ...ticket,
-      servedBy: row.reservation.validatedBy ? (serverName.get(row.reservation.validatedBy) ?? null) : null,
+      servedBy: server ? firstName(server.name) : null,
+      servedByPhotoUrl: server ? photoUrl(server.id, server.photoUpdatedAt) : null,
       review: review
         ? {
             stationRating: review.stationRating,

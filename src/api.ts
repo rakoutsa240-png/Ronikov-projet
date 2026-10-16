@@ -28,6 +28,23 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   return res.status === 204 ? (undefined as T) : (res.json() as Promise<T>);
 }
 
+// Full address of a file the API serves, such as a profile photo ("/api/users/…/photo").
+export const apiUrl = (path: string) => `${BASE_URL}${path}`;
+
+async function sendPhoto(photo: Blob): Promise<AuthUser> {
+  const res = await fetch(`${BASE_URL}/api/me/photo`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { Accept: 'application/json', 'Content-Type': photo.type || 'image/jpeg' },
+    body: photo,
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new ApiError(res.status, data?.error ?? `Erreur ${res.status}`, data);
+  }
+  return res.json() as Promise<AuthUser>;
+}
+
 export const api = {
   stations: (signal?: AbortSignal) => request<Station[]>('GET', '/stations', undefined, signal),
   prices: (signal?: AbortSignal) => request<FuelPriceGlobal[]>('GET', '/prices', undefined, signal),
@@ -46,6 +63,10 @@ export const api = {
   logout: () => request<void>('POST', '/auth/logout'),
   changePassword: (currentPassword: string, newPassword: string) =>
     request<AuthUser>('POST', '/auth/password', { currentPassword, newPassword }),
+  uploadPhoto: sendPhoto,
+  removePhoto: () => request<AuthUser>('DELETE', '/me/photo'),
+  // An admin takes down someone's photo.
+  removeUserPhoto: (id: string) => request<void>('DELETE', `/users/${encodeURIComponent(id)}/photo`),
 
   createReservation: (data: {
     stationId: string;

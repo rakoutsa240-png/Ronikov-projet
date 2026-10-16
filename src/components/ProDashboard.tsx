@@ -7,6 +7,7 @@ import { QrScanner } from './QrScanner';
 import { StationFreshness } from './StationFreshness';
 import { AttendantsPanel } from './AttendantsPanel';
 import { ReviewsPanel } from './ReviewsPanel';
+import { Avatar } from './Avatar';
 
 interface ProDashboardProps {
   managedStation: Station;
@@ -281,7 +282,14 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                       </div>
                       <div>
                         <span className="text-neutral-400 block text-[11px] font-bold">Client :</span>
-                        <span className="font-bold text-neutral-200">{validationResult.reservation.userName}</span>
+                        <span className="flex items-center gap-2 font-bold text-neutral-200">
+                          <Avatar
+                            name={validationResult.reservation.userName}
+                            photoUrl={validationResult.reservation.userPhotoUrl}
+                            className="w-10 h-10 rounded-full text-base"
+                          />
+                          {validationResult.reservation.userName}
+                        </span>
                       </div>
                       <div>
                         <span className="text-neutral-400 block text-[11px] font-bold">Paiement :</span>
@@ -313,9 +321,12 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
               <div className="space-y-2.5 text-xs max-h-64 overflow-y-auto pr-1">
                 {stationReservations.map((r) => (
                   <div key={r.id} className="p-3.5 border border-neutral-800 rounded-xl bg-black/60 flex justify-between items-center hover:border-neutral-700 transition-colors">
-                    <div>
-                      <div className="font-black text-amber-300">{r.code} — {r.liters}L ({r.fuelLabel})</div>
-                      <div className="text-[11px] text-neutral-400">{r.userName} • {r.totalAmountXOF.toLocaleString('fr-FR')} FCFA</div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar name={r.userName} photoUrl={r.userPhotoUrl} className="w-9 h-9 rounded-full text-sm" />
+                      <div className="min-w-0">
+                        <div className="font-black text-amber-300">{r.code} — {r.liters}L ({r.fuelLabel})</div>
+                        <div className="text-[11px] text-neutral-400">{r.userName} • {r.totalAmountXOF.toLocaleString('fr-FR')} FCFA</div>
+                      </div>
                     </div>
                     <span
                       className={`px-2.5 py-1 text-[11px] font-black uppercase rounded border ${

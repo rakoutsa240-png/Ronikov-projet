@@ -2,6 +2,7 @@ import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { and, eq, gt, isNull, ne } from 'drizzle-orm';
 import type { CookieOptions, NextFunction, Request, RequestHandler, Response } from 'express';
+import { photoUrl } from '../shared/photos';
 import type { AuthUser, UserRole } from '../shared/types';
 import type { Db } from './db/client';
 import { sessions, stationManagers, users } from './db/schema';
@@ -86,6 +87,7 @@ export async function toAuthUser(db: Db, user: typeof users.$inferSelect): Promi
     isPremium: user.isPremium,
     managedStationIds: managed.map((m) => m.stationId).sort(),
     mustChangePassword: user.mustChangePassword,
+    photoUrl: photoUrl(user.id, user.photoUpdatedAt),
   };
 }
 

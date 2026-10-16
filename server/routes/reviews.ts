@@ -3,6 +3,7 @@ import { alias } from 'drizzle-orm/pg-core';
 import { Router } from 'express';
 import { z } from 'zod';
 import { LOW_RATING, REVIEW_COMMENT_MAX, REVIEW_WINDOW_DAYS, shortName } from '../../shared/reviews';
+import { photoUrl } from '../../shared/photos';
 import { FUEL_LABELS } from '../../shared/stock';
 import type { AttendantRating, ReviewsSummary, StationReview } from '../../shared/types';
 import { notifyStationStaff } from '../alerts';
@@ -35,6 +36,7 @@ function reviewRows(db: Db) {
       stationName: stations.name,
       clientName: clients.name,
       attendantName: servers.name,
+      attendantPhotoAt: servers.photoUpdatedAt,
       fuelType: reservations.fuelType,
       liters: reservations.liters,
       validatedAt: reservations.validatedAt,
@@ -55,6 +57,7 @@ const toStationReview = (row: ReviewRow, forAdmin: boolean): StationReview => ({
   clientName: forAdmin ? row.clientName : shortName(row.clientName),
   attendantId: row.review.attendantId,
   attendantName: row.attendantName,
+  attendantPhotoUrl: row.review.attendantId ? photoUrl(row.review.attendantId, row.attendantPhotoAt) : null,
   fuelLabel: FUEL_LABELS[row.fuelType],
   liters: row.liters,
   servedAt: row.validatedAt?.toISOString() ?? null,
@@ -69,17 +72,18 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
 
 // Average mark of each person who served, from the visible reviews, worst first.
 export function rateAttendants(list: StationReview[]): AttendantRating[] {
-  const byPerson = new Map<string, { name: string; marks: number[] }>();
+  const byPerson = new Map<string, { name: string; photoUrl: string | null; marks: number[] }>();
   for (const r of list) {
     if (r.isHidden || !r.attendantId || r.attendantRating === null) continue;
-    const entry = byPerson.get(r.attendantId) ?? { name: r.attendantName ?? '', marks: [] };
+    const entry = byPerson.get(r.attendantId) ?? { name: r.attendantName ?? '', photoUrl: r.attendantPhotoUrl, marks: [] };
     entry.marks.push(r.attendantRating);
     byPerson.set(r.attendantId, entry);
   }
   return [...byPerson.entries()]
-    .map(([attendantId, { name, marks }]) => ({
+    .map(([attendantId, { name, photoUrl, marks }]) => ({
       attendantId,
       attendantName: name,
+      attendantPhotoUrl: photoUrl,
       average: round1(marks.reduce((a, b) => a + b, 0) / marks.length),
       count: marks.length,
       lowCount: marks.filter((m) => m <= LOW_RATING).length,

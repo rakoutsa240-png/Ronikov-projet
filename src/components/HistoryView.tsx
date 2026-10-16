@@ -9,6 +9,7 @@ import { ReceiptButton } from './ReceiptButton';
 import { PumpScreen } from './PumpScreen';
 import { ReviewModal } from './ReviewModal';
 import { Stars } from './StarRating';
+import { Avatar } from './Avatar';
 import { REVIEW_WINDOW_DAYS } from '../../shared/reviews';
 
 interface HistoryViewProps {
@@ -386,6 +387,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                   {/* Served, cancelled or expired tickets keep their receipt; served ones can be reviewed */}
                   {res.status !== 'PENDING' && (
                     <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                      {res.status === 'VALIDATED' && res.servedBy && (
+                        <span className="w-full flex items-center gap-2.5 text-neutral-300">
+                          <Avatar name={res.servedBy} photoUrl={res.servedByPhotoUrl} className="w-9 h-9 rounded-full text-sm" />
+                          <span>
+                            Servi par <strong className="text-white">{res.servedBy}</strong>
+                          </span>
+                        </span>
+                      )}
                       <ReceiptButton reservation={res} />
                       {res.review ? (
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-neutral-300">

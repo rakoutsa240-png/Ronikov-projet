@@ -5,6 +5,7 @@ import { REVIEW_COMMENT_MAX } from '../../shared/reviews';
 import { Reservation, TicketReview } from '../types';
 import { useModal } from '../useModal';
 import { StarInput } from './StarRating';
+import { Avatar } from './Avatar';
 
 interface ReviewModalProps {
   reservation: Reservation | null; // null when closed
@@ -96,8 +97,16 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
           <form onSubmit={send} className="space-y-4">
             <StarInput label="La station (propreté, attente, service)" value={stationRating} onChange={setStationRating} disabled={sending} />
             {servedBy && (
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-neutral-800 bg-neutral-950/60">
+                <Avatar name={servedBy} photoUrl={reservation.servedByPhotoUrl} className="w-14 h-14 rounded-full text-xl" />
+                <p className="text-sm text-neutral-300">
+                  <strong className="text-white">{servedBy}</strong> vous a servi.
+                </p>
+              </div>
+            )}
+            {servedBy && (
               <StarInput
-                label={`${servedBy}, qui vous a servi (accueil, politesse, honnêteté)`}
+                label={`Note de ${servedBy} (accueil, politesse, honnêteté)`}
                 value={attendantRating}
                 onChange={setAttendantRating}
                 disabled={sending}
