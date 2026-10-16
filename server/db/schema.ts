@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
+  customType,
   doublePrecision,
   index,
   integer,
@@ -96,6 +97,8 @@ export const users = pgTable(
     mustChangePassword: boolean('must_change_password').notNull().default(false),
     // Set when an admin suspends the account: it can no longer sign in.
     suspendedAt: timestamp('suspended_at', { withTimezone: true }),
+    // When the profile photo was last set (null: no photo). Versions the photo's address.
+    photoUpdatedAt: timestamp('photo_updated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('users_phone_idx').on(t.phone)],
@@ -304,3 +307,18 @@ export const reviews = pgTable(
     ),
   ],
 );
+
+const bytea = customType<{ data: Buffer; driverData: Buffer | Uint8Array }>({
+  dataType: () => 'bytea',
+  fromDriver: (value) => Buffer.from(value),
+});
+
+// Profile photos, kept out of users so that loading an account never reads the image.
+// Stored in the database because the host has no lasting disk; each one is a small square JPEG.
+export const userPhotos = pgTable('user_photos', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  image: bytea('image').notNull(),
+  contentType: text('content_type').notNull(),
+});

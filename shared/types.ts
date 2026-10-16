@@ -61,6 +61,8 @@ export interface Reservation {
   userPhone: string;
   qrPayload?: string; // signed QR content, only sent to the ticket's owner
   servedBy?: string | null; // first name of whoever validated the ticket, only sent to its owner
+  servedByPhotoUrl?: string | null; // their profile photo, so the client recognises them
+  userPhotoUrl?: string | null; // the client's profile photo, so staff recognise them at the pump
   review?: TicketReview | null; // the owner's review of a served ticket, only sent to its owner
 }
 
@@ -80,6 +82,7 @@ export interface StationReview extends TicketReview {
   clientName: string; // "Afi K." for a manager, the full name for an admin
   attendantId: string | null;
   attendantName: string | null;
+  attendantPhotoUrl: string | null;
   fuelLabel: string;
   liters: number;
   servedAt: string | null; // ISO date the ticket was validated
@@ -90,6 +93,7 @@ export interface StationReview extends TicketReview {
 export interface AttendantRating {
   attendantId: string;
   attendantName: string;
+  attendantPhotoUrl: string | null;
   average: number;
   count: number;
   lowCount: number; // marks of 1 or 2 stars
@@ -141,6 +145,7 @@ export interface AuthUser {
   isPremium: boolean;
   managedStationIds: string[];
   mustChangePassword: boolean; // signed in with a temporary password from an admin
+  photoUrl: string | null; // profile photo, null when the person has not added one
 }
 
 // A station's pump attendant as its manager sees it (GET /api/stations/:id/attendants).
@@ -150,6 +155,7 @@ export interface Attendant {
   phone: string;
   isSuspended: boolean;
   mustChangePassword: boolean; // has not yet replaced the temporary password
+  photoUrl: string | null;
 }
 
 // An account as the admin console lists it (GET /api/users).

@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthUser, Reservation, Station, UserRole } from '../types';
 import { ManagerRequestCard } from './ManagerRequestCard';
+import { ProfilePhoto } from './ProfilePhoto';
 import { User, ShieldCheck, Star, Fuel, Ticket, Wallet, MapPin, Crown, LogIn, LogOut, ChevronRight, Phone, Mail, Building2, KeyRound } from 'lucide-react';
 
 interface UserProfileViewProps {
@@ -72,16 +73,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-mono-code text-white">
       <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-          <div className="relative shrink-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center text-black font-black text-2xl sm:text-3xl shadow-xl border-2 border-amber-300">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
+          <ProfilePhoto user={user} onUserChanged={onUserChanged}>
             {user.isPremium && (
-              <div className="absolute -bottom-1 -right-1 bg-amber-400 text-black p-1 rounded-full border-2 border-black" title="Pass Premium actif">
+              <div className="absolute -top-1 -right-1 bg-amber-400 text-black p-1 rounded-full border-2 border-black" title="Pass Premium actif">
                 <Star className="w-4 h-4 fill-black" />
               </div>
             )}
-          </div>
+          </ProfilePhoto>
 
           <div className="space-y-2 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">

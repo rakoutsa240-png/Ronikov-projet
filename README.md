@@ -79,6 +79,9 @@ Set `DATABASE_URL` and `PORT` to point elsewhere (see `.env.example`). In produc
 | `POST /api/auth/login` | Sign in with `phone` and `password` |
 | `POST /api/auth/logout` | Sign out |
 | `GET /api/me` | The signed-in account, its role and managed stations (401 when signed out) |
+| `PUT /api/me/photo`, `DELETE /api/me/photo` | Set (raw JPEG, PNG or WebP body, 200 KB max) or remove your profile photo |
+| `GET /api/users/:id/photo` | Signed in: someone's profile photo (the address from `photoUrl` changes with each new photo) |
+| `DELETE /api/users/:id/photo` | Admin: take down someone's photo |
 | `POST /api/reservations` | Book fuel (`stationId`, `fuelType`, `liters`, `paymentMethod`, `paymentPhone`); returns the ticket with its code |
 | `GET /api/reservations/mine` | The signed-in account's tickets, with their codes |
 | `POST /api/reservations/:id/cancel` | Cancel one of your pending tickets |
@@ -156,6 +159,7 @@ server/
   reservations.ts    # Booking, cancelling, validating, expiry, notifications
   routes/reservations.ts # Reservation and notification routes
   routes/admin.ts    # Stock, station, price, account and Premium routes
+  routes/photos.ts   # Profile photos, stored in the database (the host has no lasting disk)
   audit.ts           # Writes to audit_log
   tickets.ts         # Ticket code generation, hashing, encryption, signed QR
   db/schema.ts       # Drizzle tables (stations, stock, prices, users, managers, sessions, reservations, notifications, audit_log)

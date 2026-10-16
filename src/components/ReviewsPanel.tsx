@@ -4,6 +4,7 @@ import { api, ApiError } from '../api';
 import { LOW_RATING } from '../../shared/reviews';
 import { ReviewsSummary, StationReview } from '../types';
 import { Stars } from './StarRating';
+import { Avatar } from './Avatar';
 
 interface ReviewsPanelProps {
   stationId?: string; // one station (Espace Pro); every station when left out (admin)
@@ -87,11 +88,14 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
                       a.average <= LOW_RATING ? 'border-rose-500/60' : 'border-neutral-800'
                     }`}
                   >
-                    <div>
-                      <div className="font-black text-white">{a.attendantName}</div>
-                      <div className="text-neutral-400">
-                        {a.count} avis
-                        {a.lowCount > 0 && <span className="text-rose-300 font-bold"> • {a.lowCount} mauvais</span>}
+                    <div className="flex items-center gap-3">
+                      <Avatar name={a.attendantName} photoUrl={a.attendantPhotoUrl} className="w-9 h-9 rounded-full text-sm" />
+                      <div>
+                        <div className="font-black text-white">{a.attendantName}</div>
+                        <div className="text-neutral-400">
+                          {a.count} avis
+                          {a.lowCount > 0 && <span className="text-rose-300 font-bold"> • {a.lowCount} mauvais</span>}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">

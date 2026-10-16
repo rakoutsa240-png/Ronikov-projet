@@ -2,6 +2,7 @@ import { and, asc, eq } from 'drizzle-orm';
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { normalizeTogoPhone } from '../../shared/phone';
+import { photoUrl } from '../../shared/photos';
 import type { Attendant } from '../../shared/types';
 import { audit } from '../audit';
 import { hashPassword, rateLimit, requireRole, temporaryPassword } from '../auth';
@@ -23,6 +24,7 @@ const toAttendant = (row: typeof users.$inferSelect): Attendant => ({
   phone: row.phone,
   isSuspended: row.suspendedAt !== null,
   mustChangePassword: row.mustChangePassword,
+  photoUrl: photoUrl(row.id, row.photoUpdatedAt),
 });
 
 // A station's attendants (pompistes) only validate tickets at that station. Its manager, or an

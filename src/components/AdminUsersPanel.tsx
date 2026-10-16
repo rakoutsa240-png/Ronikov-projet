@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Ban, Check, Crown, KeyRound, UserPlus, Users, X } from 'lucide-react';
+import { Ban, Check, Crown, ImageOff, KeyRound, UserPlus, Users, X } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { AdminUser, ManagerRequest, Station, UserRole } from '../types';
+import { Avatar } from './Avatar';
 
 interface AdminUsersPanelProps {
   stations: Station[];
@@ -70,6 +71,21 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
       setUsers((prev) => prev?.map((u) => (u.id === updated.id ? updated : u)) ?? null);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Modification impossible, réessayez.');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // For a photo that is not a face, or is offensive. The person can add another one.
+  const removePhoto = async (user: AdminUser) => {
+    if (!window.confirm(`Retirer la photo de ${user.name} ? La personne pourra en mettre une autre.`)) return;
+    setSavingId(user.id);
+    setError(null);
+    try {
+      await api.removeUserPhoto(user.id);
+      setUsers((prev) => prev?.map((u) => (u.id === user.id ? { ...u, photoUrl: null } : u)) ?? null);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Retrait impossible, réessayez.');
     } finally {
       setSavingId(null);
     }
@@ -152,7 +168,9 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
             key={user.id}
             className={`p-4 border rounded-xl grid ${user.isSuspended ? 'border-rose-500/60 bg-rose-950/30' : 'border-neutral-800 bg-black/60'} gap-3 md:grid-cols-[1.4fr_1fr_1.2fr_auto] md:items-center text-xs`}
           >
-            <div>
+            <div className="flex items-start gap-3">
+            <Avatar name={user.name} photoUrl={user.photoUrl} className="w-10 h-10 rounded-full text-base" />
+            <div className="min-w-0">
               <div className="font-black text-white flex items-center gap-1.5">
                 {user.name}
                 {user.isPremium && <Crown className="w-3.5 h-3.5 text-amber-400" aria-label="Premium" />}
@@ -170,6 +188,15 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
                   <KeyRound className="w-3 h-3" /> Mot de passe oublié
                 </button>
               )}
+              {user.photoUrl && (
+                <button
+                  onClick={() => removePhoto(user)}
+                  disabled={savingId === user.id}
+                  className="mt-1.5 ml-3 inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 hover:text-rose-200 underline disabled:opacity-60"
+                >
+                  <ImageOff className="w-3 h-3" /> Retirer la photo
+                </button>
+              )}
               {user.id !== currentUserId && user.role !== 'ADMIN' && (
                 <button
                   onClick={() => toggleSuspended(user)}
@@ -181,6 +208,7 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
                   <Ban className="w-3 h-3" /> {user.isSuspended ? 'Réactiver' : 'Suspendre'}
                 </button>
               )}
+            </div>
             </div>
 
             <select

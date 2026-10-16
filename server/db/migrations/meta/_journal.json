@@ -71,6 +71,13 @@
       "when": 1791798663682,
       "tag": "0009_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792166122682,
+      "tag": "0010_profile_photos",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ import { adminRouter } from './routes/admin';
 import { attendantsRouter } from './routes/attendants';
 import { authRouter } from './routes/auth';
 import { communityRouter } from './routes/community';
+import { photosRouter } from './routes/photos';
 import { reservationsRouter } from './routes/reservations';
 import { reviewsRouter } from './routes/reviews';
 import type { TicketKeys } from './tickets';
@@ -42,6 +43,7 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
   app.use('/api', attendantsRouter(db));
   app.use('/api', communityRouter(db));
   app.use('/api', reviewsRouter(db));
+  app.use('/api', photosRouter(db));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
@@ -117,6 +119,15 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
   }
 
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
+    // Bodies the parsers refuse (too big, malformed) are the sender's mistake, not a crash.
+    if (err?.type === 'entity.too.large') {
+      res.status(413).json({ error: 'Envoi trop lourd' });
+      return;
+    }
+    if (typeof err?.status === 'number' && err.status >= 400 && err.status < 500 && err.expose) {
+      res.status(err.status).json({ error: 'Données invalides' });
+      return;
+    }
     console.error(err);
     res.status(500).json({ error: 'Erreur serveur' });
   };
