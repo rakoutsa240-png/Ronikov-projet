@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isStale, timeAgo } from './time';
+import { isStale, timeAgo, timeLeft } from './time';
 
 describe('timeAgo', () => {
   const now = new Date('2026-10-08T12:00:00Z').getTime();
@@ -14,5 +14,16 @@ describe('timeAgo', () => {
     expect(isStale('2026-10-08T07:00:00Z', now)).toBe(false);
     expect(isStale('2026-10-08T05:00:00Z', now)).toBe(true);
     expect(isStale(undefined, now)).toBe(false);
+  });
+});
+
+describe('timeLeft', () => {
+  const now = new Date('2026-10-18T12:00:00Z').getTime();
+  it('says how long a ticket is still valid', () => {
+    expect(timeLeft('2026-10-18T13:45:30Z', now)).toBe('1 h 45');
+    expect(timeLeft('2026-10-18T13:05:00Z', now)).toBe('1 h 05');
+    expect(timeLeft('2026-10-18T13:00:00Z', now)).toBe('1 h');
+    expect(timeLeft('2026-10-18T12:12:00Z', now)).toBe('12 min');
+    expect(timeLeft('2026-10-18T12:00:20Z', now)).toBe("moins d'1 min");
   });
 });

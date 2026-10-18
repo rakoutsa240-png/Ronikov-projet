@@ -65,7 +65,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           <div className="space-y-3">
             <div className="flex items-center gap-2.5 flex-wrap">
               <StationBrandLogo brand={station.brand} size="md" interactive={true} showBadge={false} className="p-1 bg-black border border-neutral-700 rounded-lg" />
-              <span className="px-2.5 py-1 bg-amber-400 text-black text-xs font-black rounded shadow">
+              <span className="px-2.5 py-1 chip-selected text-xs font-black rounded shadow">
                 {station.brand}
               </span>
               <span className="text-xs text-neutral-400 font-bold">

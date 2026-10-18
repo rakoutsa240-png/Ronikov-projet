@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Station, FuelPriceGlobal } from '../types';
+import React, { Suspense, lazy, useState } from 'react';
+import { Station, FuelPriceGlobal, Reservation } from '../types';
 import { StationCard } from './StationCard';
 import { FUEL_TYPES } from '../../shared/stock';
 import { Gauge } from './Gauge';
@@ -9,10 +9,15 @@ import { StationSkeleton } from './Skeleton';
 import { useFavorites } from '../storage';
 import { StationFreshness } from './StationFreshness';
 import { enableAlerts, useAlertPermission } from '../alerts';
-import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart, Fuel, Smartphone } from 'lucide-react';
+import { useNow } from '../storage';
+import { timeLeft } from '../time';
+import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart, Fuel, Smartphone, QrCode } from 'lucide-react';
 import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
 import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
 import customerBg from '../assets/images/happy_customer_refuel_1785888766342.webp';
+
+// The QR code library is only downloaded when a ticket is on screen.
+const QRCodeImage = lazy(() => import('./QRCodeImage').then((m) => ({ default: m.QRCodeImage })));
 
 interface HomeViewProps {
   stations: Station[];
@@ -24,7 +29,36 @@ interface HomeViewProps {
   loading?: boolean; // stations not received from the server yet
   isSignedIn: boolean;
   onOpenAuth: () => void;
+  activeTicket?: Reservation; // the ticket that expires first, when one is waiting at the pump
+  onOpenTicket: (ticket: Reservation) => void;
 }
+
+// Top of the home page while a ticket waits at the pump: one tap shows it full screen.
+const ActiveTicketCard: React.FC<{ ticket: Reservation; onOpen: () => void }> = ({ ticket, onOpen }) => {
+  const now = useNow();
+  return (
+    <div className="theme-fixed bg-brand-800 rounded-3xl p-2.5">
+      <button
+        onClick={onOpen}
+        className="w-full bg-white text-[#0f1f18] rounded-2xl p-3 flex items-center gap-3 text-left shadow-[0_8px_24px_-14px_rgba(0,60,40,.3)] hover:bg-brand-50"
+      >
+        <Suspense fallback={<QrCode className="w-[68px] h-[68px] shrink-0 text-[#0f1f18]" />}>
+          <QRCodeImage value={ticket.qrPayload ?? ticket.code} size={68} className="shrink-0 border-0 shadow-none p-0" />
+        </Suspense>
+        <span className="flex-1 min-w-0">
+          <span className="block text-[11px] font-extrabold uppercase tracking-widest text-brand-700">
+            Ticket en cours • {timeLeft(ticket.expiresAt, now)}
+          </span>
+          <span className="block font-code text-xl font-bold tracking-wider">{ticket.code}</span>
+          <span className="block text-sm font-medium text-[#5a6661] truncate">
+            {ticket.liters} L {ticket.fuelLabel} • {ticket.stationName}
+          </span>
+        </span>
+        <ChevronRight className="w-5 h-5 shrink-0 text-brand-700" />
+      </button>
+    </div>
+  );
+};
 
 // Under the favourites: how the visitor hears about fuel coming back or a new price.
 const FavoriteAlertsHint: React.FC<{ isSignedIn: boolean; onOpenAuth: () => void }> = ({ isSignedIn, onOpenAuth }) => {
@@ -64,6 +98,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
   loading = false,
   isSignedIn,
   onOpenAuth,
+  activeTicket,
+  onOpenTicket,
 }) => {
   const favoriteIds = useFavorites();
   const favoriteStations = stations.filter((s) => favoriteIds.includes(s.id));
@@ -87,6 +123,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="space-y-16 py-4">
       {/* Hero: what the visitor came for (a station with fuel, now), then today's prices */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+        {activeTicket && <ActiveTicketCard ticket={activeTicket} onOpen={() => onOpenTicket(activeTicket)} />}
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
             Ne faites plus la queue <span className="text-amber-400">pour votre carburant.</span>
@@ -250,7 +287,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Des sourires à chaque plein
             </h2>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-400 text-black text-xs font-extrabold rounded-full">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 chip-selected text-xs font-extrabold rounded-full">
             <Smile className="w-4 h-4" /> Satisfaction garantie
           </div>
         </div>
@@ -302,7 +339,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   referrerPolicy="no-referrer"
                 />
                 <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand-950/60 to-transparent" />
-                <span className="absolute bottom-3 left-3 px-2.5 py-1 bg-amber-400 text-black text-[11px] font-bold rounded-full">
+                <span className="absolute bottom-3 left-3 px-2.5 py-1 chip-selected text-[11px] font-bold rounded-full">
                   {card.tag}
                 </span>
               </div>
@@ -383,7 +420,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <details key={item.q} className="group bg-black border border-neutral-800 rounded-2xl open:border-brand-500/50 transition-colors">
               <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <h3 className="font-bold text-white text-sm sm:text-base">{item.q}</h3>
-                <span className="shrink-0 w-8 h-8 rounded-full bg-amber-400 text-black flex items-center justify-center transition-transform group-open:rotate-90">
+                <span className="shrink-0 w-8 h-8 rounded-full chip-selected flex items-center justify-center transition-transform group-open:rotate-90">
                   <ChevronRight className="w-4 h-4" />
                 </span>
               </summary>

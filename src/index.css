@@ -216,6 +216,20 @@
   border-color: revert-layer;
 }
 
+/* Gold is kept for the main buttons (Réserver, Payer) and for accents on the green header.
+   Selected tabs and chips, active menu items and counters are green, on both themes. */
+.chip-selected {
+  background-color: var(--color-brand-700);
+  border-color: var(--color-brand-700);
+  color: #fff;
+}
+.text-active {
+  color: var(--color-brand-700);
+}
+:root[data-theme='dark'] .text-active {
+  color: var(--color-brand-200);
+}
+
 /* ---------------------------------------------------------------------------
    Gentle motion. Cards rise into place as they scroll into view (browsers that support
    scroll-driven animations; others simply show them), stock bars fill up when they appear.

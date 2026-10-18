@@ -28,6 +28,7 @@ const ProDashboard = named(() => import('./components/ProDashboard'), 'ProDashbo
 const AdminDashboard = named(() => import('./components/AdminDashboard'), 'AdminDashboard');
 const PremiumView = named(() => import('./components/PremiumView'), 'PremiumView');
 const UserProfileView = named(() => import('./components/UserProfileView'), 'UserProfileView');
+const PumpScreen = named(() => import('./components/PumpScreen'), 'PumpScreen');
 
 const pageFallback = <PageSkeleton />;
 
@@ -469,7 +470,13 @@ export default function App() {
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-  const activeTicketCount = reservations.filter((r) => r.status === 'PENDING' && new Date(r.expiresAt) > new Date()).length;
+  const activeTickets = reservations
+    .filter((r) => r.status === 'PENDING' && new Date(r.expiresAt) > new Date())
+    .sort((a, b) => a.expiresAt.localeCompare(b.expiresAt));
+  const activeTicketCount = activeTickets.length;
+  // The ticket opened full screen from the home page.
+  const [pumpTicketId, setPumpTicketId] = useState<string | null>(null);
+  const pumpTicket = reservations.find((r) => r.id === pumpTicketId) ?? null;
 
   return (
     <DynamicBackground>
@@ -514,6 +521,8 @@ export default function App() {
             globalPrices={globalPrices}
             loading={loading}
             onNavigateMap={() => setActiveTab('map')}
+            activeTicket={activeTickets[0]}
+            onOpenTicket={(ticket) => setPumpTicketId(ticket.id)}
             onBookStation={handleOpenBooking}
             onViewStation={handleViewStationDetails}
             isSignedIn={currentUser !== null}
@@ -555,6 +564,7 @@ export default function App() {
             onOpenAuth={() => setIsAuthModalOpen(true)}
             onNavigateToMap={() => setActiveTab('map')}
             onReviewed={handleReviewed}
+            stations={stations}
           />
         )}
 
@@ -611,6 +621,25 @@ export default function App() {
       <Footer />
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} activeTicketCount={activeTicketCount} />
+
+      {pumpTicket && (
+        <Suspense fallback={null}>
+          <PumpScreen
+            reservation={pumpTicket}
+            onClose={() => setPumpTicketId(null)}
+            station={stations.find((s) => s.id === pumpTicket.stationId)}
+            onCancel={
+              showingSavedTickets
+                ? undefined
+                : () => {
+                    if (!window.confirm(`Annuler votre ticket de ${pumpTicket.liters} L chez ${pumpTicket.stationName} ? Les litres seront rendus à la station.`)) return;
+                    setPumpTicketId(null);
+                    void handleCancelReservation(pumpTicket.id);
+                  }
+            }
+          />
+        </Suspense>
+      )}
 
       {/* Booking Modal */}
       <ReservationModal

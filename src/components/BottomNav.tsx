@@ -38,13 +38,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, u
               onClick={() => setActiveTab(id)}
               aria-current={isActive ? 'page' : undefined}
               className={`relative flex flex-col items-center gap-1 pt-2.5 pb-2 text-xs font-semibold transition-colors ${
-                isActive ? 'text-amber-400' : 'text-neutral-400 hover:text-white'
+                isActive ? 'text-active' : 'text-neutral-400 hover:text-white'
               }`}
             >
               <Icon className="w-6 h-6" strokeWidth={isActive ? 2.5 : 2} />
               <span>{label}</span>
               {badge ? (
-                <span className="absolute top-1.5 left-1/2 ml-2 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-black text-xs font-bold flex items-center justify-center">
+                <span className="absolute top-1.5 left-1/2 ml-2 min-w-[18px] h-[18px] px-1 rounded-full chip-selected text-xs font-bold flex items-center justify-center">
                   {badge}
                 </span>
               ) : null}

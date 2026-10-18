@@ -21,9 +21,9 @@ interface InteractiveMapProps {
 const LOME: L.LatLngTuple = [6.1725, 1.2314];
 
 const STATUS = {
-  OUT: { color: '#dc2626', label: 'Rupture' },
-  LOW: { color: '#d97706', label: 'Stock faible' },
-  OK: { color: '#16a34a', label: 'Disponible' },
+  OUT: { color: '#d21034', label: 'Rupture' },
+  LOW: { color: '#f2b300', label: 'Stock faible' },
+  OK: { color: '#12865b', label: 'Disponible' },
 };
 
 function stationStatus(st: Station, fuel: FuelType | 'ALL') {
@@ -36,18 +36,22 @@ function stationStatus(st: Station, fuel: FuelType | 'ALL') {
 const escapeHtml = (text: string) =>
   text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-// A round pin with the brand's initial, coloured by stock, and the price underneath.
-function stationIcon(st: Station, fuel: FuelType | 'ALL', selected: boolean) {
-  const { color } = stationStatus(st, fuel);
-  const price = (fuel === 'ALL' ? st.stock.SUPER : st.stock[fuel])?.pricePerLiter ?? 0;
-  const size = selected ? 40 : 32;
+// A label with the queue time: green for the shortest wait, white otherwise (a gold dot when stock is low),
+// red "Vide" when the fuel ran out. The chosen station's label is bigger, with a dark outline.
+function stationIcon(st: Station, fuel: FuelType | 'ALL', selected: boolean, fastest: boolean) {
+  const status = stationStatus(st, fuel);
+  const empty = status === STATUS.OUT;
+  const bg = empty ? STATUS.OUT.color : fastest ? '#00553c' : '#fff';
+  const fg = empty || fastest ? '#fff' : '#0f1f18';
+  const text = empty ? 'Vide' : `${st.queueTimeMinutes} min`;
+  const dot = status === STATUS.LOW ? `<span style="width:8px;height:8px;border-radius:9999px;background:${STATUS.LOW.color}"></span>` : '';
   return L.divIcon({
     className: '',
-    iconSize: [size, size + 18],
-    iconAnchor: [size / 2, size / 2],
-    html: `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Space Mono',monospace">
-      <div style="width:${size}px;height:${size}px;border-radius:9999px;background:${selected ? '#000' : '#fff'};color:${selected ? '#fff' : '#000'};border:3px solid ${color};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${selected ? 16 : 14}px;box-shadow:0 2px 6px rgba(0,0,0,.35)">${escapeHtml(st.brand.charAt(0))}</div>
-      <div style="background:${color};color:#fff;font-size:10px;font-weight:800;padding:0 6px;border-radius:9999px;white-space:nowrap;border:1px solid #fff">${price} F</div>
+    iconSize: [80, 40],
+    iconAnchor: [40, 40],
+    html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:40px;font-family:'Figtree Variable',sans-serif">
+      <div style="display:flex;align-items:center;gap:5px;white-space:nowrap;background:${bg};color:${fg};font-weight:800;font-size:${selected ? 15 : 13}px;padding:${selected ? '6px 12px' : '4px 10px'};border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.3);border:2px solid ${selected ? '#0f1f18' : bg === '#fff' ? '#d5ddd9' : bg}">${dot}${escapeHtml(text)}</div>
+      <div style="width:10px;height:10px;margin-top:-6px;transform:rotate(45deg);background:${bg};border-right:2px solid ${selected ? '#0f1f18' : bg === '#fff' ? '#d5ddd9' : bg};border-bottom:2px solid ${selected ? '#0f1f18' : bg === '#fff' ? '#d5ddd9' : bg}"></div>
     </div>`,
   });
 }
@@ -110,6 +114,15 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     [stations, selectedFuelFilter],
   );
 
+  // The station with fuel and the shortest queue gets the green label.
+  const fastestId = useMemo(
+    () =>
+      visible
+        .filter((s) => stationStatus(s, selectedFuelFilter) !== STATUS.OUT)
+        .reduce<Station | null>((best, s) => (!best || s.queueTimeMinutes < best.queueTimeMinutes ? s : best), null)?.id,
+    [visible, selectedFuelFilter],
+  );
+
   const selectedDistance = selectedStation && userLocation ? distanceKm(userLocation, selectedStation) : null;
 
   return (
@@ -129,7 +142,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           <button
             onClick={onLocate}
             disabled={locating}
-            className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold rounded flex items-center gap-1.5 disabled:opacity-60"
+            className="px-3 py-1.5 border border-neutral-700 hover:border-white text-white font-bold rounded flex items-center gap-1.5 disabled:opacity-60"
           >
             <Crosshair className="w-3.5 h-3.5" />
             {locating ? 'Localisation…' : userLocation ? 'Me relocaliser' : 'Me localiser'}
@@ -157,7 +170,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             <Marker
               key={st.id}
               position={[st.lat, st.lng]}
-              icon={stationIcon(st, selectedFuelFilter, selectedStation?.id === st.id)}
+              icon={stationIcon(st, selectedFuelFilter, selectedStation?.id === st.id, st.id === fastestId)}
               title={`${st.name} (${stationStatus(st, selectedFuelFilter).label})`}
               zIndexOffset={selectedStation?.id === st.id ? 1000 : 0}
               eventHandlers={{ click: () => onSelectStation(st) }}
@@ -166,7 +179,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         </MapContainer>
 
         <div className="absolute bottom-3 left-3 z-[400] bg-white/95 text-black border-2 border-black p-2.5 rounded-lg text-xs font-mono-code grid grid-cols-2 gap-x-3 gap-y-1 shadow-lg">
-          {[STATUS.OK, STATUS.LOW, STATUS.OUT].map((s) => (
+          {[
+            { color: '#00553c', label: 'Le plus rapide' },
+            STATUS.LOW,
+            { color: STATUS.OUT.color, label: 'Vide' },
+          ].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full" style={{ background: s.color }} />
               {s.label}
