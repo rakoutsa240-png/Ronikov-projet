@@ -49,7 +49,7 @@ export const StationCard: React.FC<StationCardProps> = ({
 
       {/* Key facts as pills */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400 text-black font-bold">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full chip-selected font-bold">
           <Clock className="w-3.5 h-3.5" />
           {station.queueTimeMinutes} min d'attente
         </span>

@@ -1,7 +1,8 @@
 import React, { Suspense, lazy, useState } from 'react';
 import { Station, FuelType } from '../types';
 import { StationCard } from './StationCard';
-import { distanceKm, LatLng, locateUser } from '../geo';
+import { distanceKm, formatDistance, LatLng, locateUser } from '../geo';
+import { StationBrandLogo } from './StationBrandLogo';
 import { FUEL_TYPES } from '../../shared/stock';
 import { useFavorites } from '../storage';
 import { StationListSkeleton } from './Skeleton';
@@ -14,7 +15,63 @@ const mapFallback = (
     Chargement de la carte…
   </div>
 );
-import { Search, Filter, SlidersHorizontal, MapPin, Grid, ListFilter } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, MapPin, Grid, ListFilter, ChevronRight } from 'lucide-react';
+
+const SORT_LABELS = { queue: 'attente', stock: 'stock', distance: 'proximité' } as const;
+
+// Stock chip of the phone list: the chosen fuel, or super when every fuel is shown.
+function stockChip(st: Station, fuel: FuelType | 'ALL') {
+  const stock = fuel === 'ALL' ? st.stock.SUPER : st.stock[fuel];
+  if (!stock || stock.status === 'OUT_OF_STOCK' || stock.availableLiters <= 0)
+    return { label: 'Vide', className: 'bg-[#fde7eb] text-[#a10c28]' };
+  if (stock.status === 'LOW') return { label: 'Stock faible', className: 'bg-[#fff1c7] text-[#7a5400]' };
+  return { label: 'En stock', className: 'bg-brand-50 text-brand-700' };
+}
+
+// On phones the stations under the map come as a sheet of short rows (brand, name, distance, wait,
+// price, stock), like a maps app; a tap opens the station page where it can be booked.
+const StationSheet: React.FC<{
+  stations: Station[];
+  fuel: FuelType | 'ALL';
+  sortBy: keyof typeof SORT_LABELS;
+  distanceTo: (s: Station) => number | undefined;
+  onView: (s: Station) => void;
+}> = ({ stations, fuel, sortBy, distanceTo, onView }) => (
+  <section
+    aria-label="Liste des stations"
+    className="lg:hidden relative bg-black rounded-t-[28px] shadow-[0_-10px_30px_-10px_rgba(0,0,0,.25)] px-4 pt-2.5 pb-3"
+  >
+    <div aria-hidden="true" className="mx-auto w-10 h-1.5 rounded-full bg-neutral-700" />
+    <div className="flex items-baseline justify-between gap-3 pt-3 pb-1">
+      <h2 className="font-display text-lg font-extrabold text-white">
+        {stations.length} station{stations.length > 1 ? 's' : ''}
+      </h2>
+      <span className="text-xs font-bold text-active">Trier : {SORT_LABELS[sortBy]}</span>
+    </div>
+    <ul className="divide-y divide-neutral-800">
+      {stations.map((st) => {
+        const km = distanceTo(st);
+        const chip = stockChip(st, fuel);
+        const price = (fuel === 'ALL' ? st.stock.SUPER : st.stock[fuel])?.pricePerLiter;
+        return (
+          // The brand tile is a button of its own, so the row is not one: a tap anywhere on it opens the station.
+          <li key={st.id} onClick={() => onView(st)} className="flex items-center gap-3 py-3 cursor-pointer">
+            <StationBrandLogo brand={st.brand} size="md" interactive={false} showBadge={false} className="shrink-0" />
+            <button className="flex-1 min-w-0 text-left">
+              <span className="block font-bold text-white truncate">{st.name}</span>
+              <span className="block text-xs text-neutral-400 truncate">
+                {km !== undefined ? `${formatDistance(km)} • ` : ''}
+                {st.queueTimeMinutes} min{price ? ` • ${price} F/L` : ''}
+              </span>
+            </button>
+            <span className={`theme-fixed shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold ${chip.className}`}>{chip.label}</span>
+            <ChevronRight className="w-4 h-4 shrink-0 text-neutral-500" />
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+);
 
 interface MapViewProps {
   stations: Station[];
@@ -139,7 +196,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <button
               onClick={() => setViewLayout('split')}
               className={`px-3 py-1.5 ${
-                viewLayout === 'split' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
+                viewLayout === 'split' ? 'chip-selected' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
               Carte et liste
@@ -147,7 +204,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <button
               onClick={() => setViewLayout('mapOnly')}
               className={`px-3 py-1.5 ${
-                viewLayout === 'mapOnly' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
+                viewLayout === 'mapOnly' ? 'chip-selected' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
               Carte
@@ -155,7 +212,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <button
               onClick={() => setViewLayout('listOnly')}
               className={`px-3 py-1.5 ${
-                viewLayout === 'listOnly' ? 'bg-amber-400 text-black' : 'bg-neutral-900 text-neutral-300 hover:text-white'
+                viewLayout === 'listOnly' ? 'chip-selected' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
               Liste
@@ -183,9 +240,9 @@ export const MapView: React.FC<MapViewProps> = ({
           <div className="md:col-span-4 flex items-center gap-1 overflow-x-auto py-1">
             <button
               onClick={() => setSelectedFuel('ALL')}
-              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap ${
                 selectedFuel === 'ALL'
-                  ? 'bg-white text-black border border-white'
+                  ? 'chip-selected border'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
@@ -193,9 +250,9 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('SUPER')}
-              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap ${
                 selectedFuel === 'SUPER'
-                  ? 'bg-white text-black border border-white'
+                  ? 'chip-selected border'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
@@ -203,9 +260,9 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('GAZOLE')}
-              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap ${
                 selectedFuel === 'GAZOLE'
-                  ? 'bg-white text-black border border-white'
+                  ? 'chip-selected border'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
@@ -213,9 +270,9 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('MELANGE')}
-              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap ${
                 selectedFuel === 'MELANGE'
-                  ? 'bg-white text-black border border-white'
+                  ? 'chip-selected border'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
@@ -223,9 +280,9 @@ export const MapView: React.FC<MapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFuel('KEROSENE')}
-              className={`px-2.5 py-1.5 font-bold whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap ${
                 selectedFuel === 'KEROSENE'
-                  ? 'bg-white text-black border border-white'
+                  ? 'chip-selected border'
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
@@ -324,9 +381,19 @@ export const MapView: React.FC<MapViewProps> = ({
             </Suspense>
           </div>
 
+          {!loading && filtered.length > 0 && (
+            <StationSheet
+              stations={filtered}
+              fuel={selectedFuel}
+              sortBy={sortBy}
+              distanceTo={distanceTo}
+              onView={onViewStationDetails}
+            />
+          )}
+
           {/* List Column */}
-          {/* On a computer the list scrolls beside the map; on a phone it simply follows the map. */}
-          <div className="lg:col-span-5 space-y-4 lg:max-h-[720px] lg:overflow-y-auto pr-1">
+          {/* On a computer the list scrolls beside the map; on a phone the sheet above replaces it. */}
+          <div className={`lg:col-span-5 space-y-4 lg:max-h-[720px] lg:overflow-y-auto pr-1 ${!loading && filtered.length > 0 ? 'hidden lg:block' : ''}`}>
             {loading ? (
               <StationListSkeleton />
             ) : filtered.length === 0 ? (

@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 // Small values kept on the phone (favourites, last booking choices, last known stations).
 // Private browsing or a full storage simply means nothing is remembered.
@@ -85,4 +85,14 @@ export function useWakeLock(active: boolean) {
       void lock?.release().catch(() => {});
     };
   }, [active]);
+}
+
+// The current time, refreshed every `everyMs`: for countdowns such as a ticket's time left.
+export function useNow(everyMs = 30_000): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), everyMs);
+    return () => window.clearInterval(id);
+  }, [everyMs]);
+  return now;
 }

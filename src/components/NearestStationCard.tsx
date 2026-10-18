@@ -89,14 +89,14 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
         )}
       </div>
 
-      <div role="group" aria-label="Carburant" className="grid grid-cols-4 gap-1.5">
+      <div role="group" aria-label="Carburant" className="grid grid-cols-4 gap-1 p-1 rounded-[14px] bg-neutral-800">
         {FUEL_TYPES.map((f) => (
           <button
             key={f}
             onClick={() => chooseFuel(f)}
             aria-pressed={fuel === f}
-            className={`py-2 rounded-lg text-sm font-semibold border transition-colors ${
-              fuel === f ? 'bg-amber-400 text-black border-amber-400' : 'bg-black text-neutral-200 border-neutral-700 hover:border-neutral-500'
+            className={`py-2 rounded-[10px] text-sm font-bold transition-colors ${
+              fuel === f ? 'bg-black text-white shadow' : 'text-neutral-300 hover:text-white'
             }`}
           >
             {SHORT_LABELS[f]}

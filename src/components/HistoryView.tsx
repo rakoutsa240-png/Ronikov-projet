@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Reservation, TicketReview } from '../types';
+import { Reservation, Station, TicketReview } from '../types';
 import { Ticket, Clock, CheckCircle2, MessageSquareHeart, AlertOctagon, Printer, Copy, XCircle, MapPin, Sparkles, ShieldCheck, QrCode, Fuel, Maximize2, X } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { PaymentMethodLabel } from './PaymentLogos';
@@ -20,6 +20,7 @@ interface HistoryViewProps {
   onOpenAuth: () => void;
   onNavigateToMap: () => void;
   onReviewed?: (reservationId: string, review: TicketReview) => void;
+  stations?: Station[]; // for the way to the station from a ticket
 }
 
 // A served ticket can still be reviewed for a while after the pump.
@@ -45,6 +46,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   onOpenAuth,
   onNavigateToMap,
   onReviewed,
+  stations,
 }) => {
   const [reviewTicket, setReviewTicket] = useState<Reservation | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'PENDING' | 'VALIDATED' | 'ENDED'>('ALL');
@@ -138,7 +140,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
     switch (status) {
       case 'PENDING':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400 text-black border border-amber-300 font-mono-code font-black text-xs rounded-md shadow-md shadow-amber-400/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 chip-selected border font-mono-code font-black text-xs rounded-md shadow-md">
             <Clock className="w-3.5 h-3.5" /> Code actif (à récupérer)
           </span>
         );
@@ -163,10 +165,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
     }
   };
 
+  // True when the visitor confirmed.
   const handleCancel = (res: Reservation) => {
-    if (window.confirm(`Annuler votre ticket de ${res.liters} L chez ${res.stationName} ? Les litres seront rendus à la station.`)) {
-      onCancelReservation(res.id);
-    }
+    if (!window.confirm(`Annuler votre ticket de ${res.liters} L chez ${res.stationName} ? Les litres seront rendus à la station.`)) return false;
+    onCancelReservation(res.id);
+    return true;
   };
 
   if (!isSignedIn) {
@@ -215,7 +218,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             <button
               onClick={() => setFilterStatus('ALL')}
               className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
-                filterStatus === 'ALL' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
+                filterStatus === 'ALL' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
               Toutes ({reservations.length})
@@ -223,7 +226,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             <button
               onClick={() => setFilterStatus('PENDING')}
               className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
-                filterStatus === 'PENDING' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
+                filterStatus === 'PENDING' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
               Actives ({reservations.filter((r) => r.status === 'PENDING').length})
@@ -231,7 +234,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             <button
               onClick={() => setFilterStatus('VALIDATED')}
               className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
-                filterStatus === 'VALIDATED' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
+                filterStatus === 'VALIDATED' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
               Servies ({reservations.filter((r) => r.status === 'VALIDATED').length})
@@ -239,7 +242,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             <button
               onClick={() => setFilterStatus('ENDED')}
               className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
-                filterStatus === 'ENDED' ? 'bg-amber-400 text-black font-extrabold' : 'hover:text-white'
+                filterStatus === 'ENDED' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
               Annulées / expirées ({reservations.filter((r) => r.status === 'EXPIRED' || r.status === 'CANCELLED').length})
@@ -461,7 +464,20 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       </div>
 
       {onReviewed && <ReviewModal reservation={reviewTicket} onClose={() => setReviewTicket(null)} onReviewed={onReviewed} />}
-      {pumpTicket && <PumpScreen reservation={pumpTicket} onClose={() => setPumpTicket(null)} />}
+      {pumpTicket && (
+        <PumpScreen
+          reservation={pumpTicket}
+          onClose={() => setPumpTicket(null)}
+          station={stations?.find((s) => s.id === pumpTicket.stationId)}
+          onCancel={
+            offline
+              ? undefined
+              : () => {
+                  if (handleCancel(pumpTicket)) setPumpTicket(null);
+                }
+          }
+        />
+      )}
 
       {/* Ticket Modal for Viewing & Printing */}
       {activeTicketModal && (

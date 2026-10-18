@@ -1,22 +1,39 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { Check, Navigation, X } from 'lucide-react';
 import { Reservation } from '../types';
 import { QRCodeImage } from './QRCodeImage';
 import { useModal } from '../useModal';
-import { useWakeLock } from '../storage';
+import { useNow, useWakeLock } from '../storage';
+import { directionsUrl, LatLng } from '../geo';
+import { timeLeft } from '../time';
+import { RESERVATION_VALIDITY_MINUTES } from '../../shared/reservations';
 
 export const ticketQrPayload = (r: Reservation) =>
   r.qrPayload ??
   `PLEINO-TICKET|CODE:${r.code}|STATION:${r.stationName}|FUEL:${r.fuelLabel}|LITERS:${r.liters}L|AMOUNT:${r.totalAmountXOF}FCFA|EXPIRES:${r.expiresAt}`;
 
-// Full-screen ticket for the pump: white background and the biggest QR code the screen allows, so the
-// attendant's camera reads it first time even in sunlight. The screen stays on while it is shown.
-export const PumpScreen: React.FC<{ reservation: Reservation; onClose: () => void }> = ({ reservation, onClose }) => {
+interface PumpScreenProps {
+  reservation: Reservation;
+  onClose: () => void;
+  // The station's position, for the "Itinéraire" button.
+  station?: LatLng;
+  // Shown for an active ticket: cancelling gives the litres back to the station.
+  onCancel?: () => void;
+}
+
+// Full-screen ticket for the pump, in the brand green. The QR code sits on a white card, as big as the
+// screen allows, so the attendant's camera reads it first time even in sunlight. The screen stays on
+// while it is shown, and the ticket is kept on the phone so it opens without network.
+export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, station, onCancel }) => {
   useModal(true, onClose);
   useWakeLock(true);
-  // Leaves room for the code and the details under the QR code.
-  const size = Math.max(200, Math.min(window.innerWidth - 48, window.innerHeight - 300, 420));
+  const now = useNow();
+  // Leaves room for the details above and the buttons under the card.
+  const size = Math.max(180, Math.min(window.innerWidth - 96, window.innerHeight - 440, 300));
+  const msLeft = new Date(reservation.expiresAt).getTime() - now;
+  const active = reservation.status === 'PENDING' && msLeft > 0;
+  const validityShare = Math.max(0, Math.min(1, msLeft / (RESERVATION_VALIDITY_MINUTES * 60_000)));
 
   // Rendered at the root of the page: inside the booking window (which blurs what is behind it) a
   // "fixed" element would only cover that window, not the whole screen.
@@ -25,24 +42,75 @@ export const PumpScreen: React.FC<{ reservation: Reservation; onClose: () => voi
       role="dialog"
       aria-modal="true"
       aria-label="Ticket à présenter au pompiste"
-      className="theme-fixed fixed inset-0 z-[100] bg-white text-black flex flex-col items-center justify-center gap-4 p-6 no-print overflow-y-auto"
+      className="theme-fixed fixed inset-0 z-[100] bg-brand-800 text-white no-print overflow-y-auto"
     >
-      <button
-        onClick={onClose}
-        aria-label="Fermer"
-        className="absolute top-4 right-4 p-3 rounded-full bg-neutral-100 hover:bg-neutral-200"
-      >
-        <X className="w-6 h-6" />
-      </button>
-      <p className="text-base font-semibold text-neutral-700 text-center">Présentez cet écran au pompiste</p>
-      <QRCodeImage value={ticketQrPayload(reservation)} size={size} className="border-0 shadow-none p-0" />
-      <div className="font-code text-3xl sm:text-4xl font-bold tracking-widest">{reservation.code}</div>
-      <div className="text-lg font-semibold text-center">
-        {reservation.liters} L de {reservation.fuelLabel}
-        <span className="block text-base font-normal text-neutral-700">
-          {reservation.stationName} • valable jusqu'à{' '}
-          {new Date(reservation.expiresAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-        </span>
+      <div className="min-h-full max-w-md mx-auto flex flex-col gap-4 px-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+        <div className="flex items-center justify-between gap-3">
+          <button onClick={onClose} aria-label="Fermer" className="p-2.5 -ml-2 rounded-full hover:bg-white/10">
+            <X className="w-6 h-6" />
+          </button>
+          <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold text-brand-100">
+            Enregistré sur ce téléphone <Check className="w-3.5 h-3.5" />
+          </span>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-brand-100">Montrez ce code au pompiste</p>
+          <h2 className="font-display text-3xl font-extrabold leading-tight">
+            {reservation.liters} L de {reservation.fuelLabel}
+          </h2>
+          <p className="text-sm text-brand-100">
+            {reservation.stationName} • payé {reservation.totalAmountXOF.toLocaleString('fr-FR')} FCFA
+          </p>
+        </div>
+
+        <div className="bg-white text-[#0f1f18] rounded-3xl p-5 flex flex-col items-center gap-4 shadow-xl shadow-black/20">
+          <QRCodeImage value={ticketQrPayload(reservation)} size={size} className="border-0 shadow-none p-0" />
+          <div className="w-full border-t-2 border-dashed border-[#d5ddd9]" />
+          <div className="font-code text-3xl font-bold tracking-widest">{reservation.code}</div>
+          <p className="text-xs font-medium text-[#5a6661] -mt-2">Le code est enregistré sur ce téléphone</p>
+        </div>
+
+        {active ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-brand-100">Valable encore</span>
+              <span className="font-display font-extrabold">{timeLeft(reservation.expiresAt, now)}</span>
+            </div>
+            <div className="h-2 rounded-full bg-white/15 overflow-hidden" aria-hidden="true">
+              <div className="h-full rounded-full bg-amber-400" style={{ width: `${validityShare * 100}%` }} />
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm font-semibold text-brand-100 text-center">
+            {reservation.status === 'PENDING' ? 'Ce ticket a expiré.' : 'Ce ticket a déjà été utilisé ou annulé.'}
+          </p>
+        )}
+
+        {(station || (active && onCancel)) && (
+          <div className="grid grid-cols-2 gap-3 mt-auto pt-2">
+            {station && (
+              <a
+                href={directionsUrl(station)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center justify-center gap-2 h-[50px] rounded-2xl border-2 border-white/40 font-bold text-sm hover:bg-white/10 ${
+                  active && onCancel ? '' : 'col-span-2'
+                }`}
+              >
+                <Navigation className="w-4 h-4" /> Itinéraire
+              </a>
+            )}
+            {active && onCancel && (
+              <button
+                onClick={onCancel}
+                className={`h-[50px] rounded-2xl border-2 border-white/40 font-bold text-sm hover:bg-white/10 ${station ? '' : 'col-span-2'}`}
+              >
+                Annuler
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>,
     document.body,
