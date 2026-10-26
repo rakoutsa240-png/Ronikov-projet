@@ -3,16 +3,17 @@ import { NotificationItem } from '../types';
 import { X, Bell, CheckCheck, Clock, Fuel, ShieldAlert, Sparkles, CheckCircle2 } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { useModal } from '../useModal';
+import { locale, t, tServer } from '../i18n';
 
 // API notifications carry an ISO date; the demo data already holds a label like "Il y a 5 min".
 function formatNotificationTime(timestamp: string): string {
   const date = new Date(timestamp);
   if (!/^\d{4}-\d{2}-\d{2}T/.test(timestamp) || Number.isNaN(date.getTime())) return timestamp;
   const minutes = Math.round((Date.now() - date.getTime()) / 60_000);
-  if (minutes < 1) return 'À l’instant';
-  if (minutes < 60) return `Il y a ${minutes} min`;
-  if (minutes < 24 * 60) return `Il y a ${Math.round(minutes / 60)} h`;
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  if (minutes < 1) return t('À l’instant');
+  if (minutes < 60) return t('Il y a {n} min', { n: minutes });
+  if (minutes < 24 * 60) return t('Il y a {n} h', { n: Math.round(minutes / 60) });
+  return date.toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 }
 
 interface NotificationDrawerProps {
@@ -116,7 +117,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 </div>
                 <div>
                   <h2 className="text-base font-black text-white tracking-tight flex items-center gap-2">
-                    <span>Notifications</span>
+                    <span>{t('Notifications')}</span>
                     {unreadCount > 0 && (
                       <span className="px-2 py-0.5 bg-amber-400 text-black text-[11px] font-black rounded-full">
                         {unreadCount}
@@ -124,7 +125,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     )}
                   </h2>
                   <p className="text-[11px] text-neutral-400 font-sans">
-                    Alertes stations & confirmations en direct
+                    {t('Alertes stations & confirmations en direct')}
                   </p>
                 </div>
               </div>
@@ -135,13 +136,13 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     onClick={onMarkAllRead}
                     className="text-[11px] uppercase font-bold text-amber-300 hover:text-white border border-neutral-700 hover:border-amber-400 px-2.5 py-1 rounded-lg transition-colors"
                   >
-                    Tout lire
+                    {t('Tout lire')}
                   </button>
                 )}
                 <button
                   onClick={onClose}
                   className="p-1.5 border border-neutral-700 text-neutral-300 hover:text-white hover:border-amber-400 rounded-lg transition-colors bg-neutral-900"
-                  title="Fermer"
+                  title={t('Fermer')}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -152,8 +153,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             {notifications.length === 0 ? (
               <div className="py-16 text-center text-xs text-neutral-500 space-y-2 border border-dashed border-neutral-800 rounded-2xl bg-black/40">
                 <Bell className="w-8 h-8 mx-auto text-neutral-700" />
-                <p className="font-bold text-neutral-400">Aucune notification pour le moment</p>
-                <p className="text-xs text-neutral-600 font-sans">Vos confirmations et recharges apparaîtront ici.</p>
+                <p className="font-bold text-neutral-400">{t('Aucune notification pour le moment')}</p>
+                <p className="text-xs text-neutral-600 font-sans">{t('Vos confirmations et recharges apparaîtront ici.')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -189,11 +190,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
                           <div>
                             <span className={`text-xs font-black block ${accent.textAccent}`}>
-                              {n.title}
+                              {tServer(n.title)}
                             </span>
                             {brand && (
                               <span className="text-[9px] text-neutral-400 font-bold">
-                                Station {brand}
+                                {t('Station')} {brand}
                               </span>
                             )}
                           </div>
@@ -206,7 +207,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
                       {/* Message Body */}
                       <p className="text-xs text-neutral-200 font-sans leading-relaxed">
-                        {n.message}
+                        {tServer(n.message)}
                       </p>
                     </div>
                   );
@@ -221,7 +222,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               onClick={onClose}
               className="w-full py-3 bg-amber-400 text-black text-xs font-black tracking-wider hover:bg-amber-300 active:scale-98 transition-all rounded-xl shadow-lg shadow-amber-400/20"
             >
-              Fermer les Notifications
+              {t('Fermer les notifications')}
             </button>
           </div>
         </div>

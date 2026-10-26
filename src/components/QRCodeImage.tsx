@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { t } from '../i18n';
 
 interface QRCodeImageProps {
   value: string;
@@ -64,7 +65,7 @@ export const QRCodeImage: React.FC<QRCodeImageProps> = ({ value, size = 160, cla
     <img
       src={dataUrl}
       alt={`Code QR scannable: ${value}`}
-      title="Code QR scannable par le pompiste"
+      title={t('Code QR scannable par le pompiste')}
       className={`bg-white rounded-xl border border-neutral-200 p-2 shadow-sm object-contain ${className}`}
       style={{ width: size, height: size }}
     />

@@ -6,6 +6,7 @@ import { distanceKm, directionsUrl, formatDistance, LatLng, locateUser } from '.
 import { loadJSON, saveJSON } from '../storage';
 import { FavoriteButton } from './FavoriteButton';
 import { StationFreshness } from './StationFreshness';
+import { num, t } from '../i18n';
 
 const SHORT_LABELS: Record<FuelType, string> = { SUPER: 'Super', GAZOLE: 'Gazole', MELANGE: 'Mélange', KEROSENE: 'Kérosène' };
 const FUEL_KEY = 'ronikov.homeFuel';
@@ -75,7 +76,7 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
     <section aria-labelledby="nearest-title" className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-2xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="nearest-title" className="text-lg sm:text-xl font-extrabold text-white">
-          {position ? 'Station la plus proche' : 'Attente la plus courte'}
+          {position ? t('Station la plus proche') : t('Attente la plus courte')}
         </h2>
         {!position && (
           <button
@@ -84,12 +85,12 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg border border-neutral-700 text-white hover:border-amber-400 disabled:opacity-60"
           >
             <LocateFixed className="w-4 h-4 text-amber-400" />
-            {locating ? 'Recherche…' : 'Me localiser'}
+            {locating ? t('Recherche…') : t('Me localiser')}
           </button>
         )}
       </div>
 
-      <div role="group" aria-label="Carburant" className="grid grid-cols-4 gap-1 p-1 rounded-[14px] bg-neutral-800">
+      <div role="group" aria-label={t('Carburant')} className="grid grid-cols-4 gap-1 p-1 rounded-[14px] bg-neutral-800">
         {FUEL_TYPES.map((f) => (
           <button
             key={f}
@@ -99,7 +100,7 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
               fuel === f ? 'bg-black text-white shadow' : 'text-neutral-300 hover:text-white'
             }`}
           >
-            {SHORT_LABELS[f]}
+            {t(SHORT_LABELS[f])}
           </button>
         ))}
       </div>
@@ -125,10 +126,10 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
                 </span>
               )}
               <span className="inline-flex items-center gap-1 text-white font-semibold">
-                <Clock className="w-4 h-4 text-amber-400" /> {best.station.queueTimeMinutes} min d'attente
+                <Clock className="w-4 h-4 text-amber-400" /> {t("{n} min d'attente", { n: best.station.queueTimeMinutes })}
               </span>
               <span className="text-neutral-200">
-                {best.station.stock[fuel].pricePerLiter} FCFA/L • {best.station.stock[fuel].availableLiters.toLocaleString('fr-FR')} L dispo
+                {best.station.stock[fuel].pricePerLiter} FCFA/L • {t('{n} L dispo', { n: num(best.station.stock[fuel].availableLiters) })}
               </span>
             </div>
             <StationFreshness station={best.station} />
@@ -139,13 +140,13 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-neutral-700 text-white font-semibold text-sm hover:border-amber-400"
               >
-                <Navigation className="w-4 h-4" /> Itinéraire
+                <Navigation className="w-4 h-4" /> {t('Itinéraire')}
               </a>
               <button
                 onClick={() => onBook(best.station)}
                 className="inline-flex items-center justify-center gap-1 py-3 rounded-xl bg-amber-400 text-black font-extrabold text-sm hover:bg-amber-300"
               >
-                Réserver <ChevronRight className="w-4 h-4" />
+                {t('Réserver')} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -167,7 +168,7 @@ export const NearestStationCard: React.FC<NearestStationCardProps> = ({ stations
           )}
         </div>
       ) : (
-        <p className="text-sm text-neutral-300">Aucune station n'a de {SHORT_LABELS[fuel]} à réserver pour le moment.</p>
+        <p className="text-sm text-neutral-300">{t("Aucune station n'a de {fuel} à réserver pour le moment.", { fuel: t(SHORT_LABELS[fuel]) })}</p>
       )}
     </section>
   );

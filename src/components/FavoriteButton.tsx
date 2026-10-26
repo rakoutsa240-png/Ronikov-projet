@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import { toggleFavorite, useFavorites } from '../storage';
+import { t } from '../i18n';
 
 // Star that adds or removes a station from the visitor's favourites (kept on this phone).
 export const FavoriteButton: React.FC<{ stationId: string; className?: string }> = ({ stationId, className = '' }) => {
@@ -13,8 +14,8 @@ export const FavoriteButton: React.FC<{ stationId: string; className?: string }>
         toggleFavorite(stationId);
       }}
       aria-pressed={isFavorite}
-      aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-      title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      aria-label={isFavorite ? t('Retirer des favoris') : t('Ajouter aux favoris')}
+      title={isFavorite ? t('Retirer des favoris') : t('Ajouter aux favoris')}
       className={`p-2 rounded-lg border shrink-0 transition-colors ${
         isFavorite ? 'border-amber-400 bg-amber-400/10 text-amber-400' : 'border-neutral-700 text-neutral-400 hover:text-amber-300'
       } ${className}`}

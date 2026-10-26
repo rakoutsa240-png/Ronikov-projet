@@ -18,6 +18,7 @@ import { ReportStationModal } from './components/ReportStationModal';
 import { showAlert } from './alerts';
 import { WifiOff, RefreshCw } from 'lucide-react';
 import { parseHash, routeToHash, Route, Tab } from './routes';
+import { t, tServer, useLang } from './i18n';
 
 // Pages other than the home page and the map are downloaded only when opened, so the first visit stays light.
 const named = <K extends string>(load: () => Promise<Record<K, React.ComponentType<any>>>, name: K) =>
@@ -39,6 +40,8 @@ const TICKETS_KEY = 'ronikov.tickets';
 
 
 export default function App() {
+  // Every page reads its texts through t(): following the language here re-renders them all.
+  useLang();
   // Everything comes from the API. Until it answers the pages show grey placeholders, or the stations
   // saved at the last visit; the demo data is only a last resort when the server can't be reached.
   const [stations, setStations] = useState<Station[]>(() => loadJSON<Station[]>(STATIONS_KEY, []));
@@ -349,7 +352,7 @@ export default function App() {
       });
       refreshStations();
     } catch (e) {
-      window.alert(e instanceof ApiError ? e.message : 'Annulation impossible, réessayez.');
+      window.alert(e instanceof ApiError ? e.message : t('Annulation impossible, réessayez.'));
     }
   };
 
@@ -369,14 +372,14 @@ export default function App() {
       const { message, reservation } = await api.validateTicket(stationId, code);
       setStaffReservations((prev) => prev.map((r) => (r.id === reservation.id ? reservation : r)));
       refreshStations();
-      return { success: true, message, reservation };
+      return { success: true, message: tServer(message), reservation };
     } catch (e) {
       if (e instanceof ApiError) {
         const reservation = e.data?.reservation as Reservation | undefined;
         if (reservation) setStaffReservations((prev) => prev.map((r) => (r.id === reservation.id ? reservation : r)));
         return { success: false, message: e.message, reservation };
       }
-      return { success: false, message: 'Serveur Pleino injoignable. Réessayez.' };
+      return { success: false, message: t('Serveur Pleino injoignable. Réessayez.') };
     }
   };
 
@@ -401,7 +404,7 @@ export default function App() {
         if (Object.keys(changes).length > 0) replaceStation(await api.updateStock(stationId, fuel, changes), stationId);
       }
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : t('Serveur Pleino injoignable. Réessayez.'));
     }
   };
 
@@ -410,7 +413,7 @@ export default function App() {
     try {
       replaceStation(await api.updateStation(stationId, { queueTimeMinutes: newQueueTime }), stationId);
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : t('Serveur Pleino injoignable. Réessayez.'));
     }
   };
 
@@ -419,7 +422,7 @@ export default function App() {
       const updated = await api.confirmStation(stationId);
       if (updated) replaceStation(updated, stationId);
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : t('Serveur Pleino injoignable. Réessayez.'));
     }
   };
 
@@ -427,11 +430,11 @@ export default function App() {
   const handleToggleStationPartner = async (stationId: string) => {
     const station = stations.find((s) => s.id === stationId);
     if (!station) return;
-    if (station.isPartner && !window.confirm(`Suspendre ${station.name} ? Elle ne sera plus présentée comme partenaire.`)) return;
+    if (station.isPartner && !window.confirm(t('Suspendre {name} ? Elle ne sera plus présentée comme partenaire.', { name: station.name }))) return;
     try {
       replaceStation(await api.updateStation(stationId, { isPartner: !station.isPartner }), stationId);
     } catch (e) {
-      window.alert(e instanceof ApiError ? e.message : 'Modification impossible, réessayez.');
+      window.alert(e instanceof ApiError ? e.message : t('Modification impossible, réessayez.'));
     }
   };
 
@@ -446,7 +449,7 @@ export default function App() {
       );
       if (updateAllStations) refreshStations();
     } catch (e) {
-      throw new Error(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
+      throw new Error(e instanceof ApiError ? e.message : t('Serveur Pleino injoignable. Réessayez.'));
     }
   };
 
@@ -457,9 +460,9 @@ export default function App() {
       return null;
     }
     try {
-      return { ok: true, message: (await api.requestPremium()).message };
+      return { ok: true, message: tServer((await api.requestPremium()).message) };
     } catch (e) {
-      return { ok: false, message: e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.' };
+      return { ok: false, message: e instanceof ApiError ? e.message : t('Serveur Pleino injoignable. Réessayez.') };
     }
   };
 
@@ -500,12 +503,14 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3">
             <WifiOff className="w-4 h-4 shrink-0" />
             <span className="flex-1">
-              {!isOnline ? 'Pas de connexion internet.' : 'Le serveur Pleino ne répond pas.'} Les stocks affichés peuvent ne pas être à jour
-              {reservations.length > 0 ? ', vos tickets restent visibles dans « Tickets ».' : '.'}
+              {!isOnline ? t('Pas de connexion internet.') : t('Le serveur Pleino ne répond pas.')}{' '}
+              {reservations.length > 0
+                ? t('Les stocks affichés peuvent ne pas être à jour, vos tickets restent visibles dans « Tickets ».')
+                : t('Les stocks affichés peuvent ne pas être à jour.')}
             </span>
             {isOnline && (
               <button onClick={() => loadStationsAndPrices()} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-black/10 hover:bg-black/20 shrink-0">
-                <RefreshCw className="w-4 h-4" /> Réessayer
+                <RefreshCw className="w-4 h-4" /> {t('Réessayer')}
               </button>
             )}
           </div>
@@ -632,7 +637,7 @@ export default function App() {
               showingSavedTickets
                 ? undefined
                 : () => {
-                    if (!window.confirm(`Annuler votre ticket de ${pumpTicket.liters} L chez ${pumpTicket.stationName} ? Les litres seront rendus à la station.`)) return;
+                    if (!window.confirm(t('Annuler votre ticket de {liters} L chez {station} ? Les litres seront rendus à la station.', { liters: pumpTicket.liters, station: pumpTicket.stationName }))) return;
                     setPumpTicketId(null);
                     void handleCancelReservation(pumpTicket.id);
                   }
@@ -656,9 +661,9 @@ export default function App() {
         isOpen={isAuthModalOpen}
         reason={
           pendingBooking
-            ? 'Connectez-vous ou créez un compte gratuit pour réserver : votre ticket sera lié à votre compte.'
+            ? t('Connectez-vous ou créez un compte gratuit pour réserver : votre ticket sera lié à votre compte.')
             : pendingReport
-              ? 'Connectez-vous ou créez un compte gratuit pour signaler un problème à cette station.'
+              ? t('Connectez-vous ou créez un compte gratuit pour signaler un problème à cette station.')
               : undefined
         }
         onClose={() => {

@@ -3,6 +3,7 @@ import { AuthUser } from '../types';
 import { X, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { useModal } from '../useModal';
+import { t } from '../i18n';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onAuthenticated(user, password);
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Serveur Pleino injoignable. Réessayez plus tard.');
+      setError(err instanceof ApiError ? err.message : t('Serveur Pleino injoignable. Réessayez plus tard.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +56,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div role="dialog" aria-modal="true" className="bg-white border-2 border-black max-w-md w-full p-6 space-y-6 font-mono-code relative text-black my-auto">
         <button
           onClick={onClose}
-          aria-label="Fermer"
+          aria-label={t('Fermer')}
           className="absolute top-4 right-4 p-1.5 border border-black hover:bg-black hover:text-white transition-colors"
         >
           <X className="w-5 h-5" />
@@ -64,10 +65,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Header */}
         <div className="border-b border-black pb-3 space-y-1">
           <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-widest block">
-            Accès espace sécurisé Togo
+            {t('Accès espace sécurisé Togo')}
           </span>
           <h2 className="text-2xl font-extrabold tracking-tight">
-            {mode === 'login' ? 'CONNEXION PLEINO' : 'CRÉATION DE COMPTE'}
+            {mode === 'login' ? t('CONNEXION PLEINO') : t('CRÉATION DE COMPTE')}
           </h2>
         </div>
 
@@ -78,13 +79,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'register' && (
             <div className="space-y-1">
-              <label className="text-xs font-bold block text-black">Nom & Prénoms</label>
+              <label className="text-xs font-bold block text-black">{t('Nom & Prénoms')}</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Kofi Mensah"
+                placeholder={t('Ex : Kofi Mensah')}
                 className="w-full p-2.5 border border-black text-xs font-bold focus:outline-none"
               />
             </div>
@@ -92,7 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {mode === 'register' && (
             <div className="space-y-1">
-              <label className="text-xs font-bold block text-black">E-mail (facultatif)</label>
+              <label className="text-xs font-bold block text-black">{t('E-mail (facultatif)')}</label>
               <input
                 type="email"
                 value={email}
@@ -105,7 +106,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           <div className="space-y-1">
             <label className="text-xs font-bold block text-black">
-              Numéro de Téléphone Togolais (+228)
+              {t('Numéro de téléphone togolais (+228)')}
             </label>
             <div className="flex border border-black">
               <span className="px-3 py-2 bg-neutral-100 border-r border-black font-bold text-xs text-neutral-700 flex items-center">
@@ -125,7 +126,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold block text-black">Mot de passe</label>
+            <label className="text-xs font-bold block text-black">{t('Mot de passe')}</label>
             <div className="flex border border-black">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -140,13 +141,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              aria-label={showPassword ? t('Masquer le mot de passe') : t('Afficher le mot de passe')}
               className="px-3 border-l border-black text-neutral-600 hover:text-black"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             </div>
-            {mode === 'register' && <p className="text-[11px] text-neutral-500 font-sans">8 caractères minimum.</p>}
+            {mode === 'register' && <p className="text-[11px] text-neutral-500 font-sans">{t('8 caractères minimum.')}</p>}
             {mode === 'login' && (
               <button
                 type="button"
@@ -154,13 +155,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 aria-expanded={showForgotHelp}
                 className="text-[11px] text-neutral-600 font-sans font-bold underline hover:text-black"
               >
-                Mot de passe oublié ?
+                {t('Mot de passe oublié ?')}
               </button>
             )}
             {mode === 'login' && showForgotHelp && (
               <p className="text-[11px] text-neutral-700 font-sans bg-neutral-100 border border-neutral-300 p-2.5">
-                Contactez l'équipe Pleino depuis le numéro de votre compte. Un administrateur vous donnera un mot de
-                passe temporaire ; à la connexion suivante, vous choisirez le vôtre.
+                {t("Contactez l'équipe Pleino depuis le numéro de votre compte. Un administrateur vous donnera un mot de passe temporaire ; à la connexion suivante, vous choisirez le vôtre.")}
               </p>
             )}
           </div>
@@ -176,7 +176,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             disabled={isSubmitting}
             className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
           >
-            <span>{mode === 'login' ? 'Se connecter' : 'Créer mon compte'}</span>
+            <span>{mode === 'login' ? t('Se connecter') : t('Créer mon compte')}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
@@ -191,8 +191,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             className="text-neutral-600 font-bold hover:text-black underline"
           >
             {mode === 'login'
-              ? "Pas encore de compte ? S'inscrire"
-              : 'Déjà inscrit ? Se connecter'}
+              ? t("Pas encore de compte ? S'inscrire")
+              : t('Déjà inscrit ? Se connecter')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../i18n';
 
 // Grey placeholders shown while the server answers, instead of an empty screen or stale demo data.
 const Bar: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -23,7 +24,7 @@ export const StationSkeleton: React.FC = () => (
 );
 
 export const StationListSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => (
-  <div role="status" aria-label="Chargement des stations" className="space-y-4">
+  <div role="status" aria-label={t('Chargement des stations')} className="space-y-4">
     {Array.from({ length: count }, (_, i) => (
       <StationSkeleton key={i} />
     ))}
@@ -31,7 +32,7 @@ export const StationListSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
 );
 
 export const PageSkeleton: React.FC = () => (
-  <div role="status" aria-label="Chargement" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+  <div role="status" aria-label={t('Chargement')} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
     <Bar className="h-8 w-2/3 sm:w-1/3" />
     <Bar className="h-4 w-1/2 sm:w-1/4" />
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

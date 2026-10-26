@@ -3,6 +3,7 @@ import { AuthUser, Reservation, Station, UserRole } from '../types';
 import { ManagerRequestCard } from './ManagerRequestCard';
 import { ProfilePhoto } from './ProfilePhoto';
 import { User, ShieldCheck, Star, Fuel, Ticket, Wallet, MapPin, Crown, LogIn, LogOut, ChevronRight, Phone, Mail, Building2, KeyRound } from 'lucide-react';
+import { locale, num, t } from '../i18n';
 
 interface UserProfileViewProps {
   user: AuthUser | null;
@@ -41,15 +42,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       <div className="max-w-xl mx-auto px-4 py-16 font-mono-code text-white">
         <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
           <User className="w-12 h-12 mx-auto text-amber-400" />
-          <h1 className="text-2xl font-black">Mon profil</h1>
+          <h1 className="text-2xl font-black">{t('Mon profil')}</h1>
           <p className="text-sm text-neutral-300 font-sans">
-            Connectez-vous pour retrouver vos tickets, vos litres servis et votre Pass Premium.
+            {t('Connectez-vous pour retrouver vos tickets, vos litres servis et votre Pass Premium.')}
           </p>
           <button
             onClick={onOpenAuth}
             className="inline-flex items-center gap-2 px-6 py-3 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300"
           >
-            <LogIn className="w-4 h-4" /> Se connecter ou créer un compte
+            <LogIn className="w-4 h-4" /> {t('Se connecter ou créer un compte')}
           </button>
         </div>
       </div>
@@ -63,10 +64,10 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
   const lastServed = served[0];
 
   const stats = [
-    { label: 'Tickets actifs', value: String(active.length), icon: Ticket },
-    { label: 'Pleins servis', value: String(served.length), icon: Fuel },
-    { label: 'Litres servis', value: `${litersServed.toLocaleString('fr-FR')} L`, icon: Fuel },
-    { label: 'Dépensé', value: `${amountSpent.toLocaleString('fr-FR')} FCFA`, icon: Wallet },
+    { label: t('Tickets actifs'), value: String(active.length), icon: Ticket },
+    { label: t('Pleins servis'), value: String(served.length), icon: Fuel },
+    { label: t('Litres servis'), value: `${num(litersServed)} L`, icon: Fuel },
+    { label: t('Dépensé'), value: `${num(amountSpent)} FCFA`, icon: Wallet },
   ];
 
   return (
@@ -75,7 +76,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           <ProfilePhoto user={user} onUserChanged={onUserChanged}>
             {user.isPremium && (
-              <div className="absolute -top-1 -right-1 bg-amber-400 text-black p-1 rounded-full border-2 border-black" title="Pass Premium actif">
+              <div className="absolute -top-1 -right-1 bg-amber-400 text-black p-1 rounded-full border-2 border-black" title={t('Pass Premium actif')}>
                 <Star className="w-4 h-4 fill-black" />
               </div>
             )}
@@ -84,15 +85,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           <div className="space-y-2 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-2.5 py-0.5 bg-amber-400 text-black text-xs font-black rounded">
-                {ROLE_LABELS[user.role]}
+                {t(ROLE_LABELS[user.role])}
               </span>
               {user.isPremium ? (
                 <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold rounded">
-                  Pass Premium actif
+                  {t('Pass Premium actif')}
                 </span>
               ) : (
                 <span className="px-2.5 py-0.5 bg-neutral-800 text-neutral-300 border border-neutral-700 text-xs font-bold rounded">
-                  Compte standard
+                  {t('Compte standard')}
                 </span>
               )}
             </div>
@@ -124,19 +125,19 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
         {lastServed && (
           <p className="text-xs text-neutral-400 font-sans flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            Dernier plein : {lastServed.liters} L de {lastServed.fuelLabel} chez {lastServed.stationName}
-            {lastServed.validatedAt && ` le ${new Date(lastServed.validatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}`}.
+            {t('Dernier plein : {n} L de {fuel} chez {station}', { n: lastServed.liters, fuel: t(lastServed.fuelLabel), station: lastServed.stationName })}
+            {lastServed.validatedAt && ` ${t('le {date}', { date: new Date(lastServed.validatedAt).toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })}`}.
           </p>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold">
-        <ProfileLink icon={Ticket} label="Mes réservations" detail={active.length ? `${active.length} ticket(s) à récupérer` : 'Historique de vos tickets'} onClick={() => onNavigate('history')} />
-        <ProfileLink icon={MapPin} label="Réserver du carburant" detail="Stations, stocks et carte" onClick={() => onNavigate('map')} />
+        <ProfileLink icon={Ticket} label={t('Mes réservations')} detail={active.length ? t('{n} ticket(s) à récupérer', { n: active.length }) : t('Historique de vos tickets')} onClick={() => onNavigate('history')} />
+        <ProfileLink icon={MapPin} label={t('Réserver du carburant')} detail={t('Stations, stocks et carte')} onClick={() => onNavigate('map')} />
         <ProfileLink
           icon={Crown}
-          label="Pass Premium"
-          detail={user.isPremium ? 'Actif : pas de frais de réservation' : 'Réservations sans frais'}
+          label={t('Pass Premium')}
+          detail={user.isPremium ? t('Actif : pas de frais de réservation') : t('Réservations sans frais')}
           onClick={() => onNavigate('premium')}
         />
         {user.role === 'CLIENT' && (
@@ -145,18 +146,18 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           </div>
         )}
         {user.role !== 'CLIENT' && (
-          <ProfileLink icon={Building2} label="Espace Pro" detail={user.role === 'ATTENDANT' ? 'Valider les tickets' : 'Valider les tickets, stocks'} onClick={() => onNavigate('pro')} />
+          <ProfileLink icon={Building2} label={t('Espace Pro')} detail={user.role === 'ATTENDANT' ? t('Valider les tickets') : t('Valider les tickets, stocks')} onClick={() => onNavigate('pro')} />
         )}
         {user.role === 'ADMIN' && (
-          <ProfileLink icon={ShieldCheck} label="Console Admin" detail="Prix, stations, comptes" onClick={() => onNavigate('admin')} />
+          <ProfileLink icon={ShieldCheck} label={t('Console Admin')} detail={t('Prix, stations, comptes')} onClick={() => onNavigate('admin')} />
         )}
-        <ProfileLink icon={KeyRound} label="Changer mon mot de passe" detail="Déconnecte vos autres appareils" onClick={onChangePassword} />
+        <ProfileLink icon={KeyRound} label={t('Changer mon mot de passe')} detail={t('Déconnecte vos autres appareils')} onClick={onChangePassword} />
         <button
           onClick={onLogout}
           className="p-4 border border-neutral-800 bg-black/85 rounded-xl flex items-center gap-3 text-rose-300 hover:border-rose-400 transition-colors text-left"
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          <span>Se déconnecter</span>
+          <span>{t('Se déconnecter')}</span>
         </button>
       </div>
     </div>

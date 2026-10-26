@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'recharts';
 import { TrendingUp, TrendingDown, Minus, Calendar, Fuel, Info } from 'lucide-react';
+import { t, useLang } from '../i18n';
 
 interface PriceHistoryChartProps {
   station: Station;
@@ -60,7 +61,8 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
     return () => controller.abort();
   }, [station.id]);
 
-  const historyData = useMemo(() => buildDailySeries(changes, station, days), [changes, station, days]);
+  const lang = useLang();
+  const historyData = useMemo(() => buildDailySeries(changes, station, days), [changes, station, days, lang]);
 
   // Statistics for selected fuel
   const stats = useMemo(() => {
@@ -79,7 +81,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
       maxPrice,
       diff,
       diffPercent,
-      activeLabel: FUEL_CONFIG[activeKey].label,
+      activeLabel: t(FUEL_CONFIG[activeKey].label),
     };
   }, [historyData, selectedFuel]);
 
@@ -103,7 +105,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
                       className="w-2.5 h-2.5 rounded-full inline-block"
                       style={{ backgroundColor: entry.color }}
                     />
-                    <span className="text-neutral-300 font-semibold">{config?.label || entry.name}:</span>
+                    <span className="text-neutral-300 font-semibold">{config ? t(config.label) : entry.name}:</span>
                   </div>
                   <span className="font-black text-white">{entry.value} FCFA / L</span>
                 </div>
@@ -123,10 +125,10 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         <div>
           <div className="text-xs text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-amber-400" />
-            <span>Analyse tarifaire Togo</span>
+            <span>{t('Analyse tarifaire Togo')}</span>
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            Historique des prix ({days} derniers jours)
+            {t('Historique des prix ({n} derniers jours)', { n: days })}
           </h2>
           <div className="mt-2 inline-flex rounded-lg border border-neutral-800 p-0.5 text-xs font-bold">
             {([7, 30] as const).map((d) => (
@@ -135,7 +137,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
                 onClick={() => setDays(d)}
                 className={`px-2.5 py-1 rounded-md ${days === d ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'}`}
               >
-                {d} jours
+                {t('{n} jours', { n: d })}
               </button>
             ))}
           </div>
@@ -151,7 +153,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
                 : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
             }`}
           >
-            Tous les carburants
+            {t('Tous les carburants')}
           </button>
           {(Object.keys(FUEL_CONFIG) as FuelType[]).map((type) => (
             <button
@@ -178,25 +180,25 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
           <div className="text-[11px] text-neutral-400 font-bold uppercase flex items-center gap-1">
             <Fuel className="w-3 h-3 text-amber-400" />
-            <span>Carburant affiché</span>
+            <span>{t('Carburant affiché')}</span>
           </div>
           <div className="text-sm font-black text-amber-400 truncate">{stats.activeLabel}</div>
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[11px] text-neutral-400 font-bold uppercase">Prix actuel</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">{t('Prix actuel')}</div>
           <div className="text-base font-black text-white">{stats.currentPrice} FCFA / L</div>
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[11px] text-neutral-400 font-bold uppercase">Min / Max ({days} jours)</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">{t('Min / Max ({n} jours)', { n: days })}</div>
           <div className="text-sm font-bold text-neutral-200">
             <span className="text-emerald-400">{stats.minPrice}</span> / <span className="text-amber-400">{stats.maxPrice}</span> FCFA
           </div>
         </div>
 
         <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-1">
-          <div className="text-[11px] text-neutral-400 font-bold uppercase">Tendance {days}j</div>
+          <div className="text-[11px] text-neutral-400 font-bold uppercase">{t('Tendance {n} j', { n: days })}</div>
           <div className="flex items-center gap-1 text-xs font-black">
             {stats.diff > 0 ? (
               <span className="text-rose-400 flex items-center gap-0.5">
@@ -208,7 +210,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
               </span>
             ) : (
               <span className="text-amber-400 flex items-center gap-0.5">
-                <Minus className="w-3.5 h-3.5" /> Prix stable (0%)
+                <Minus className="w-3.5 h-3.5" /> {t('Prix stable (0%)')}
               </span>
             )}
           </div>
@@ -264,7 +266,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
               wrapperStyle={{ paddingTop: '15px', fontSize: '11px' }}
               formatter={(value: string) => {
                 const config = FUEL_CONFIG[value as FuelType];
-                return <span className="text-neutral-300 font-bold">{config?.label || value}</span>;
+                return <span className="text-neutral-300 font-bold">{config ? t(config.label) : value}</span>;
               }}
             />
 
@@ -326,7 +328,7 @@ export const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({ station })
       <div className="flex items-center gap-2 text-xs text-neutral-400 bg-neutral-900/60 p-3 rounded-xl border border-neutral-800">
         <Info className="w-4 h-4 text-amber-400 shrink-0" />
         <span>
-          Prix réellement pratiqués par la station <strong>{station.name}</strong>, enregistrés à chaque changement de tarif.
+          {t('Prix réellement pratiqués par la station')} <strong>{station.name}</strong>{t(', enregistrés à chaque changement de tarif.')}
         </span>
       </div>
     </div>

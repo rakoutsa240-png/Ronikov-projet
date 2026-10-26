@@ -3,6 +3,7 @@ import { KeyRound, UserMinus, UserPlus, Users } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { Attendant } from '../types';
 import { Avatar } from './Avatar';
+import { t } from '../i18n';
 
 interface AttendantsPanelProps {
   stationId: string;
@@ -33,7 +34,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
     api
       .attendants(stationId)
       .then((list) => !cancelled && setAttendants(list))
-      .catch((e) => !cancelled && setError(errorText(e, 'Liste des pompistes indisponible.')));
+      .catch((e) => !cancelled && setError(errorText(e, t('Liste des pompistes indisponible.'))));
     return () => {
       cancelled = true;
     };
@@ -50,14 +51,14 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
       setName('');
       setPhone('');
     } catch (e) {
-      setError(errorText(e, 'Ajout impossible, réessayez.'));
+      setError(errorText(e, t('Ajout impossible, réessayez.')));
     } finally {
       setBusy(null);
     }
   };
 
   const remove = async (attendant: Attendant) => {
-    if (!window.confirm(`Retirer ${attendant.name} des pompistes de ${stationName} ? Son compte redevient un compte client.`)) return;
+    if (!window.confirm(t('Retirer {name} des pompistes de {station} ? Son compte redevient un compte client.', { name: attendant.name, station: stationName }))) return;
     setBusy(attendant.id);
     setError(null);
     try {
@@ -65,7 +66,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
       setAttendants((list) => (list ?? []).filter((a) => a.id !== attendant.id));
       if (notice?.name === attendant.name) setNotice(null);
     } catch (e) {
-      setError(errorText(e, 'Retrait impossible, réessayez.'));
+      setError(errorText(e, t('Retrait impossible, réessayez.')));
     } finally {
       setBusy(null);
     }
@@ -79,7 +80,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
       setNotice({ name: attendant.name, password: temporaryPassword });
       setAttendants((list) => (list ?? []).map((a) => (a.id === attendant.id ? { ...a, mustChangePassword: true } : a)));
     } catch (e) {
-      setError(errorText(e, 'Nouveau mot de passe impossible, réessayez.'));
+      setError(errorText(e, t('Nouveau mot de passe impossible, réessayez.')));
     } finally {
       setBusy(null);
     }
@@ -89,18 +90,17 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
     <section className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-5">
       <div className="border-b border-neutral-800 pb-4">
         <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest flex items-center gap-1.5">
-          <Users className="w-3.5 h-3.5" /> Équipe de la station
+          <Users className="w-3.5 h-3.5" /> {t('Équipe de la station')}
         </span>
-        <h2 className="text-2xl font-black text-white tracking-tight">Mes pompistes</h2>
+        <h2 className="text-2xl font-black text-white tracking-tight">{t('Mes pompistes')}</h2>
         <p className="text-xs text-neutral-400 font-sans mt-1">
-          Un pompiste se connecte avec son numéro et peut seulement valider les tickets de {stationName}. Il ne voit ni ne modifie
-          le stock.
+          {t('Un pompiste se connecte avec son numéro et peut seulement valider les tickets de {station}. Il ne voit ni ne modifie le stock.', { station: stationName })}
         </p>
       </div>
 
       <form onSubmit={add} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 text-xs">
         <label className="flex flex-col gap-1 font-bold text-neutral-300">
-          Nom
+          {t('Nom')}
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -112,7 +112,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
           />
         </label>
         <label className="flex flex-col gap-1 font-bold text-neutral-300">
-          Téléphone
+          {t('Téléphone')}
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -127,7 +127,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
           disabled={busy === 'add'}
           className="self-end px-4 py-2.5 bg-amber-400 text-black font-black rounded-lg hover:bg-amber-300 flex items-center justify-center gap-1.5 disabled:opacity-60"
         >
-          <UserPlus className="w-4 h-4" /> {busy === 'add' ? 'Ajout...' : 'Ajouter'}
+          <UserPlus className="w-4 h-4" /> {busy === 'add' ? t('Ajout…') : t('Ajouter')}
         </button>
       </form>
 
@@ -136,17 +136,16 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
           {notice.password ? (
             <>
               <p>
-                Mot de passe temporaire de {notice.name} :{' '}
+                {t('Mot de passe temporaire de {name} :', { name: notice.name })}{' '}
                 <span className="font-code font-black text-base text-white select-all">{notice.password}</span>
               </p>
               <p className="text-neutral-300">
-                Donnez-le-lui avec son numéro. Il ne sera plus affiché ; à sa première connexion, il choisira son propre mot de passe.
+                {t('Donnez-le-lui avec son numéro. Il ne sera plus affiché ; à sa première connexion, il choisira son propre mot de passe.')}
               </p>
             </>
           ) : (
             <p>
-              {notice.name} avait déjà un compte Pleino : il se connecte avec son mot de passe habituel et trouve l'Espace Pro dans le
-              menu.
+              {t("{name} avait déjà un compte Pleino : il se connecte avec son mot de passe habituel et trouve l'Espace Pro dans le menu.", { name: notice.name })}
             </p>
           )}
         </div>
@@ -159,9 +158,9 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
       )}
 
       {attendants === null ? (
-        !error && <p className="text-xs text-neutral-400">Chargement...</p>
+        !error && <p className="text-xs text-neutral-400">{t('Chargement…')}</p>
       ) : attendants.length === 0 ? (
-        <p className="text-xs text-neutral-400 italic text-center py-2">Aucun pompiste pour l'instant.</p>
+        <p className="text-xs text-neutral-400 italic text-center py-2">{t("Aucun pompiste pour l'instant.")}</p>
       ) : (
         <ul className="space-y-2.5 text-xs">
           {attendants.map((a) => (
@@ -172,8 +171,8 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
                   <div className="font-black text-white">{a.name}</div>
                   <div className="text-[11px] text-neutral-400">
                     {formatPhone(a.phone)}
-                    {a.isSuspended ? ' • compte suspendu' : a.mustChangePassword ? ' • mot de passe temporaire' : ''}
-                    {!a.photoUrl && ' • sans photo'}
+                    {a.isSuspended ? ` • ${t('compte suspendu')}` : a.mustChangePassword ? ` • ${t('mot de passe temporaire')}` : ''}
+                    {!a.photoUrl && ` • ${t('sans photo')}`}
                   </div>
                 </div>
               </div>
@@ -183,14 +182,14 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
                   disabled={busy === a.id}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 underline hover:text-amber-200 disabled:opacity-60"
                 >
-                  <KeyRound className="w-3 h-3" /> Nouveau mot de passe
+                  <KeyRound className="w-3 h-3" /> {t('Nouveau mot de passe')}
                 </button>
                 <button
                   onClick={() => remove(a)}
                   disabled={busy === a.id}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 underline hover:text-rose-200 disabled:opacity-60"
                 >
-                  <UserMinus className="w-3 h-3" /> Retirer
+                  <UserMinus className="w-3 h-3" /> {t('Retirer')}
                 </button>
               </div>
             </li>

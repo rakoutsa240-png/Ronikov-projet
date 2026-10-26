@@ -1,6 +1,7 @@
 import React from 'react';
 import { PaymentMethod } from '../types';
 import { Smartphone, CreditCard, CheckCircle2 } from 'lucide-react';
+import { t } from '../i18n';
 
 interface PaymentLogoProps {
   method: PaymentMethod;
@@ -35,7 +36,7 @@ export const MixxByYasBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md' |
           </span>
         </div>
         <p className="text-[11px] text-neutral-400 font-sans leading-none mt-0.5">
-          Paiement Mobile Money Togo
+          {t('Paiement Mobile Money Togo')}
         </p>
       </div>
     </div>
@@ -89,7 +90,7 @@ export const CardPaymentBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md'
       <div className="text-left">
         <div className="flex items-center gap-1.5">
           <span className={`font-black tracking-tight font-mono-code ${selected ? 'text-amber-300' : 'text-white'}`}>
-            Carte Bancaire
+            {t('Carte Bancaire')}
           </span>
         </div>
         <p className="text-[11px] text-neutral-400 font-sans leading-none mt-0.5">
@@ -126,7 +127,7 @@ export const PaymentMethodLabel: React.FC<{ method: PaymentMethod; showDetails?:
   return (
     <span className="inline-flex items-center gap-1.5 font-mono-code">
       <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 border border-neutral-700 font-black text-[11px] rounded uppercase shadow-sm">
-        Carte Visa/MC
+        {t('Carte Visa/MC')}
       </span>
     </span>
   );

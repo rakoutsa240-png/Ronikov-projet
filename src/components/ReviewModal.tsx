@@ -6,6 +6,7 @@ import { Reservation, TicketReview } from '../types';
 import { useModal } from '../useModal';
 import { StarInput } from './StarRating';
 import { Avatar } from './Avatar';
+import { t } from '../i18n';
 
 interface ReviewModalProps {
   reservation: Reservation | null; // null when closed
@@ -38,7 +39,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stationRating) {
-      setError('Choisissez une note pour la station.');
+      setError(t('Choisissez une note pour la station.'));
       return;
     }
     setSending(true);
@@ -52,7 +53,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
       onReviewed(reservation.id, review);
       setDone(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Serveur Pleino injoignable. Réessayez.');
+      setError(err instanceof ApiError ? err.message : t('Serveur Pleino injoignable. Réessayez.'));
     } finally {
       setSending(false);
     }
@@ -70,13 +71,13 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 id="review-title" className="text-lg font-extrabold flex items-center gap-2">
-              <MessageSquareHeart className="w-5 h-5 text-amber-400" /> Donner mon avis
+              <MessageSquareHeart className="w-5 h-5 text-amber-400" /> {t('Donner mon avis')}
             </h2>
             <p className="text-sm text-neutral-400">
-              {reservation.stationName} • {reservation.liters} L {reservation.fuelLabel}
+              {reservation.stationName} • {reservation.liters} L {t(reservation.fuelLabel)}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Fermer" className="p-2 rounded-lg border border-neutral-700 hover:border-amber-400">
+          <button onClick={onClose} aria-label={t('Fermer')} className="p-2 rounded-lg border border-neutral-700 hover:border-amber-400">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -86,27 +87,27 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
             <p role="status" className="flex items-start gap-2 text-sm text-emerald-300">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
               {lowMark
-                ? 'Merci. Le gérant de la station est prévenu et l’équipe Pleino peut voir votre avis.'
-                : 'Merci pour votre avis ! Il aide les autres clients à choisir leur station.'}
+                ? t('Merci. Le gérant de la station est prévenu et l’équipe Pleino peut voir votre avis.')
+                : t('Merci pour votre avis ! Il aide les autres clients à choisir leur station.')}
             </p>
             <button onClick={onClose} className="w-full py-3 rounded-xl bg-amber-400 text-black font-bold">
-              Fermer
+              {t('Fermer')}
             </button>
           </div>
         ) : (
           <form onSubmit={send} className="space-y-4">
-            <StarInput label="La station (propreté, attente, service)" value={stationRating} onChange={setStationRating} disabled={sending} />
+            <StarInput label={t('La station (propreté, attente, service)')} value={stationRating} onChange={setStationRating} disabled={sending} />
             {servedBy && (
               <div className="flex items-center gap-3 p-3 rounded-xl border border-neutral-800 bg-neutral-950/60">
                 <Avatar name={servedBy} photoUrl={reservation.servedByPhotoUrl} className="w-14 h-14 rounded-full text-xl" />
                 <p className="text-sm text-neutral-300">
-                  <strong className="text-white">{servedBy}</strong> vous a servi.
+                  <strong className="text-white">{servedBy}</strong> {t('vous a servi.')}
                 </p>
               </div>
             )}
             {servedBy && (
               <StarInput
-                label={`Note de ${servedBy} (accueil, politesse, honnêteté)`}
+                label={t('Note de {name} (accueil, politesse, honnêteté)', { name: servedBy })}
                 value={attendantRating}
                 onChange={setAttendantRating}
                 disabled={sending}
@@ -114,7 +115,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
             )}
             <label className="block space-y-1.5">
               <span className="text-sm font-bold text-neutral-200">
-                Un commentaire <span className="font-normal text-neutral-400">(facultatif)</span>
+                {t('Un commentaire')} <span className="font-normal text-neutral-400">({t('facultatif')})</span>
               </span>
               <textarea
                 value={comment}
@@ -122,13 +123,12 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
                 maxLength={REVIEW_COMMENT_MAX}
                 rows={3}
                 disabled={sending}
-                placeholder={lowMark ? 'Que s’est-il passé ? Ex. : pompiste impoli, litres manquants…' : 'Ce qui vous a plu ou déplu'}
+                placeholder={lowMark ? t('Que s’est-il passé ? Ex. : pompiste impoli, litres manquants…') : t('Ce qui vous a plu ou déplu')}
                 className="w-full p-3 border border-neutral-700 bg-black/80 text-white text-sm rounded-xl focus:border-amber-400 focus:outline-none"
               />
             </label>
             <p className="text-xs text-neutral-400">
-              La note de la station est publique. Votre commentaire et la note de {servedBy ?? 'la personne qui vous a servi'} ne sont lus
-              que par le gérant de la station et l’équipe Pleino.
+              {t('La note de la station est publique. Votre commentaire et la note de {name} ne sont lus que par le gérant de la station et l’équipe Pleino.', { name: servedBy ?? t('la personne qui vous a servi') })}
             </p>
             {error && (
               <p role="alert" className="text-sm text-red-300">
@@ -136,7 +136,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ reservation, onClose, 
               </p>
             )}
             <button type="submit" disabled={sending} className="w-full py-3 rounded-xl bg-amber-400 text-black font-black disabled:opacity-60">
-              {sending ? 'Envoi…' : 'Envoyer mon avis'}
+              {sending ? t('Envoi…') : t('Envoyer mon avis')}
             </button>
           </form>
         )}

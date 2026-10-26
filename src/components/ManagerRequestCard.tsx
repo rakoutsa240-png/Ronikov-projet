@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Building2, Clock, XCircle } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { AuthUser, ManagerRequest, Station } from '../types';
+import { t } from '../i18n';
 
 interface ManagerRequestCardProps {
   stations: Station[];
@@ -37,7 +38,7 @@ export const ManagerRequestCard: React.FC<ManagerRequestCardProps> = ({ stations
       setLatest(await api.requestManager(stationId, message.trim()));
       setOpen(false);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Envoi impossible, réessayez.');
+      setError(err instanceof ApiError ? err.message : t('Envoi impossible, réessayez.'));
     } finally {
       setSending(false);
     }
@@ -50,8 +51,8 @@ export const ManagerRequestCard: React.FC<ManagerRequestCardProps> = ({ stations
       <div role="status" className="p-4 border border-amber-400/50 bg-amber-400/5 rounded-xl flex items-start gap-3 text-xs">
         <Clock className="w-5 h-5 text-amber-400 shrink-0" />
         <span className="font-sans text-neutral-200">
-          <span className="block font-bold text-white font-mono-code">Demande de gérant envoyée</span>
-          Vous avez demandé à gérer {latest.stationName}. Pleino va vous appeler pour vérifier, puis ouvrir votre Espace Pro.
+          <span className="block font-bold text-white font-mono-code">{t('Demande de gérant envoyée')}</span>
+          {t('Vous avez demandé à gérer {station}. Pleino va vous appeler pour vérifier, puis ouvrir votre Espace Pro.', { station: latest.stationName })}
         </span>
       </div>
     );
@@ -62,31 +63,31 @@ export const ManagerRequestCard: React.FC<ManagerRequestCardProps> = ({ stations
       {latest?.status === 'REJECTED' && !open && (
         <p className="flex items-start gap-2 text-rose-300 font-sans">
           <XCircle className="w-4 h-4 shrink-0" />
-          Votre demande pour gérer {latest.stationName} n’a pas été acceptée. Vous pouvez en envoyer une autre.
+          {t('Votre demande pour gérer {station} n’a pas été acceptée. Vous pouvez en envoyer une autre.', { station: latest.stationName })}
         </p>
       )}
       {!open ? (
         <button onClick={() => setOpen(true)} className="w-full flex items-center gap-3 text-left text-white font-bold">
           <Building2 className="w-5 h-5 text-amber-400 shrink-0" />
           <span className="flex-1">
-            <span className="block">Vous gérez une station ?</span>
-            <span className="block text-neutral-400 font-sans font-normal">Demandez l’accès à l’Espace Pro pour mettre à jour vos stocks</span>
+            <span className="block">{t('Vous gérez une station ?')}</span>
+            <span className="block text-neutral-400 font-sans font-normal">{t('Demandez l’accès à l’Espace Pro pour mettre à jour vos stocks')}</span>
           </span>
         </button>
       ) : (
         <form onSubmit={submit} className="space-y-3">
           <p className="font-black text-white flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-amber-400" /> Demander l’accès gérant
+            <Building2 className="w-4 h-4 text-amber-400" /> {t('Demander l’accès gérant')}
           </p>
           <label className="block space-y-1">
-            <span className="text-neutral-300 font-bold">Votre station</span>
+            <span className="text-neutral-300 font-bold">{t('Votre station')}</span>
             <select
               required
               value={stationId}
               onChange={(e) => setStationId(e.target.value)}
               className="w-full p-2.5 border border-neutral-700 bg-black text-white rounded-lg"
             >
-              <option value="">Choisissez…</option>
+              <option value="">{t('Choisissez…')}</option>
               {stations.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name} ({s.district})
@@ -95,13 +96,13 @@ export const ManagerRequestCard: React.FC<ManagerRequestCardProps> = ({ stations
             </select>
           </label>
           <label className="block space-y-1">
-            <span className="text-neutral-300 font-bold">Message (facultatif)</span>
+            <span className="text-neutral-300 font-bold">{t('Message (facultatif)')}</span>
             <textarea
               value={message}
               maxLength={500}
               rows={2}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ex. : je suis le gérant depuis 2022"
+              placeholder={t('Ex. : je suis le gérant depuis 2022')}
               className="w-full p-2.5 border border-neutral-700 bg-black text-white rounded-lg font-sans"
             />
           </label>
@@ -116,10 +117,10 @@ export const ManagerRequestCard: React.FC<ManagerRequestCardProps> = ({ stations
               disabled={sending || !stationId}
               className="flex-1 py-2.5 bg-amber-400 text-black font-black rounded-lg hover:bg-amber-300 disabled:opacity-60"
             >
-              {sending ? 'Envoi…' : 'Envoyer la demande'}
+              {sending ? t('Envoi…') : t('Envoyer la demande')}
             </button>
             <button type="button" onClick={() => setOpen(false)} className="px-4 py-2.5 border border-neutral-700 rounded-lg text-neutral-300">
-              Annuler
+              {t('Annuler')}
             </button>
           </div>
         </form>

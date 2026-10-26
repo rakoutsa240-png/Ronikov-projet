@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Share2 } from 'lucide-react';
 import { Reservation } from '../types';
+import { t } from '../i18n';
 
 // "Reçu" button: builds the receipt picture and opens the share menu (WhatsApp...) or downloads it.
 export const ReceiptButton: React.FC<{ reservation: Reservation; className?: string }> = ({ reservation, className = '' }) => {
@@ -27,7 +28,7 @@ export const ReceiptButton: React.FC<{ reservation: Reservation; className?: str
     >
       <Share2 className="w-4 h-4 text-amber-400" />
       <span>
-        {state === 'busy' ? 'Préparation…' : state === 'downloaded' ? 'Reçu téléchargé' : state === 'error' ? 'Réessayer' : 'Envoyer le reçu'}
+        {state === 'busy' ? t('Préparation…') : state === 'downloaded' ? t('Reçu téléchargé') : state === 'error' ? t('Réessayer') : t('Envoyer le reçu')}
       </span>
     </button>
   );

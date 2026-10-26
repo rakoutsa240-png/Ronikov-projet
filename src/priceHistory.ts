@@ -1,4 +1,5 @@
 import type { FuelType, PriceChange, Station } from './types';
+import { locale, t } from './i18n';
 
 const FUELS: FuelType[] = ['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE'];
 
@@ -29,12 +30,12 @@ export function buildDailySeries(changes: PriceChange[], station: Station, days:
       }),
     ) as Record<FuelType, number>;
 
-    const dayName = day.toLocaleDateString('fr-FR', { weekday: 'short' });
-    const dayMonth = day.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+    const dayName = day.toLocaleDateString(locale(), { weekday: 'short' });
+    const dayMonth = day.toLocaleDateString(locale(), { day: '2-digit', month: '2-digit' });
     points.push({
       ...prices,
-      date: i === 0 ? "Aujourd'hui" : days > 7 ? dayMonth : `${dayName.charAt(0).toUpperCase()}${dayName.slice(1)} ${dayMonth}`,
-      fullDate: day.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      date: i === 0 ? t("Aujourd'hui") : days > 7 ? dayMonth : `${dayName.charAt(0).toUpperCase()}${dayName.slice(1)} ${dayMonth}`,
+      fullDate: day.toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }),
     });
   }
   return points;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Fuel, ShieldCheck, MapPin, Phone, Mail } from 'lucide-react';
 import { Logo } from './Logo';
+import { t } from '../i18n';
 
 export const Footer: React.FC = () => {
   return (
@@ -11,17 +12,17 @@ export const Footer: React.FC = () => {
           <div className="space-y-4">
             <Logo />
             <p className="text-white/70 font-sans text-xs leading-relaxed">
-              Plateforme togolaise de localisation, réservation et paiement anticipé de carburant en stations-service.
+              {t('Plateforme togolaise de localisation, réservation et paiement anticipé de carburant en stations-service.')}
             </p>
             <div className="text-xs text-white/55 font-bold uppercase">
-              République togolaise — Togo
+              {t('République togolaise — Togo')}
             </div>
           </div>
 
           {/* Col 2: Villes & Couverture Togo */}
           <div className="space-y-3">
             <h4 className="font-bold text-white border-b border-white/15 pb-1">
-              Couverture nationale
+              {t('Couverture nationale')}
             </h4>
             <ul className="space-y-1.5 text-white/70">
               <li>Lomé (Golfe & Agoè-Nyivé)</li>
@@ -36,7 +37,7 @@ export const Footer: React.FC = () => {
           {/* Col 3: Partenaires & Services */}
           <div className="space-y-3">
             <h4 className="font-bold text-white border-b border-white/15 pb-1">
-              Reseaux partenaires
+              {t('Réseaux partenaires')}
             </h4>
             <ul className="space-y-1.5 text-white/70">
               <li>TotalEnergies Marketing Togo</li>
@@ -50,13 +51,13 @@ export const Footer: React.FC = () => {
           {/* Col 4: Service Client */}
           <div className="space-y-3">
             <h4 className="font-bold text-white border-b border-white/15 pb-1">
-              Assistance 24h/7j
+              {t('Assistance 24h/7j')}
             </h4>
             <div className="space-y-2 text-white/85">
-              <p>Service Client Togo: +228 90 00 00 00</p>
+              <p>{t('Service Client Togo')}: +228 90 00 00 00</p>
               <p>Email: contact@pleino.tg</p>
               <p className="text-[11px] text-white/55 font-sans pt-1">
-                Paiements via Mixx by Yas (Togocom) et Flooz (Moov Africa).
+                {t('Paiements via Mixx by Yas (Togocom) et Flooz (Moov Africa).')}
               </p>
             </div>
           </div>
@@ -64,10 +65,10 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright & legal */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/55">
-          <div>© {new Date().getFullYear()} Pleino. Tous droits réservés.</div>
+          <div>© {new Date().getFullYear()} Pleino. {t('Tous droits réservés.')}</div>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="#/carte" className="hover:text-white">Stations & carte</a>
-            <a href="#/premium" className="hover:text-white">Pass Premium</a>
+            <a href="#/carte" className="hover:text-white">{t('Stations & carte')}</a>
+            <a href="#/premium" className="hover:text-white">{t('Pass Premium')}</a>
           </div>
         </div>
       </div>
