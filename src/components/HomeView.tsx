@@ -15,6 +15,7 @@ import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight
 import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
 import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
 import customerBg from '../assets/images/happy_customer_refuel_1785888766342.webp';
+import { num, t } from '../i18n';
 
 // The QR code library is only downloaded when a ticket is on screen.
 const QRCodeImage = lazy(() => import('./QRCodeImage').then((m) => ({ default: m.QRCodeImage })));
@@ -47,11 +48,11 @@ const ActiveTicketCard: React.FC<{ ticket: Reservation; onOpen: () => void }> = 
         </Suspense>
         <span className="flex-1 min-w-0">
           <span className="block text-[11px] font-extrabold uppercase tracking-widest text-brand-700">
-            Ticket en cours • {timeLeft(ticket.expiresAt, now)}
+            {t('Ticket en cours')} • {timeLeft(ticket.expiresAt, now)}
           </span>
           <span className="block font-code text-xl font-bold tracking-wider">{ticket.code}</span>
           <span className="block text-sm font-medium text-[#5a6661] truncate">
-            {ticket.liters} L {ticket.fuelLabel} • {ticket.stationName}
+            {ticket.liters} L {t(ticket.fuelLabel)} • {ticket.stationName}
           </span>
         </span>
         <ChevronRight className="w-5 h-5 shrink-0 text-brand-700" />
@@ -67,23 +68,24 @@ const FavoriteAlertsHint: React.FC<{ isSignedIn: boolean; onOpenAuth: () => void
     return (
       <p className="text-xs text-neutral-400">
         <button onClick={onOpenAuth} className="text-amber-300 font-semibold underline">
-          Connectez-vous
+          {t('Connectez-vous')}
         </button>{' '}
-        pour être prévenu quand une de ces stations retrouve du carburant ou change de prix.
+        {t('pour être prévenu quand une de ces stations retrouve du carburant ou change de prix.')}
       </p>
     );
   }
   if (permission === 'default') {
     return (
       <button onClick={() => void enableAlerts()} className="text-xs text-amber-300 font-semibold underline text-left">
-        Recevoir aussi les alertes sur ce téléphone
+        {t('Recevoir aussi les alertes sur ce téléphone')}
       </button>
     );
   }
   return (
     <p className="text-xs text-neutral-400">
-      Vous êtes prévenu (cloche en haut{permission === 'granted' ? ' et alertes du téléphone' : ''}) quand une de ces stations retrouve du
-      carburant ou change de prix.
+      {permission === 'granted'
+        ? t('Vous êtes prévenu (cloche en haut et alertes du téléphone) quand une de ces stations retrouve du carburant ou change de prix.')
+        : t('Vous êtes prévenu (cloche en haut) quand une de ces stations retrouve du carburant ou change de prix.')}
     </p>
   );
 };
@@ -126,10 +128,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {activeTicket && <ActiveTicketCard ticket={activeTicket} onOpen={() => onOpenTicket(activeTicket)} />}
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            Ne faites plus la queue <span className="text-amber-400">pour votre carburant.</span>
+            {t('Ne faites plus la queue')} <span className="text-amber-400">{t('pour votre carburant.')}</span>
           </h1>
           <p className="text-sm sm:text-base text-neutral-300 max-w-2xl leading-relaxed">
-            Trouvez une station qui a du stock, réservez vos litres, payez par Mixx by Yas ou Flooz et présentez votre code à la pompe.
+            {t('Trouvez une station qui a du stock, réservez vos litres, payez par Mixx by Yas ou Flooz et présentez votre code à la pompe.')}
           </p>
         </div>
 
@@ -149,21 +151,21 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {favoriteStations.length > 0 && (
               <section aria-labelledby="favorites-title" className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 sm:p-5 space-y-2">
                 <h2 id="favorites-title" className="text-sm font-bold text-neutral-200 flex items-center gap-2">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> Mes stations favorites
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> {t('Mes stations favorites')}
                 </h2>
                 <ul className="divide-y divide-neutral-800 text-sm">
                   {favoriteStations.map((st) => (
                     <li key={st.id} className="flex items-center justify-between gap-3 py-2">
                       <button onClick={() => onViewStation(st)} className="text-left text-neutral-100 font-medium truncate hover:text-amber-300">
                         {st.name}
-                        <span className="block text-xs text-neutral-400">{st.queueTimeMinutes} min d'attente</span>
+                        <span className="block text-xs text-neutral-400">{t("{n} min d'attente", { n: st.queueTimeMinutes })}</span>
                         <StationFreshness station={st} maxReports={1} className="mt-0.5" />
                       </button>
                       <button
                         onClick={() => onBookStation(st)}
                         className="px-3 py-2 rounded-lg bg-amber-400 text-black font-bold text-sm hover:bg-amber-300 shrink-0"
                       >
-                        Réserver
+                        {t('Réserver')}
                       </button>
                     </li>
                   ))}
@@ -175,7 +177,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               onClick={onNavigateMap}
               className="w-full py-3 rounded-xl border border-neutral-700 text-white font-semibold text-sm hover:border-amber-400 flex items-center justify-center gap-2"
             >
-              Voir toutes les stations sur la carte <ArrowRight className="w-4 h-4" />
+              {t('Voir toutes les stations sur la carte')} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -183,10 +185,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Live Togo figures */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-white">
           {[
-            { label: 'Stations', value: `${stations.length}`, hint: cities.join(', ') },
-            { label: 'Stock à réserver', value: `${totalLiters.toLocaleString('fr-FR')} L`, hint: 'Tous carburants' },
-            { label: 'Attente moyenne', value: `${averageWait} min`, hint: 'Déclarée par les stations' },
-            { label: 'Ticket', value: 'Code + QR', hint: 'Valable 2 heures' },
+            { label: t('Stations'), value: `${stations.length}`, hint: cities.join(', ') },
+            { label: t('Stock à réserver'), value: `${num(totalLiters)} L`, hint: t('Tous carburants') },
+            { label: t('Attente moyenne'), value: `${averageWait} min`, hint: t('Déclarée par les stations') },
+            { label: t('Ticket'), value: t('Code + QR'), hint: t('Valable 2 heures') },
           ].map((m) => (
             <div key={m.label} className="bg-neutral-900 border border-neutral-800 rounded-xl p-3 sm:p-4">
               <div className="text-xs text-neutral-400">{m.label}</div>
@@ -203,13 +205,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative">
           <div className="space-y-3 max-w-2xl">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
-              Comment ça marche
+              {t('Comment ça marche')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Votre carburant réservé en 4 étapes
+              {t('Votre carburant réservé en 4 étapes')}
             </h2>
             <p className="text-sm text-brand-100/80 leading-relaxed">
-              De la recherche de station jusqu'à la pompe, sans faire la queue.
+              {t("De la recherche de station jusqu'à la pompe, sans faire la queue.")}
             </p>
           </div>
 
@@ -217,10 +219,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {/* The road that links the steps: horizontal on large screens, one piece per step on phones */}
             <span aria-hidden="true" className="hidden md:block absolute top-6 left-[12.5%] right-[12.5%] border-t-2 border-dashed border-amber-400/40" />
             {[
-              { icon: MapPin, title: 'Localiser', text: 'Trouvez les stations proches qui ont votre carburant (Super, Gazole, Mélange), avec le niveau de stock en temps réel.' },
-              { icon: Fuel, title: 'Réserver', text: 'Choisissez votre volume en litres ou en FCFA. Le carburant est aussitôt mis de côté pour vous à la station.' },
-              { icon: Smartphone, title: 'Payer', text: 'Réglez avec Mixx by Yas (ex-TMoney) ou Flooz (Moov Africa). Vous recevez un code unique valable 2 heures.' },
-              { icon: CheckCircle2, title: 'Récupérer', text: 'Montrez votre code au pompiste, la pompe est débloquée. Servez-vous et repartez sans attendre !' },
+              { icon: MapPin, title: t('Localiser'), text: t('Trouvez les stations proches qui ont votre carburant (Super, Gazole, Mélange), avec le niveau de stock en temps réel.') },
+              { icon: Fuel, title: t('Réserver'), text: t('Choisissez votre volume en litres ou en FCFA. Le carburant est aussitôt mis de côté pour vous à la station.') },
+              { icon: Smartphone, title: t('Payer'), text: t('Réglez avec Mixx by Yas (ex-TMoney) ou Flooz (Moov Africa). Vous recevez un code unique valable 2 heures.') },
+              { icon: CheckCircle2, title: t('Récupérer'), text: t('Montrez votre code au pompiste, la pompe est débloquée. Servez-vous et repartez sans attendre !') },
             ].map((step, i) => (
               <li key={step.title} className="reveal relative flex md:flex-col md:items-center md:text-center gap-5 md:gap-4">
                 {i < 3 && (
@@ -232,7 +234,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="flex-1 rounded-2xl bg-white/5 border border-white/10 p-5 space-y-2 md:w-full">
                   <div className="flex md:justify-center items-center gap-2 text-amber-400">
                     <step.icon className="w-5 h-5" aria-hidden="true" />
-                    <span className="text-xs font-bold uppercase tracking-widest">Étape {i + 1}</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">{t('Étape {n}', { n: i + 1 })}</span>
                   </div>
                   <h3 className="text-xl font-bold tracking-tight">{step.title}</h3>
                   <p className="text-sm text-brand-100/80 leading-relaxed">{step.text}</p>
@@ -248,10 +250,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-mono-code font-bold uppercase text-amber-400 tracking-widest block">
-              Stations partenaires en direct
+              {t('Stations partenaires en direct')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Stations à Lomé, attente la plus courte
+              {t('Stations à Lomé, attente la plus courte')}
             </h2>
           </div>
 
@@ -259,7 +261,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             onClick={onNavigateMap}
             className="px-4 py-2 border border-neutral-700 bg-black text-xs font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-1.5 self-start sm:self-auto rounded-full text-white"
           >
-            <span>Voir toutes les stations</span>
+            <span>{t('Voir toutes les stations')}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -281,14 +283,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase text-amber-400 tracking-widest block">
-              Service client et accueil
+              {t('Service client et accueil')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Des sourires à chaque plein
+              {t('Des sourires à chaque plein')}
             </h2>
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 chip-selected text-xs font-extrabold rounded-full">
-            <Smile className="w-4 h-4" /> Satisfaction garantie
+            <Smile className="w-4 h-4" /> {t('Satisfaction garantie')}
           </div>
         </div>
 
@@ -296,32 +298,32 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {[
             {
               img: heroBg,
-              alt: 'Station-service moderne à Lomé',
-              tag: 'Pompes modernes',
-              title: 'Des pompes rapides et connectées',
-              text: 'Des stations équipées de jauges précises, reliées en direct à Pleino pour que le stock affiché soit le vrai.',
-              who: 'TotalEnergies et Sanol',
+              alt: t('Station-service moderne à Lomé'),
+              tag: t('Pompes modernes'),
+              title: t('Des pompes rapides et connectées'),
+              text: t('Des stations équipées de jauges précises, reliées en direct à Pleino pour que le stock affiché soit le vrai.'),
+              who: t('TotalEnergies et Sanol'),
               end: (
-                <div className="flex text-amber-400" aria-label="5 étoiles sur 5">
+                <div className="flex text-amber-400" aria-label={t('5 étoiles sur 5')}>
                   {[0, 1, 2, 3, 4].map((i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />)}
                 </div>
               ),
             },
             {
               img: managerBg,
-              alt: 'Gérante de station souriante au Togo',
-              tag: 'Gérants et pompistes formés',
-              title: 'Un accueil pro et souriant',
-              text: '« Nous accueillons chaque conducteur avec plaisir. Valider un code QR prend moins de 10 secondes ! »',
-              who: 'Ablavi K., superviseure',
+              alt: t('Gérante de station souriante au Togo'),
+              tag: t('Gérants et pompistes formés'),
+              title: t('Un accueil pro et souriant'),
+              text: t('« Nous accueillons chaque conducteur avec plaisir. Valider un code QR prend moins de 10 secondes ! »'),
+              who: t('Ablavi K., superviseure'),
             },
             {
               img: customerBg,
-              alt: 'Client satisfait qui fait le plein au Togo',
-              tag: 'Clients satisfaits',
-              title: 'Faites comme Kofi : réservez votre plein',
-              text: '« Je ne perds plus de temps le matin avant d\'aller au bureau. Mon réservoir est plein en un clin d\'œil ! »',
-              who: 'Kofi M., conducteur à Lomé',
+              alt: t('Client satisfait qui fait le plein au Togo'),
+              tag: t('Clients satisfaits'),
+              title: t('Faites comme Kofi : réservez votre plein'),
+              text: t("« Je ne perds plus de temps le matin avant d'aller au bureau. Mon réservoir est plein en un clin d'œil ! »"),
+              who: t('Kofi M., conducteur à Lomé'),
               onClick: onNavigateMap,
             },
           ].map((card) => (
@@ -352,7 +354,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <span>{card.who}</span>
                   {card.end ?? (card.onClick && (
                     <span className="inline-flex items-center gap-1 text-amber-400">
-                      Voir la carte <ChevronRight className="w-3.5 h-3.5" />
+                      {t('Voir la carte')} <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   ))}
                 </div>
@@ -368,13 +370,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div aria-hidden="true" className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-amber-400/15 blur-3xl" />
           <div className="relative space-y-4 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-amber-400 text-black text-[11px] font-extrabold uppercase rounded-full">
-              <ShieldCheck className="w-3.5 h-3.5" /> Espace Pro stations-service
+              <ShieldCheck className="w-3.5 h-3.5" /> {t('Espace Pro stations-service')}
             </div>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-              Vous gérez une station-service au Togo ?
+              {t('Vous gérez une station-service au Togo ?')}
             </h2>
             <p className="text-sm text-brand-100/85 leading-relaxed">
-              Devenez station partenaire Pleino. Vendez à l'avance, étalez l'affluence à vos pompes, supprimez les impayés et validez chaque client en quelques secondes grâce au code.
+              {t("Devenez station partenaire Pleino. Vendez à l'avance, étalez l'affluence à vos pompes, supprimez les impayés et validez chaque client en quelques secondes grâce au code.")}
             </p>
           </div>
 
@@ -382,7 +384,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             onClick={onNavigatePro}
             className="relative px-7 py-3.5 bg-amber-400 text-black font-extrabold text-sm hover:bg-amber-300 transition-colors whitespace-nowrap shrink-0 rounded-full shadow-lg shadow-black/20 inline-flex items-center gap-2"
           >
-            Accéder à l'Espace Pro <ArrowRight className="w-4 h-4" />
+            {t("Accéder à l'Espace Pro")} <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </section>
@@ -391,30 +393,30 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-8">
         <div className="text-center">
           <span className="text-xs font-bold uppercase text-amber-400 tracking-widest block">
-            Des questions ?
+            {t('Des questions ?')}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            Foire aux questions
+            {t('Foire aux questions')}
           </h2>
         </div>
 
         <div className="space-y-3">
           {[
             {
-              q: 'Que se passe-t-il si le délai de 2 heures expire ?',
-              a: "Si vous ne vous présentez pas à la station avant l'expiration du code (2 h), le ticket expire et les litres retournent à la station. Vous pouvez aussi annuler vous-même un ticket actif depuis « Mes réservations ».",
+              q: t('Que se passe-t-il si le délai de 2 heures expire ?'),
+              a: t("Si vous ne vous présentez pas à la station avant l'expiration du code (2 h), le ticket expire et les litres retournent à la station. Vous pouvez aussi annuler vous-même un ticket actif depuis « Mes réservations »."),
             },
             {
-              q: 'Quels modes de paiement sont acceptés au Togo ?',
-              a: 'Pleino accepte Mixx by Yas (ex-TMoney, Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.',
+              q: t('Quels modes de paiement sont acceptés au Togo ?'),
+              a: t('Pleino accepte Mixx by Yas (ex-TMoney, Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.'),
             },
             {
-              q: 'Comment le pompiste valide-t-il ma réservation ?',
-              a: "Le pompiste saisit votre code (RNK-XXXX-XX) dans l'Espace Pro Pleino ou scanne votre QR code avec la caméra. Chaque ticket ne peut être servi qu'une fois, pour exactement les litres réservés.",
+              q: t('Comment le pompiste valide-t-il ma réservation ?'),
+              a: t("Le pompiste saisit votre code (RNK-XXXX-XX) dans l'Espace Pro Pleino ou scanne votre QR code avec la caméra. Chaque ticket ne peut être servi qu'une fois, pour exactement les litres réservés."),
             },
             {
-              q: 'Comment fonctionne le Pass Premium Pleino ?',
-              a: "Le Pass Premium supprime les frais de réservation (150 FCFA par ticket). Demandez-le depuis la page Pass Premium : un administrateur Pleino l'active sur votre compte.",
+              q: t('Comment fonctionne le Pass Premium Pleino ?'),
+              a: t("Le Pass Premium supprime les frais de réservation (150 FCFA par ticket). Demandez-le depuis la page Pass Premium : un administrateur Pleino l'active sur votre compte."),
             },
           ].map((item) => (
             <details key={item.q} className="group bg-black border border-neutral-800 rounded-2xl open:border-brand-500/50 transition-colors">

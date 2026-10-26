@@ -10,6 +10,7 @@ import { StationFreshness, useNow } from './StationFreshness';
 import { RatingBadge } from './StarRating';
 import { reportLabel } from '../../shared/reports';
 import { timeAgo } from '../time';
+import { num, t, tServer } from '../i18n';
 
 interface StationDetailViewProps {
   station: Station | null;
@@ -28,19 +29,19 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
   if (!station) {
     return (
       <div className="max-w-7xl mx-auto p-8 text-center font-mono-code text-white">
-        <p className="text-neutral-300">Station introuvable.</p>
+        <p className="text-neutral-300">{t('Station introuvable.')}</p>
         <button onClick={onBack} className="mt-4 px-4 py-2 bg-amber-400 text-black text-xs font-bold rounded-xl">
-          Retour à la carte
+          {t('Retour à la carte')}
         </button>
       </div>
     );
   }
 
   const fuels: { type: FuelType; label: string }[] = [
-    { type: 'SUPER', label: 'Super Sans Plomb' },
-    { type: 'GAZOLE', label: 'Gazole (Diesel)' },
-    { type: 'MELANGE', label: 'Mélange 2 Temps' },
-    { type: 'KEROSENE', label: 'Pétrole / Kérosène' },
+    { type: 'SUPER', label: t('Super Sans Plomb') },
+    { type: 'GAZOLE', label: t('Gazole (Diesel)') },
+    { type: 'MELANGE', label: t('Mélange 2 Temps') },
+    { type: 'KEROSENE', label: t('Pétrole / Kérosène') },
   ];
 
   const canBook = fuels.some((f) => (station.stock[f.type]?.availableLiters ?? 0) >= 2);
@@ -53,7 +54,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 bg-black/80 backdrop-blur-md text-neutral-300 hover:text-white hover:border-amber-400 transition-all text-xs font-bold rounded-xl shadow-lg"
       >
         <ArrowLeft className="w-4 h-4 text-amber-400" />
-        <span>Retour aux stations</span>
+        <span>{t('Retour aux stations')}</span>
       </button>
 
       {/* Main Station Header Banner */}
@@ -73,7 +74,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
               </span>
               {station.isPartner && (
                 <span className="inline-flex items-center gap-1.5 text-xs border border-amber-400/60 bg-amber-400/10 text-amber-300 px-2.5 py-0.5 font-bold uppercase rounded-md shadow">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Partenaire sécurisé
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Partenaire sécurisé')}
                 </span>
               )}
             </div>
@@ -98,7 +99,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
             onClick={() => onBook(station)}
             className="hidden md:flex px-8 py-4 bg-amber-400 text-black font-black text-xs tracking-wider hover:bg-amber-300 transition-all items-center justify-center gap-2 rounded-xl shadow-lg shadow-amber-400/20 shrink-0 border border-amber-300"
           >
-            <span>Réserver dans cette station</span>
+            <span>{t('Réserver dans cette station')}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -106,7 +107,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         {/* Quick Info Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs relative z-10">
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">Attente estimée</div>
+            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t('Attente estimée')}</div>
             <div className="text-lg font-black text-amber-400 flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-400" />
               <span>{station.queueTimeMinutes} min</span>
@@ -114,12 +115,12 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">Horaires d'ouverture</div>
-            <div className="text-sm font-bold text-white">{station.operatingHours}</div>
+            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t("Horaires d'ouverture")}</div>
+            <div className="text-sm font-bold text-white">{t(station.operatingHours)}</div>
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">Téléphone de la station</div>
+            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t('Téléphone de la station')}</div>
             <div className="text-sm font-bold text-white flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
               <a href={`tel:${station.phone.replace(/\s/g, '')}`} className="whitespace-nowrap text-[13px] sm:text-sm hover:text-amber-300">
@@ -129,14 +130,14 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">Itinéraire</div>
+            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t('Itinéraire')}</div>
             <a
               href={directionsUrl(station)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-bold text-amber-400 hover:underline"
             >
-              Ouvrir dans Google Maps
+              {t('Ouvrir dans Google Maps')}
             </a>
           </div>
         </div>
@@ -147,10 +148,10 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="border-b border-neutral-800 pb-3 flex justify-between items-end">
           <div>
             <span className="text-xs text-amber-400 font-bold uppercase tracking-widest block flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Jauge de stock en direct
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {t('Jauge de stock en direct')}
             </span>
             <h2 className="text-2xl font-black text-white tracking-tight">
-              Disponibilité des carburants
+              {t('Disponibilité des carburants')}
             </h2>
           </div>
         </div>
@@ -162,21 +163,21 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
               {station.reports!.map((r) => (
                 <li key={`${r.kind}-${r.fuelType ?? ''}`} className="flex items-center gap-2 text-sm">
                   <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                  <span className="font-bold text-red-300">{reportLabel(r)}</span>
+                  <span className="font-bold text-red-300">{tServer(reportLabel(r))}</span>
                   <span className="text-neutral-400">
-                    · {r.count > 1 ? `${r.count} clients` : '1 client'}, {timeAgo(r.lastAt, now)}
+                    · {r.count > 1 ? t('{n} clients', { n: r.count }) : t('1 client')}, {timeAgo(r.lastAt, now)}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-neutral-400">Aucun problème signalé par les clients ces dernières heures.</p>
+            <p className="text-sm text-neutral-400">{t('Aucun problème signalé par les clients ces dernières heures.')}</p>
           )}
           <button
             onClick={() => onReport(station)}
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-neutral-700 text-sm font-bold text-white hover:border-amber-400 inline-flex items-center justify-center gap-2"
           >
-            <AlertTriangle className="w-4 h-4 text-amber-400" /> Signaler un problème
+            <AlertTriangle className="w-4 h-4 text-amber-400" /> {t('Signaler un problème')}
           </button>
         </div>
 
@@ -198,7 +199,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                       />
                     </div>
                     <span className={`text-sm ${empty ? 'text-neutral-400' : 'text-neutral-200'}`}>
-                      {empty ? 'Épuisé' : `${stock.availableLiters.toLocaleString('fr-FR')} L`}
+                      {empty ? t('Épuisé') : `${num(stock.availableLiters)} L`}
                     </span>
                   </div>
                 </div>
@@ -226,17 +227,17 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                   value={percent}
                   size="lg"
                   label={`${stock.availableLiters} L`}
-                  sublabel={`Sur ${stock.maxCapacityLiters} L max`}
+                  sublabel={t('Sur {n} L max', { n: stock.maxCapacityLiters })}
                   darkMode={true}
                 />
 
                 <div className="border-t border-neutral-800/80 pt-3 text-xs space-y-1.5 text-neutral-300">
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Prix officiel :</span>
+                    <span className="text-neutral-400">{t('Prix officiel :')}</span>
                     <span className="font-bold text-white">{stock.pricePerLiter} FCFA / L</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">État de la pompe :</span>
+                    <span className="text-neutral-400">{t('État de la pompe :')}</span>
                     <span
                       className={`font-bold ${
                         stock.status === 'AVAILABLE'
@@ -247,10 +248,10 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                       }`}
                     >
                       {stock.status === 'AVAILABLE'
-                        ? 'En stock'
+                        ? t('En stock')
                         : stock.status === 'LOW'
-                        ? 'Stock limité'
-                        : 'Épuisé'}
+                        ? t('Stock limité')
+                        : t('Épuisé')}
                     </span>
                   </div>
                 </div>
@@ -264,7 +265,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                       : 'bg-neutral-900 text-neutral-500 border border-neutral-800 cursor-not-allowed'
                   }`}
                 >
-                  {stock.availableLiters > 0 ? 'Réserver ce carburant' : 'Rupture'}
+                  {stock.availableLiters > 0 ? t('Réserver ce carburant') : t('Rupture')}
                 </button>
               </div>
             );
@@ -281,13 +282,13 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="border border-neutral-800 p-6 space-y-4 bg-black/85 backdrop-blur-xl rounded-2xl text-white shadow-2xl">
           <h3 className="text-base font-black border-b border-neutral-800 pb-2 text-white flex items-center gap-2">
             <Fuel className="w-4 h-4 text-amber-400" />
-            <span>Services et équipements</span>
+            <span>{t('Services et équipements')}</span>
           </h3>
           <ul className="grid grid-cols-2 gap-3 text-xs">
             {station.amenities.map((item, idx) => (
               <li key={idx} className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-semibold text-neutral-200">{item}</span>
+                <span className="font-semibold text-neutral-200">{t(item)}</span>
               </li>
             ))}
           </ul>
@@ -297,12 +298,12 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="border border-neutral-800 p-6 space-y-4 bg-black/85 backdrop-blur-xl rounded-2xl text-white shadow-2xl">
           <h3 className="text-base font-black border-b border-neutral-800 pb-2 text-white flex items-center gap-2">
             <Navigation className="w-4 h-4 text-amber-400" />
-            <span>Accès et itinéraire</span>
+            <span>{t('Accès et itinéraire')}</span>
           </h3>
           <div className="space-y-3 text-xs text-neutral-300">
             <p className="font-bold text-amber-300">{station.address}</p>
             <p className="font-sans text-neutral-300 leading-relaxed">
-              Depuis le centre-ville de Lomé, prenez l'axe principal en direction de {station.district}. La station est facilement identifiable par son totem lumineux {station.brand}.
+              {t("Depuis le centre-ville de Lomé, prenez l'axe principal en direction de {district}. La station est facilement identifiable par son totem lumineux {brand}.", { district: station.district, brand: station.brand })}
             </p>
             <div className="pt-1">
               <a
@@ -312,7 +313,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                 className="px-4 py-3 bg-amber-400 text-black font-black text-xs inline-flex items-center gap-2 rounded-xl hover:bg-amber-300 transition-all shadow-lg shadow-amber-400/20"
               >
                 <Navigation className="w-4 h-4" />
-                <span>Lancer le GPS</span>
+                <span>{t('Lancer le GPS')}</span>
               </a>
             </div>
           </div>
@@ -324,14 +325,14 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="bg-neutral-950/95 backdrop-blur border border-neutral-700 rounded-2xl p-3 flex items-center gap-3 shadow-2xl">
           <div className="flex-1 min-w-0 text-sm">
             <div className="font-bold text-white truncate">{station.name}</div>
-            <div className="text-neutral-300">{station.queueTimeMinutes} min d'attente</div>
+            <div className="text-neutral-300">{t("{n} min d'attente", { n: station.queueTimeMinutes })}</div>
           </div>
           <button
             onClick={() => onBook(station)}
             disabled={!canBook}
             className="px-6 py-3 bg-amber-400 text-black font-extrabold text-sm rounded-xl hover:bg-amber-300 disabled:opacity-40 shrink-0"
           >
-            {canBook ? 'Réserver' : 'Rupture'}
+            {canBook ? t('Réserver') : t('Rupture')}
           </button>
         </div>
       </div>

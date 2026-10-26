@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { t } from '../i18n';
 
 // The browser's own QR reader (Chrome and Edge on Android, Chrome on computers).
 interface DetectedBarcode {
@@ -59,7 +60,7 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult, onClose }) => {
           }
         }, 300);
       })
-      .catch(() => setError("Accès à la caméra refusé. Autorisez la caméra pour ce site, ou saisissez le code."));
+      .catch(() => setError(t("Accès à la caméra refusé. Autorisez la caméra pour ce site, ou saisissez le code.")));
 
     return () => {
       stopped = true;
@@ -76,14 +77,14 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult, onClose }) => {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fermer la caméra"
+          aria-label={t('Fermer la caméra')}
           className="absolute top-2 right-2 p-1.5 bg-black/80 border border-neutral-600 rounded-lg text-white"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
       <p className={`text-xs text-center font-sans ${error ? 'text-rose-300 font-bold' : 'text-neutral-400'}`}>
-        {error ?? 'Placez le QR code du client dans le cadre.'}
+        {error ?? t('Placez le QR code du client dans le cadre.')}
       </p>
     </div>
   );

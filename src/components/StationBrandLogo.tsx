@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, CheckCircle2, Flame, ExternalLink, ShieldCheck, Fuel, MapPin, X } from 'lucide-react';
+import { t } from '../i18n';
 
 export type StationBrandType = 
   | 'TotalEnergies' 
@@ -125,7 +126,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
           className={`relative rounded-xl overflow-hidden p-1 transition-all duration-300 transform ${dimensions} ${
             interactive ? 'cursor-pointer hover:scale-110 active:scale-95 hover:rotate-3' : ''
           }`}
-          title={`Logo ${brandInfo.name} — Cliquez pour aperçu`}
+          title={t('Logo {name} — Cliquez pour aperçu', { name: brandInfo.name })}
         >
           {renderLogoVector()}
 
@@ -142,7 +143,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
             </span>
             <span className="text-[9px] text-neutral-400 font-mono-code flex items-center gap-1 mt-0.5">
               <ShieldCheck className="w-3 h-3 text-amber-400" />
-              <span>Station certifiée</span>
+              <span>{t('Station certifiée')}</span>
             </span>
           </div>
         )}
@@ -163,7 +164,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               type="button"
               onClick={() => setShowDetailsModal(false)}
               className="absolute top-4 right-4 w-9 h-9 bg-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-700 rounded-full flex items-center justify-center font-bold text-sm transition-colors border border-neutral-700"
-              title="Fermer l'aperçu"
+              title={t("Fermer l'aperçu")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -175,13 +176,13 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               </div>
               <div>
                 <span className={`inline-block px-2.5 py-0.5 text-[11px] font-extrabold uppercase rounded mb-1 border ${brandInfo.badge}`}>
-                  Partenaire Réseau Togo
+                  {t('Partenaire Réseau Togo')}
                 </span>
                 <h3 className="text-xl font-extrabold text-white leading-tight">
                   {brandInfo.name}
                 </h3>
                 <p className="text-xs text-amber-300 font-sans mt-0.5">
-                  Réseau Officiel Certifié Pleino
+                  {t('Réseau Officiel Certifié Pleino')}
                 </p>
               </div>
             </div>
@@ -191,31 +192,31 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               <div className="p-3.5 bg-black/70 border border-neutral-800 rounded-xl space-y-2.5">
                 <div className="flex justify-between items-center text-neutral-300">
                   <span className="font-bold flex items-center gap-1.5">
-                    <Fuel className="w-3.5 h-3.5 text-amber-400" /> Pompes & Automates :
+                    <Fuel className="w-3.5 h-3.5 text-amber-400" /> {t('Pompes & Automates :')}
                   </span>
-                  <span className="text-emerald-400 font-bold">100% Compatibles QR Code</span>
+                  <span className="text-emerald-400 font-bold">{t('100% Compatibles QR Code')}</span>
                 </div>
                 <div className="flex justify-between items-center text-neutral-300">
                   <span className="font-bold flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Garantie Carburant :
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Garantie Carburant :')}
                   </span>
-                  <span className="text-amber-400 font-bold">Normes ISO / Européennes</span>
+                  <span className="text-amber-400 font-bold">{t('Normes ISO / Européennes')}</span>
                 </div>
                 <div className="flex justify-between items-center text-neutral-300">
                   <span className="font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Paiement Accepté :
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('Paiement Accepté :')}
                   </span>
-                  <span className="text-white font-bold">TMoney, Flooz, Carte Visa</span>
+                  <span className="text-white font-bold">{t('TMoney, Flooz, Carte Visa')}</span>
                 </div>
               </div>
 
               <div className="p-3.5 bg-amber-400/10 border border-amber-400/30 rounded-xl space-y-1">
                 <div className="text-xs font-extrabold text-amber-300 flex items-center gap-1.5 uppercase">
                   <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>Personnalisation de Logo & Design</span>
+                  <span>{t('Personnalisation de Logo & Design')}</span>
                 </div>
                 <p className="text-xs text-neutral-300 font-sans leading-relaxed">
-                  Chaque station partenaire affiche son identité visuelle propre. Vous pourrez bientôt télécharger vos propres logos de stations personnalisés depuis l'Espace Pro.
+                  {t("Chaque station partenaire affiche son identité visuelle propre. Vous pourrez bientôt télécharger vos propres logos de stations personnalisés depuis l'Espace Pro.")}
                 </p>
               </div>
             </div>
@@ -227,7 +228,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
                 onClick={() => setShowDetailsModal(false)}
                 className="w-full py-3 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300 active:scale-98 transition-all shadow-lg shadow-amber-400/20"
               >
-                Fermer l'Aperçu du Logo
+                {t("Fermer l'Aperçu du Logo")}
               </button>
             </div>
           </div>

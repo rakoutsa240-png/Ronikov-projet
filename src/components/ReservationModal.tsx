@@ -9,6 +9,7 @@ import { MAX_LITERS_PER_RESERVATION, SERVICE_FEE_XOF } from '../../shared/reserv
 import { FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 import { useModal } from '../useModal';
 import { loadJSON, saveJSON } from '../storage';
+import { num, t } from '../i18n';
 
 interface ReservationModalProps {
   station: Station | null;
@@ -132,7 +133,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
       } satisfies LastBooking);
       setStep(4);
     } catch (e) {
-      setPaymentError(e instanceof ApiError ? e.message : 'Serveur Pleino injoignable. Réessayez.');
+      setPaymentError(e instanceof ApiError ? e.message : t('Serveur Pleino injoignable. Réessayez.'));
     } finally {
       setIsProcessing(false);
     }
@@ -155,7 +156,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onClose}
-          aria-label="Fermer"
+          aria-label={t('Fermer')}
           className="absolute top-4 right-4 p-2 border border-neutral-700 hover:border-amber-400 bg-neutral-900/90 text-neutral-300 hover:text-white rounded-xl transition-all z-20"
         >
           <X className="w-5 h-5" />
@@ -165,7 +166,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         <div className="border-b border-neutral-800 pb-4 space-y-3 relative z-10 pr-12">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-1 chip-selected text-[11px] font-mono-code font-black uppercase rounded shadow">
-              Réservation Pleino
+              {t('Réservation Pleino')}
             </span>
             <span className="text-xs font-mono-code text-neutral-400 font-bold">
               {station.name} ({station.district})
@@ -174,7 +175,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
 
           {/* Stepper: choice, payment, ticket */}
           <ol className="pt-2 grid grid-cols-3 gap-2 text-xs font-semibold">
-            {['Carburant', 'Paiement', 'Ticket'].map((label, i) => {
+            {[t('Carburant'), t('Paiement'), t('Ticket')].map((label, i) => {
               const stage = step === 1 ? 0 : step === 4 ? 2 : 1;
               return (
                 <li key={label} aria-current={i === stage ? 'step' : undefined} className="space-y-1.5">
@@ -194,7 +195,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             {/* Fuel Type Selector */}
             <div className="space-y-2">
               <label className="text-xs font-mono-code font-bold text-neutral-200 block">
-                1. Sélectionner le type de carburant
+                {t('1. Sélectionner le type de carburant')}
               </label>
               <div className="grid grid-cols-2 gap-2.5">
                 {(['SUPER', 'GAZOLE', 'MELANGE', 'KEROSENE'] as FuelType[]).map((f) => {
@@ -215,10 +216,10 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                           : 'border-neutral-800 bg-black/60 hover:border-neutral-700 text-neutral-200'
                       }`}
                     >
-                      <div className={`text-sm font-bold ${isSelected ? 'text-amber-300' : 'text-white'}`}>{fuelLabels[f]}</div>
+                      <div className={`text-sm font-bold ${isSelected ? 'text-amber-300' : 'text-white'}`}>{t(fuelLabels[f])}</div>
                       <div className="text-sm font-semibold text-amber-400 mt-0.5">{stock?.pricePerLiter} FCFA/L</div>
                       <div className="text-xs mt-0.5 text-neutral-300">
-                        {isAvailable ? `${stock.availableLiters.toLocaleString('fr-FR')} L dispo` : 'Rupture de stock'}
+                        {isAvailable ? t('{n} L dispo', { n: num(stock.availableLiters) }) : t('Rupture de stock')}
                       </div>
                     </button>
                   );
@@ -230,7 +231,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             <div className="space-y-3 pt-3 border-t border-neutral-800">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-mono-code font-bold text-neutral-200">
-                  2. Quantité à réserver
+                  {t('2. Quantité à réserver')}
                 </label>
                 <div className="flex border border-neutral-800 rounded-lg overflow-hidden font-mono-code text-xs bg-black">
                   <button
@@ -239,7 +240,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                       inputMode === 'fcfa' ? 'chip-selected' : 'bg-neutral-900 text-neutral-400 hover:text-white'
                     }`}
                   >
-                    En FCFA
+                    {t('En FCFA')}
                   </button>
                   <button
                     onClick={() => switchInputMode('liters')}
@@ -247,7 +248,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                       inputMode === 'liters' ? 'chip-selected' : 'bg-neutral-900 text-neutral-400 hover:text-white'
                     }`}
                   >
-                    En litres
+                    {t('En litres')}
                   </button>
                 </div>
               </div>
@@ -256,8 +257,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               {inputMode === 'liters' ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border border-neutral-800 p-4 bg-black/60 rounded-xl font-mono-code">
-                    <span className="text-xs text-neutral-400 font-bold">Volume choisi :</span>
-                    <span className="text-2xl font-black text-amber-300">{liters} Litres</span>
+                    <span className="text-xs text-neutral-400 font-bold">{t('Volume choisi :')}</span>
+                    <span className="text-2xl font-black text-amber-300">{t('{n} Litres', { n: liters })}</span>
                   </div>
 
                   <input
@@ -288,8 +289,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border border-neutral-800 p-4 bg-black/60 rounded-xl font-mono-code">
-                    <span className="text-xs text-neutral-400 font-bold">Montant souhaité :</span>
-                    <span className="text-2xl font-black text-amber-300">{fcfaAmount.toLocaleString('fr-FR')} FCFA</span>
+                    <span className="text-xs text-neutral-400 font-bold">{t('Montant souhaité :')}</span>
+                    <span className="text-2xl font-black text-amber-300">{num(fcfaAmount)} FCFA</span>
                   </div>
 
                   <input
@@ -313,7 +314,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                           fcfaAmount === preset ? 'chip-selected shadow' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
-                        {i === FCFA_PRESETS.length ? `Max (${maxLiters} L)` : preset.toLocaleString('fr-FR')}
+                        {i === FCFA_PRESETS.length ? `Max (${maxLiters} L)` : num(preset)}
                       </button>
                     ))}
                   </div>
@@ -323,13 +324,13 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
 
             {inputMode === 'fcfa' && (
               <p className="text-xs font-mono-code text-neutral-400">
-                Soit {liters} litres, arrondi au litre : {(liters * pricePerLiter).toLocaleString('fr-FR')} FCFA de carburant.
+                {t('Soit {n} litres, arrondi au litre : {amount} FCFA de carburant.', { n: liters, amount: num(liters * pricePerLiter) })}
               </p>
             )}
 
             {!canBook && (
               <p role="alert" className="text-xs font-mono-code font-bold text-red-300 border border-red-500/60 bg-red-500/10 p-3 rounded-xl">
-                Cette station n'a plus de carburant à réserver pour le moment.
+                {t("Cette station n'a plus de carburant à réserver pour le moment.")}
               </p>
             )}
 
@@ -339,7 +340,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 onClick={() => setStep(3)}
                 className="w-full sm:w-auto justify-center px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <span>Continuer vers le paiement</span>
+                <span>{t('Continuer vers le paiement')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -352,21 +353,21 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             {/* Short summary of the order */}
             <div className="border border-neutral-800 bg-black/60 rounded-xl p-4 text-sm space-y-1.5">
               <div className="flex justify-between gap-3">
-                <span className="text-neutral-300">{liters} L de {fuelLabels[selectedFuel]}</span>
-                <span className="font-semibold text-white">{totalFuelCost.toLocaleString('fr-FR')} FCFA</span>
+                <span className="text-neutral-300">{t('{n} L de {fuel}', { n: liters, fuel: t(fuelLabels[selectedFuel]) })}</span>
+                <span className="font-semibold text-white">{num(totalFuelCost)} FCFA</span>
               </div>
               <div className="flex justify-between gap-3">
-                <span className="text-neutral-300">Frais de réservation</span>
-                <span className="font-semibold text-white">{isUserPremium ? 'Offerts (Premium)' : `${serviceFee} FCFA`}</span>
+                <span className="text-neutral-300">{t('Frais de réservation')}</span>
+                <span className="font-semibold text-white">{isUserPremium ? t('Offerts (Premium)') : `${serviceFee} FCFA`}</span>
               </div>
               <p className="text-xs text-neutral-400 pt-1">
-                Carburant gardé pour vous 2 heures à {station.name}. Sans passage, le ticket expire et les litres retournent à la station.
+                {t('Carburant gardé pour vous 2 heures à {station}. Sans passage, le ticket expire et les litres retournent à la station.', { station: station.name })}
               </p>
             </div>
 
             <div className="space-y-3">
               <label className="text-xs font-mono-code font-bold text-neutral-200 block">
-                Sélectionner le mode de paiement Mobile Money Togo / Carte
+                {t('Sélectionner le mode de paiement Mobile Money Togo / Carte')}
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-code text-xs">
@@ -412,7 +413,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             {(paymentMethod === 'MIXX_BY_YAS' || paymentMethod === 'MOOV_MONEY' || paymentMethod === 'TMONEY' || paymentMethod === 'FLOOZ') && (
               <div className="space-y-2 border border-neutral-800 p-4 bg-black/60 rounded-xl font-mono-code">
                 <label className="text-xs font-bold block text-neutral-200">
-                  Numéro de téléphone pour la validation push USSD
+                  {t('Numéro de téléphone pour la validation push USSD')}
                 </label>
                 <div className="flex border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden focus-within:border-amber-400">
                   <span className="px-3 py-2 bg-neutral-800 border-r border-neutral-700 font-bold text-xs text-amber-300 flex items-center">
@@ -431,7 +432,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 <p className="text-xs text-neutral-400 flex items-center gap-1.5 mt-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>
-                    Un pop-up de confirmation PIN sera envoyé directement sur votre ligne Togo{' '}
+                    {t('Un pop-up de confirmation PIN sera envoyé directement sur votre ligne Togo')}{' '}
                     <strong className="text-amber-300">
                       {paymentMethod === 'MIXX_BY_YAS' || paymentMethod === 'TMONEY' ? 'mixx by yas (Togocom)' : 'Moov Africa Flooz'}
                     </strong>
@@ -448,8 +449,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
 
             {/* Summary Banner */}
             <div className="border-t border-b border-neutral-800 py-3 flex justify-between items-center font-mono-code text-xs text-white">
-              <span className="text-neutral-400">Total à débiter:</span>
-              <span className="text-lg font-black text-amber-400">{totalPayable.toLocaleString('fr-FR')} FCFA</span>
+              <span className="text-neutral-400">{t('Total à débiter :')}</span>
+              <span className="text-lg font-black text-amber-400">{num(totalPayable)} FCFA</span>
             </div>
 
             <div className="pt-2 flex justify-between">
@@ -457,7 +458,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 onClick={() => setStep(1)}
                 className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-neutral-300 font-mono-code font-bold text-xs hover:border-amber-400 rounded-xl transition-all"
               >
-                Retour
+                {t('Retour')}
               </button>
 
               <button
@@ -468,11 +469,11 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 {isProcessing ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent animate-spin rounded-full"></span>
-                    <span>Validation du Paiement...</span>
+                    <span>{t('Validation du paiement…')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Payer {totalPayable.toLocaleString('fr-FR')} FCFA</span>
+                    <span>{t('Payer {amount} FCFA', { amount: num(totalPayable) })}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

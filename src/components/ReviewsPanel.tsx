@@ -5,13 +5,14 @@ import { LOW_RATING } from '../../shared/reviews';
 import { ReviewsSummary, StationReview } from '../types';
 import { Stars } from './StarRating';
 import { Avatar } from './Avatar';
+import { locale, num, t } from '../i18n';
 
 interface ReviewsPanelProps {
   stationId?: string; // one station (Espace Pro); every station when left out (admin)
   canHide?: boolean; // admins hide abusive reviews
 }
 
-const formatDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+const formatDate = (iso: string) => new Date(iso).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' });
 
 const isLow = (r: StationReview) => r.stationRating <= LOW_RATING || (r.attendantRating !== null && r.attendantRating <= LOW_RATING);
 
@@ -28,21 +29,21 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
     setError(null);
     (stationId ? api.stationReviews(stationId) : api.allReviews())
       .then((summary) => !cancelled && setData(summary))
-      .catch((e) => !cancelled && setError(e instanceof ApiError ? e.message : 'Avis indisponibles pour le moment.'));
+      .catch((e) => !cancelled && setError(e instanceof ApiError ? e.message : t('Avis indisponibles pour le moment.')));
     return () => {
       cancelled = true;
     };
   }, [stationId]);
 
   const toggleHidden = async (review: StationReview) => {
-    if (!review.isHidden && !window.confirm('Masquer cet avis ? Il ne comptera plus dans les notes et le gérant ne le verra plus.')) return;
+    if (!review.isHidden && !window.confirm(t('Masquer cet avis ? Il ne comptera plus dans les notes et le gérant ne le verra plus.'))) return;
     setBusy(review.id);
     setError(null);
     try {
       const updated = await api.hideReview(review.id, !review.isHidden);
       setData((d) => d && { ...d, reviews: d.reviews.map((r) => (r.id === updated.id ? updated : r)) });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Action impossible, réessayez.');
+      setError(e instanceof ApiError ? e.message : t('Action impossible, réessayez.'));
     } finally {
       setBusy(null);
     }
@@ -54,14 +55,14 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
     <section className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-5">
       <div className="border-b border-neutral-800 pb-4">
         <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest flex items-center gap-1.5">
-          <MessageSquareHeart className="w-3.5 h-3.5" /> Ce que disent les clients
+          <MessageSquareHeart className="w-3.5 h-3.5" /> {t('Ce que disent les clients')}
         </span>
-        <h2 className="text-2xl font-black text-white tracking-tight">Avis clients</h2>
+        <h2 className="text-2xl font-black text-white tracking-tight">{t('Avis clients')}</h2>
         <p className="text-xs text-neutral-400 font-sans mt-1">
-          Seuls les clients servis avec un ticket Pleino peuvent noter, une fois par ticket.{' '}
+          {t('Seuls les clients servis avec un ticket Pleino peuvent noter, une fois par ticket.')}{' '}
           {canHide
-            ? 'Masquez un avis abusif (insultes, numéro de téléphone…) : il ne compte plus nulle part.'
-            : 'Les notes des pompistes et les commentaires ne sont visibles que par vous et l’équipe Pleino.'}
+            ? t('Masquez un avis abusif (insultes, numéro de téléphone…) : il ne compte plus nulle part.')
+            : t('Les notes des pompistes et les commentaires ne sont visibles que par vous et l’équipe Pleino.')}
         </p>
       </div>
 
@@ -72,14 +73,14 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
       )}
 
       {data === null ? (
-        !error && <p className="text-xs text-neutral-400">Chargement...</p>
+        !error && <p className="text-xs text-neutral-400">{t('Chargement…')}</p>
       ) : data.reviews.length === 0 ? (
-        <p className="text-xs text-neutral-400 italic text-center py-2">Aucun avis pour l'instant.</p>
+        <p className="text-xs text-neutral-400 italic text-center py-2">{t("Aucun avis pour l'instant.")}</p>
       ) : (
         <>
           {data.attendants.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-black text-white">Note des pompistes</h3>
+              <h3 className="text-sm font-black text-white">{t('Note des pompistes')}</h3>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 {data.attendants.map((a) => (
                   <li
@@ -93,14 +94,14 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
                       <div>
                         <div className="font-black text-white">{a.attendantName}</div>
                         <div className="text-neutral-400">
-                          {a.count} avis
-                          {a.lowCount > 0 && <span className="text-rose-300 font-bold"> • {a.lowCount} mauvais</span>}
+                          {t('{n} avis', { n: a.count })}
+                          {a.lowCount > 0 && <span className="text-rose-300 font-bold"> • {t('{n} mauvais', { n: a.lowCount })}</span>}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <Stars value={a.average} />
-                      <div className="font-black text-amber-300 tabular-nums">{a.average.toLocaleString('fr-FR')} / 5</div>
+                      <div className="font-black text-amber-300 tabular-nums">{num(a.average)} / 5</div>
                     </div>
                   </li>
                 ))}
@@ -109,10 +110,10 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
           )}
 
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-black text-white">Derniers avis</h3>
+            <h3 className="text-sm font-black text-white">{t('Derniers avis')}</h3>
             <label className="inline-flex items-center gap-2 text-xs font-bold text-neutral-300">
               <input type="checkbox" checked={onlyLow} onChange={(e) => setOnlyLow(e.target.checked)} className="accent-amber-400" />
-              Mauvais avis seulement
+              {t('Mauvais avis seulement')}
             </label>
           </div>
 
@@ -129,24 +130,24 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
                     {r.clientName}
                     <span className="font-normal text-neutral-400">
                       {' '}
-                      • {formatDate(r.createdAt)} • {r.liters} L {r.fuelLabel}
+                      • {formatDate(r.createdAt)} • {r.liters} L {t(r.fuelLabel)}
                       {!stationId && ` • ${r.stationName}`}
                     </span>
                   </div>
                   {isLow(r) && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 font-bold">
-                      <ThumbsDown className="w-3 h-3" /> Mauvais avis
+                      <ThumbsDown className="w-3 h-3" /> {t('Mauvais avis')}
                     </span>
                   )}
-                  {r.isHidden && <span className="px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 font-bold">Masqué</span>}
+                  {r.isHidden && <span className="px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 font-bold">{t('Masqué')}</span>}
                 </div>
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-neutral-300">
                   <span className="inline-flex items-center gap-1.5">
-                    Station <Stars value={r.stationRating} />
+                    {t('Station')} <Stars value={r.stationRating} />
                   </span>
                   {r.attendantRating !== null && (
                     <span className="inline-flex items-center gap-1.5">
-                      {r.attendantName ?? 'Compte supprimé'} <Stars value={r.attendantRating} />
+                      {r.attendantName ?? t('Compte supprimé')} <Stars value={r.attendantRating} />
                     </span>
                   )}
                 </div>
@@ -158,12 +159,12 @@ export const ReviewsPanel: React.FC<ReviewsPanelProps> = ({ stationId, canHide =
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 underline hover:text-amber-200 disabled:opacity-60"
                   >
                     {r.isHidden ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                    {r.isHidden ? 'Réafficher' : 'Masquer cet avis'}
+                    {r.isHidden ? t('Réafficher') : t('Masquer cet avis')}
                   </button>
                 )}
               </li>
             ))}
-            {shown.length === 0 && <li className="text-neutral-400 italic text-center py-2">Aucun mauvais avis.</li>}
+            {shown.length === 0 && <li className="text-neutral-400 italic text-center py-2">{t('Aucun mauvais avis.')}</li>}
           </ul>
         </>
       )}

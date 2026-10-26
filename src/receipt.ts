@@ -1,4 +1,5 @@
 import type { PaymentMethod, Reservation } from './types';
+import { locale, num, t } from './i18n';
 
 // A payment receipt the client can keep or send on WhatsApp. It is a picture, so it opens on any phone.
 // It never shows the full ticket code: whoever has the code can take the fuel.
@@ -11,9 +12,9 @@ const PAYMENT_NAMES: Record<PaymentMethod, string> = {
   CARD: 'Carte bancaire',
 };
 
-const fcfa = (n: number) => `${n.toLocaleString('fr-FR').replace(/ | /g, ' ')} FCFA`;
+const fcfa = (n: number) => `${num(n).replace(/ | /g, ' ')} FCFA`;
 const dateTime = (iso: string) =>
-  new Date(iso).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  new Date(iso).toLocaleString(locale(), { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export const maskCode = (code: string) => code.replace(/^(RNK-)(\w+)(-\w+)$/, (_m, a, b, c) => `${a}${'•'.repeat(b.length)}${c}`);
 export const maskPhone = (phone: string) => {
@@ -24,13 +25,13 @@ export const maskPhone = (phone: string) => {
 export function receiptStatus(r: Reservation): string {
   switch (r.status) {
     case 'VALIDATED':
-      return r.validatedAt ? `Servi le ${dateTime(r.validatedAt)}` : 'Servi à la pompe';
+      return r.validatedAt ? t('Servi le {date}', { date: dateTime(r.validatedAt) }) : t('Servi à la pompe');
     case 'CANCELLED':
-      return 'Annulé';
+      return t('Annulé');
     case 'EXPIRED':
-      return 'Expiré (non servi)';
+      return t('Expiré (non servi)');
     default:
-      return `À servir avant ${new Date(r.expiresAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+      return t('À servir avant {time}', { time: new Date(r.expiresAt).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' }) });
   }
 }
 
@@ -38,22 +39,22 @@ export function receiptStatus(r: Reservation): string {
 export function receiptLines(r: Reservation): [string, string][] {
   const fuelAmount = r.liters * r.pricePerLiter;
   return [
-    ['Date', dateTime(r.createdAt)],
-    ['Référence', r.id.slice(0, 8).toUpperCase()],
-    ['Ticket', maskCode(r.code)],
+    [t('Date'), dateTime(r.createdAt)],
+    [t('Référence'), r.id.slice(0, 8).toUpperCase()],
+    [t('Ticket'), maskCode(r.code)],
     ['', ''],
-    ['Station', r.stationName],
-    ['Adresse', r.stationAddress],
-    ['Carburant', r.fuelLabel],
-    ['Quantité', `${r.liters} L × ${fcfa(r.pricePerLiter)}`],
+    [t('Station'), r.stationName],
+    [t('Adresse'), r.stationAddress],
+    [t('Carburant'), t(r.fuelLabel)],
+    [t('Quantité'), `${r.liters} L × ${fcfa(r.pricePerLiter)}`],
     ['', ''],
-    ['Carburant', fcfa(fuelAmount)],
-    ['Frais de service', r.serviceFeeXOF > 0 ? fcfa(r.serviceFeeXOF) : 'Offerts'],
-    ['Total payé', fcfa(r.totalAmountXOF)],
-    ['Paiement', PAYMENT_NAMES[r.paymentMethod]],
-    ['Payé depuis', maskPhone(r.phonePayment)],
-    ['Client', r.userName],
-    ['Statut', receiptStatus(r)],
+    [t('Carburant'), fcfa(fuelAmount)],
+    [t('Frais de service'), r.serviceFeeXOF > 0 ? fcfa(r.serviceFeeXOF) : t('Offerts')],
+    [t('Total payé'), fcfa(r.totalAmountXOF)],
+    [t('Paiement'), t(PAYMENT_NAMES[r.paymentMethod])],
+    [t('Payé depuis'), maskPhone(r.phonePayment)],
+    [t('Client'), r.userName],
+    [t('Statut'), receiptStatus(r)],
   ];
 }
 
@@ -95,7 +96,7 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
       ctx.font = font(800, 44);
       ctx.fillText('Pleino', pad, 78);
       ctx.font = font(600, 24);
-      ctx.fillText('Reçu de paiement carburant', pad, 118);
+      ctx.fillText(t('Reçu de paiement carburant'), pad, 118);
     }
     y = 200;
     for (const [label, value] of receiptLines(r)) {
@@ -112,7 +113,7 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
         y += 22;
         continue;
       }
-      const isTotal = label === 'Total payé';
+      const isTotal = label === t('Total payé');
       ctx.font = font(isTotal ? 800 : 600, isTotal ? 30 : 24);
       const lines = wrap(ctx, value, W - pad - valueX);
       if (draw) {
@@ -127,7 +128,7 @@ export async function drawReceipt(r: Reservation): Promise<Blob> {
     }
     y += 20;
     ctx.font = font(500, 19);
-    const note = wrap(ctx, 'Ce reçu ne permet pas de se servir : le code complet reste dans l’application Pleino. ronikov.onrender.com', W - 2 * pad);
+    const note = wrap(ctx, t('Ce reçu ne permet pas de se servir : le code complet reste dans l’application Pleino.') + ' ronikov.onrender.com', W - 2 * pad);
     if (draw) {
       ctx.fillStyle = '#737373';
       note.forEach((line, i) => ctx.fillText(line, pad, y + i * 28));
@@ -152,7 +153,7 @@ export async function shareReceipt(r: Reservation): Promise<'shared' | 'download
   const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
   if (nav.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: 'Reçu Pleino', text: `Reçu Pleino : ${r.liters} L de ${r.fuelLabel} à ${r.stationName}` });
+      await navigator.share({ files: [file], title: t('Reçu Pleino'), text: t('Reçu Pleino : {n} L de {fuel} à {station}', { n: r.liters, fuel: t(r.fuelLabel), station: r.stationName }) });
       return 'shared';
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled';

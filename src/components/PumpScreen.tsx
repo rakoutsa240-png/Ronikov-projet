@@ -8,6 +8,7 @@ import { useNow, useWakeLock } from '../storage';
 import { directionsUrl, LatLng } from '../geo';
 import { timeLeft } from '../time';
 import { RESERVATION_VALIDITY_MINUTES } from '../../shared/reservations';
+import { num, t } from '../i18n';
 
 export const ticketQrPayload = (r: Reservation) =>
   r.qrPayload ??
@@ -41,26 +42,26 @@ export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, st
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Ticket à présenter au pompiste"
+      aria-label={t('Ticket à présenter au pompiste')}
       className="theme-fixed fixed inset-0 z-[100] bg-brand-800 text-white no-print overflow-y-auto"
     >
       <div className="min-h-full max-w-md mx-auto flex flex-col gap-4 px-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between gap-3">
-          <button onClick={onClose} aria-label="Fermer" className="p-2.5 -ml-2 rounded-full hover:bg-white/10">
+          <button onClick={onClose} aria-label={t('Fermer')} className="p-2.5 -ml-2 rounded-full hover:bg-white/10">
             <X className="w-6 h-6" />
           </button>
           <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold text-brand-100">
-            Enregistré sur ce téléphone <Check className="w-3.5 h-3.5" />
+            {t('Enregistré sur ce téléphone')} <Check className="w-3.5 h-3.5" />
           </span>
         </div>
 
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-brand-100">Montrez ce code au pompiste</p>
+          <p className="text-sm font-semibold text-brand-100">{t('Montrez ce code au pompiste')}</p>
           <h2 className="font-display text-3xl font-extrabold leading-tight">
-            {reservation.liters} L de {reservation.fuelLabel}
+            {t('{n} L de {fuel}', { n: reservation.liters, fuel: t(reservation.fuelLabel) })}
           </h2>
           <p className="text-sm text-brand-100">
-            {reservation.stationName} • payé {reservation.totalAmountXOF.toLocaleString('fr-FR')} FCFA
+            {reservation.stationName} • {t('payé {amount} FCFA', { amount: num(reservation.totalAmountXOF) })}
           </p>
         </div>
 
@@ -68,13 +69,13 @@ export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, st
           <QRCodeImage value={ticketQrPayload(reservation)} size={size} className="border-0 shadow-none p-0" />
           <div className="w-full border-t-2 border-dashed border-[#d5ddd9]" />
           <div className="font-code text-3xl font-bold tracking-widest">{reservation.code}</div>
-          <p className="text-xs font-medium text-[#5a6661] -mt-2">Le code est enregistré sur ce téléphone</p>
+          <p className="text-xs font-medium text-[#5a6661] -mt-2">{t('Le code est enregistré sur ce téléphone')}</p>
         </div>
 
         {active ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-brand-100">Valable encore</span>
+              <span className="text-brand-100">{t('Valable encore')}</span>
               <span className="font-display font-extrabold">{timeLeft(reservation.expiresAt, now)}</span>
             </div>
             <div className="h-2 rounded-full bg-white/15 overflow-hidden" aria-hidden="true">
@@ -83,7 +84,7 @@ export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, st
           </div>
         ) : (
           <p className="text-sm font-semibold text-brand-100 text-center">
-            {reservation.status === 'PENDING' ? 'Ce ticket a expiré.' : 'Ce ticket a déjà été utilisé ou annulé.'}
+            {reservation.status === 'PENDING' ? t('Ce ticket a expiré.') : t('Ce ticket a déjà été utilisé ou annulé.')}
           </p>
         )}
 
@@ -98,7 +99,7 @@ export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, st
                   active && onCancel ? '' : 'col-span-2'
                 }`}
               >
-                <Navigation className="w-4 h-4" /> Itinéraire
+                <Navigation className="w-4 h-4" /> {t('Itinéraire')}
               </a>
             )}
             {active && onCancel && (
@@ -106,7 +107,7 @@ export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, st
                 onClick={onCancel}
                 className={`h-[50px] rounded-2xl border-2 border-white/40 font-bold text-sm hover:bg-white/10 ${station ? '' : 'col-span-2'}`}
               >
-                Annuler
+                {t('Annuler')}
               </button>
             )}
           </div>

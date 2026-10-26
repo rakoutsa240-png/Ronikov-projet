@@ -4,6 +4,7 @@ import { api, ApiError } from '../api';
 import { locateUser } from '../geo';
 import { STATION_BRANDS } from '../../shared/stations';
 import { FuelType, Station } from '../types';
+import { t } from '../i18n';
 
 interface AddStationFormProps {
   onAdded: (station: Station) => void;
@@ -52,7 +53,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
       const pos = await locateUser();
       setForm((f) => ({ ...f, lat: pos.lat.toFixed(5), lng: pos.lng.toFixed(5) }));
     } catch (e) {
-      setError(`${(e as Error).message} Vous pouvez aussi la copier depuis Google Maps (appui long sur la station).`);
+      setError(`${(e as Error).message} ${t('Vous pouvez aussi la copier depuis Google Maps (appui long sur la station).')}`);
     } finally {
       setLocating(false);
     }
@@ -63,7 +64,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
     const lat = Number(form.lat.replace(',', '.'));
     const lng = Number(form.lng.replace(',', '.'));
     if (!form.lat || !form.lng || Number.isNaN(lat) || Number.isNaN(lng)) {
-      setError('Indiquez la position GPS de la station (latitude et longitude).');
+      setError(t('Indiquez la position GPS de la station (latitude et longitude).'));
       return;
     }
     const fuels = Object.fromEntries(
@@ -76,7 +77,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
       onAdded(station);
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Ajout impossible, réessayez.');
+      setError(err instanceof ApiError ? err.message : t('Ajout impossible, réessayez.'));
     } finally {
       setSaving(false);
     }
@@ -85,19 +86,19 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
   return (
     <form onSubmit={submit} className="p-5 border border-amber-400/60 bg-neutral-950 rounded-xl space-y-4 text-xs">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-black text-amber-400">Nouvelle station</h3>
-        <button type="button" onClick={onClose} aria-label="Fermer" className="text-neutral-400 hover:text-white">
+        <h3 className="text-sm font-black text-amber-400">{t('Nouvelle station')}</h3>
+        <button type="button" onClick={onClose} aria-label={t('Fermer')} className="text-neutral-400 hover:text-white">
           <X className="w-4 h-4" />
         </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Nom</span>
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Nom')}</span>
           <input required value={form.name} onChange={set('name')} placeholder="Oryx Adidogomé" className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Enseigne</span>
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Enseigne')}</span>
           <select value={form.brand} onChange={set('brand')} className={inputClass}>
             {STATION_BRANDS.map((b) => (
               <option key={b} value={b}>
@@ -107,32 +108,32 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
           </select>
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Quartier</span>
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Quartier')}</span>
           <input required value={form.district} onChange={set('district')} placeholder="Adidogomé" className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Ville</span>
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Ville')}</span>
           <input required value={form.city} onChange={set('city')} className={inputClass} />
         </label>
         <label className="space-y-1 sm:col-span-2">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Adresse</span>
-          <input required value={form.address} onChange={set('address')} placeholder="Route de Kpalimé, près du marché" className={inputClass} />
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Adresse')}</span>
+          <input required value={form.address} onChange={set('address')} placeholder={t('Route de Kpalimé, près du marché')} className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Téléphone</span>
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Téléphone')}</span>
           <input required value={form.phone} onChange={set('phone')} placeholder="+228 22 00 00 00" className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">Horaires</span>
+          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Horaires')}</span>
           <input required value={form.operatingHours} onChange={set('operatingHours')} className={inputClass} />
         </label>
       </div>
 
       <div className="space-y-1">
-        <span className="text-neutral-400 font-bold uppercase text-[11px]">Position GPS</span>
+        <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Position GPS')}</span>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
-          <input value={form.lat} onChange={set('lat')} placeholder="Latitude (ex. 6.1725)" inputMode="decimal" className={inputClass} />
-          <input value={form.lng} onChange={set('lng')} placeholder="Longitude (ex. 1.2314)" inputMode="decimal" className={inputClass} />
+          <input value={form.lat} onChange={set('lat')} placeholder={t('Latitude (ex. 6.1725)')} inputMode="decimal" className={inputClass} />
+          <input value={form.lng} onChange={set('lng')} placeholder={t('Longitude (ex. 1.2314)')} inputMode="decimal" className={inputClass} />
           <button
             type="button"
             onClick={useMyPosition}
@@ -140,13 +141,13 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
             className="px-3 py-2 border border-neutral-700 rounded-lg font-bold text-white hover:border-amber-400 flex items-center justify-center gap-1.5"
           >
             <Crosshair className="w-3.5 h-3.5" />
-            {locating ? 'Recherche…' : 'Je suis à la station'}
+            {locating ? t('Recherche…') : t('Je suis à la station')}
           </button>
         </div>
       </div>
 
       <div className="space-y-1">
-        <span className="text-neutral-400 font-bold uppercase text-[11px]">Services</span>
+        <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Services')}</span>
         <div className="flex flex-wrap gap-2">
           {AMENITIES.map((a) => (
             <label key={a} className="flex items-center gap-1.5 px-2 py-1 border border-neutral-800 rounded-md cursor-pointer">
@@ -156,18 +157,18 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
                 onChange={(e) => setAmenities((prev) => (e.target.checked ? [...prev, a] : prev.filter((x) => x !== a)))}
                 className="accent-amber-400"
               />
-              <span className="text-neutral-200">{a}</span>
+              <span className="text-neutral-200">{t(a)}</span>
             </label>
           ))}
         </div>
       </div>
 
       <div className="space-y-1">
-        <span className="text-neutral-400 font-bold uppercase text-[11px]">Stock de départ en litres (vide si inconnu)</span>
+        <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Stock de départ en litres (vide si inconnu)')}</span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {FUELS.map(({ type, label }) => (
             <label key={type} className="space-y-1">
-              <span className="text-neutral-500 text-[11px]">{label}</span>
+              <span className="text-neutral-500 text-[11px]">{t(label)}</span>
               <input
                 type="number"
                 min={0}
@@ -183,7 +184,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
 
       <label className="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" checked={form.isPartner} onChange={set('isPartner')} className="accent-amber-400" />
-        <span className="text-neutral-200 font-bold">Station partenaire (réservations ouvertes)</span>
+        <span className="text-neutral-200 font-bold">{t('Station partenaire (réservations ouvertes)')}</span>
       </label>
 
       {error && (
@@ -198,7 +199,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
         className="w-full sm:w-auto px-5 py-2.5 bg-amber-400 text-black font-black rounded-lg flex items-center justify-center gap-2 disabled:opacity-60"
       >
         <Plus className="w-4 h-4" />
-        {saving ? 'Ajout…' : 'Ajouter la station'}
+        {saving ? t('Ajout…') : t('Ajouter la station')}
       </button>
     </form>
   );

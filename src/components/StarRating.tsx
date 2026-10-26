@@ -2,6 +2,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import { RATING_LABELS } from '../../shared/reviews';
 import { StationRating } from '../types';
+import { num, t } from '../i18n';
 
 interface StarInputProps {
   label: string;
@@ -21,21 +22,21 @@ export const StarInput: React.FC<StarInputProps> = ({ label, value, onChange, di
           type="button"
           role="radio"
           aria-checked={value === n}
-          aria-label={`${n} sur 5 : ${RATING_LABELS[n]}`}
+          aria-label={`${t('{n} sur 5', { n })} : ${t(RATING_LABELS[n])}`}
           onClick={() => onChange(n)}
           className="p-1 rounded-lg hover:scale-110 transition-transform disabled:opacity-50"
         >
           <Star className={`w-8 h-8 ${value !== null && n <= value ? 'fill-amber-400 text-amber-400' : 'text-neutral-600'}`} />
         </button>
       ))}
-      <span className="ml-2 text-xs font-bold text-amber-300 min-w-[5rem]">{value ? RATING_LABELS[value] : ''}</span>
+      <span className="ml-2 text-xs font-bold text-amber-300 min-w-[5rem]">{value ? t(RATING_LABELS[value]) : ''}</span>
     </div>
   </fieldset>
 );
 
 // Small read-only stars, e.g. ★★★★☆.
 export const Stars: React.FC<{ value: number; className?: string }> = ({ value, className = 'w-3.5 h-3.5' }) => (
-  <span className="inline-flex items-center gap-0.5" role="img" aria-label={`${value} sur 5`}>
+  <span className="inline-flex items-center gap-0.5" role="img" aria-label={t('{n} sur 5', { n: value })}>
     {[1, 2, 3, 4, 5].map((n) => (
       <Star key={n} className={`${className} ${n <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'text-neutral-600'}`} />
     ))}
@@ -48,11 +49,11 @@ export const RatingBadge: React.FC<{ rating?: StationRating | null; className?: 
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-900 text-neutral-200 font-semibold ${className}`}
-      title={`Note moyenne des clients servis : ${rating.average.toLocaleString('fr-FR')} sur 5`}
+      title={t('Note moyenne des clients servis : {n} sur 5', { n: num(rating.average) })}
     >
       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-      <span className="tabular-nums">{rating.average.toLocaleString('fr-FR', { minimumFractionDigits: 1 })}</span>
-      <span className="text-neutral-400 font-normal">({rating.count} avis)</span>
+      <span className="tabular-nums">{num(rating.average, { minimumFractionDigits: 1 })}</span>
+      <span className="text-neutral-400 font-normal">({t('{n} avis', { n: rating.count })})</span>
     </span>
   );
 };

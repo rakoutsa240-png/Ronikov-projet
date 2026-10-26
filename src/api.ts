@@ -1,4 +1,5 @@
 import type { AdminUser, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, ReviewsSummary, Station, StationReview, TicketReview } from './types';
+import { tServer } from './i18n';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
@@ -23,7 +24,7 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(res.status, data?.error ?? `Erreur ${res.status}`, data);
+    throw new ApiError(res.status, tServer(data?.error ?? `Erreur ${res.status}`), data);
   }
   return res.status === 204 ? (undefined as T) : (res.json() as Promise<T>);
 }
@@ -40,7 +41,7 @@ async function sendPhoto(photo: Blob): Promise<AuthUser> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(res.status, data?.error ?? `Erreur ${res.status}`, data);
+    throw new ApiError(res.status, tServer(data?.error ?? `Erreur ${res.status}`), data);
   }
   return res.json() as Promise<AuthUser>;
 }

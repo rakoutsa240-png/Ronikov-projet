@@ -4,6 +4,7 @@ import { api, ApiError } from '../api';
 import { squarePhoto } from '../photo';
 import { AuthUser } from '../types';
 import { Avatar } from './Avatar';
+import { t } from '../i18n';
 
 interface ProfilePhotoProps {
   user: AuthUser;
@@ -34,7 +35,7 @@ export const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ user, onUserChanged,
     try {
       onUserChanged(await api.uploadPhoto(await squarePhoto(file)));
     } catch (err) {
-      setError(err instanceof ApiError || err instanceof Error ? err.message : 'Envoi impossible, réessayez');
+      setError(err instanceof ApiError || err instanceof Error ? t(err.message) : t('Envoi impossible, réessayez'));
     } finally {
       setBusy(false);
     }
@@ -46,7 +47,7 @@ export const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ user, onUserChanged,
     try {
       onUserChanged(await api.removePhoto());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Suppression impossible, réessayez');
+      setError(err instanceof Error ? t(err.message) : t('Suppression impossible, réessayez'));
     } finally {
       setBusy(false);
     }
@@ -59,7 +60,7 @@ export const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ user, onUserChanged,
           type="button"
           onClick={() => input.current?.click()}
           disabled={busy}
-          aria-label={user.photoUrl ? 'Changer ma photo' : 'Ajouter ma photo'}
+          aria-label={user.photoUrl ? t('Changer ma photo') : t('Ajouter ma photo')}
           className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           <Avatar name={user.name} photoUrl={user.photoUrl} className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl text-3xl shadow-xl" />
@@ -77,7 +78,7 @@ export const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ user, onUserChanged,
             disabled={busy}
             className="px-3 py-1.5 rounded-lg bg-amber-400 text-black hover:bg-amber-300 disabled:opacity-60"
           >
-            {user.photoUrl ? 'Changer la photo' : 'Ajouter ma photo'}
+            {user.photoUrl ? t('Changer la photo') : t('Ajouter ma photo')}
           </button>
           {user.photoUrl && (
             <button
@@ -86,11 +87,11 @@ export const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ user, onUserChanged,
               disabled={busy}
               className="px-3 py-1.5 rounded-lg border border-neutral-700 text-neutral-300 hover:border-rose-400 hover:text-rose-300 disabled:opacity-60 inline-flex items-center gap-1"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Retirer
+              <Trash2 className="w-3.5 h-3.5" /> {t('Retirer')}
             </button>
           )}
         </div>
-        <p className="text-[11px] leading-snug text-neutral-400 font-sans">{HINTS[user.role]}</p>
+        <p className="text-[11px] leading-snug text-neutral-400 font-sans">{t(HINTS[user.role])}</p>
         {error && (
           <p role="alert" className="text-[11px] text-rose-300 font-sans">
             {error}

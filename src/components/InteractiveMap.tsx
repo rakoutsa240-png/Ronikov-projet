@@ -6,6 +6,7 @@ import { ChevronRight, Crosshair, Maximize2, Minimize2, Navigation, ShieldCheck 
 import { Station, FuelType } from '../types';
 import { Gauge } from './Gauge';
 import { directionsUrl, distanceKm, formatDistance, LatLng } from '../geo';
+import { t } from '../i18n';
 
 interface InteractiveMapProps {
   stations: Station[];
@@ -43,7 +44,7 @@ function stationIcon(st: Station, fuel: FuelType | 'ALL', selected: boolean, fas
   const empty = status === STATUS.OUT;
   const bg = empty ? STATUS.OUT.color : fastest ? '#00553c' : '#fff';
   const fg = empty || fastest ? '#fff' : '#0f1f18';
-  const text = empty ? 'Vide' : `${st.queueTimeMinutes} min`;
+  const text = empty ? t('Vide') : `${st.queueTimeMinutes} min`;
   const dot = status === STATUS.LOW ? `<span style="width:8px;height:8px;border-radius:9999px;background:${STATUS.LOW.color}"></span>` : '';
   return L.divIcon({
     className: '',
@@ -133,9 +134,9 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     >
       <div className="bg-neutral-900 text-white border-b-2 border-black px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-code">
         <div className="flex items-center gap-3">
-          <span className="font-extrabold tracking-wider text-sm">Carte des stations</span>
+          <span className="font-extrabold tracking-wider text-sm">{t('Carte des stations')}</span>
           <span className="px-2.5 py-0.5 bg-black text-emerald-400 border border-emerald-500 font-bold rounded text-xs">
-            {visible.length} stations
+            {t('{n} stations', { n: visible.length })}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -145,11 +146,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             className="px-3 py-1.5 border border-neutral-700 hover:border-white text-white font-bold rounded flex items-center gap-1.5 disabled:opacity-60"
           >
             <Crosshair className="w-3.5 h-3.5" />
-            {locating ? 'Localisation…' : userLocation ? 'Me relocaliser' : 'Me localiser'}
+            {locating ? t('Localisation…') : userLocation ? t('Me relocaliser') : t('Me localiser')}
           </button>
           <button
             onClick={() => setIsFullscreen((v) => !v)}
-            aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            aria-label={isFullscreen ? t('Quitter le plein écran') : t('Plein écran')}
             className="p-1.5 border border-neutral-700 hover:border-white rounded"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -165,13 +166,13 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           />
           <MapFocus stations={stations} selected={selectedStation} user={userLocation} />
           <ResizeOnChange trigger={isFullscreen} />
-          {userLocation && <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon} title="Vous êtes ici" />}
+          {userLocation && <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon} title={t('Vous êtes ici')} />}
           {visible.map((st) => (
             <Marker
               key={st.id}
               position={[st.lat, st.lng]}
               icon={stationIcon(st, selectedFuelFilter, selectedStation?.id === st.id, st.id === fastestId)}
-              title={`${st.name} (${stationStatus(st, selectedFuelFilter).label})`}
+              title={`${st.name} (${t(stationStatus(st, selectedFuelFilter).label)})`}
               zIndexOffset={selectedStation?.id === st.id ? 1000 : 0}
               eventHandlers={{ click: () => onSelectStation(st) }}
             />
@@ -186,12 +187,12 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           ].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full" style={{ background: s.color }} />
-              {s.label}
+              {t(s.label)}
             </span>
           ))}
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-blue-600" />
-            Vous
+            {t('Vous')}
           </span>
         </div>
       </div>
@@ -208,7 +209,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               </span>
               {selectedStation.isPartner && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-mono-code bg-brand-500/15 text-brand-400 px-2 py-0.5 font-bold rounded-full">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Partenaire
+                  <ShieldCheck className="w-3.5 h-3.5" /> {t('Partenaire')}
                 </span>
               )}
             </div>
@@ -216,7 +217,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             <p className="text-xs text-neutral-400">
               {selectedStation.address}
               {selectedDistance !== null && (
-                <strong className="text-white"> • à {formatDistance(selectedDistance)} à vol d'oiseau</strong>
+                <strong className="text-white"> • {t("à {distance} à vol d'oiseau", { distance: formatDistance(selectedDistance) })}</strong>
               )}
             </p>
             <a
@@ -226,7 +227,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 text-white font-bold text-xs rounded-full hover:bg-neutral-900"
             >
               <Navigation className="w-4 h-4" />
-              Itinéraire
+              {t('Itinéraire')}
             </a>
           </div>
 
@@ -238,14 +239,14 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                   : 0
               }
               size="sm"
-              label="Stock super"
+              label={t('Stock super')}
               sublabel={`${selectedStation.stock.SUPER.availableLiters}L`}
             />
             <button
               onClick={() => onBookStation(selectedStation)}
               className="flex-1 md:flex-none px-7 py-3.5 bg-amber-400 text-black font-extrabold text-sm rounded-full hover:bg-amber-300 shadow-md shadow-amber-400/20 flex items-center justify-center gap-2"
             >
-              <span>Réserver le carburant</span>
+              <span>{t('Réserver le carburant')}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

@@ -10,12 +10,14 @@ import { StationListSkeleton } from './Skeleton';
 // The map library is heavy, so it only loads when this page opens.
 const InteractiveMap = lazy(() => import('./InteractiveMap'));
 
-const mapFallback = (
+const MapLoading = () => (
   <div className="h-[420px] sm:h-[520px] border-2 border-black bg-neutral-900 text-neutral-400 flex items-center justify-center text-xs font-mono-code">
-    Chargement de la carte…
+    {t('Chargement de la carte…')}
   </div>
 );
+const mapFallback = <MapLoading />;
 import { Search, Filter, SlidersHorizontal, MapPin, Grid, ListFilter, ChevronRight } from 'lucide-react';
+import { t } from '../i18n';
 
 const SORT_LABELS = { queue: 'attente', stock: 'stock', distance: 'proximité' } as const;
 
@@ -23,9 +25,9 @@ const SORT_LABELS = { queue: 'attente', stock: 'stock', distance: 'proximité' }
 function stockChip(st: Station, fuel: FuelType | 'ALL') {
   const stock = fuel === 'ALL' ? st.stock.SUPER : st.stock[fuel];
   if (!stock || stock.status === 'OUT_OF_STOCK' || stock.availableLiters <= 0)
-    return { label: 'Vide', className: 'bg-[#fde7eb] text-[#a10c28]' };
-  if (stock.status === 'LOW') return { label: 'Stock faible', className: 'bg-[#fff1c7] text-[#7a5400]' };
-  return { label: 'En stock', className: 'bg-brand-50 text-brand-700' };
+    return { label: t('Vide'), className: 'bg-[#fde7eb] text-[#a10c28]' };
+  if (stock.status === 'LOW') return { label: t('Stock faible'), className: 'bg-[#fff1c7] text-[#7a5400]' };
+  return { label: t('En stock'), className: 'bg-brand-50 text-brand-700' };
 }
 
 // On phones the stations under the map come as a sheet of short rows (brand, name, distance, wait,
@@ -38,15 +40,15 @@ const StationSheet: React.FC<{
   onView: (s: Station) => void;
 }> = ({ stations, fuel, sortBy, distanceTo, onView }) => (
   <section
-    aria-label="Liste des stations"
+    aria-label={t('Liste des stations')}
     className="lg:hidden relative bg-black rounded-t-[28px] shadow-[0_-10px_30px_-10px_rgba(0,0,0,.25)] px-4 pt-2.5 pb-3"
   >
     <div aria-hidden="true" className="mx-auto w-10 h-1.5 rounded-full bg-neutral-700" />
     <div className="flex items-baseline justify-between gap-3 pt-3 pb-1">
       <h2 className="font-display text-lg font-extrabold text-white">
-        {stations.length} station{stations.length > 1 ? 's' : ''}
+        {stations.length > 1 ? t('{n} stations', { n: stations.length }) : t('{n} station', { n: stations.length })}
       </h2>
-      <span className="text-xs font-bold text-active">Trier : {SORT_LABELS[sortBy]}</span>
+      <span className="text-xs font-bold text-active">{t('Trier : {by}', { by: t(SORT_LABELS[sortBy]) })}</span>
     </div>
     <ul className="divide-y divide-neutral-800">
       {stations.map((st) => {
@@ -163,7 +165,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const noResults = (
     <div className="p-8 border border-neutral-800 rounded-xl text-center font-mono-code space-y-3 bg-black/85">
-      <p className="text-sm font-bold text-white">Aucune station ne correspond à vos critères</p>
+      <p className="text-sm font-bold text-white">{t('Aucune station ne correspond à vos critères')}</p>
       <button
         onClick={() => {
           setSearchTerm('');
@@ -172,7 +174,7 @@ export const MapView: React.FC<MapViewProps> = ({
         }}
         className="px-4 py-2 bg-amber-400 text-black text-xs font-black rounded-lg hover:bg-amber-300"
       >
-        Effacer les filtres
+        {t('Effacer les filtres')}
       </button>
     </div>
   );
@@ -183,10 +185,10 @@ export const MapView: React.FC<MapViewProps> = ({
       <div className="border-b-2 border-neutral-700/80 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 font-mono-code">
         <div>
           <div className="hidden sm:block text-xs text-amber-400 font-bold uppercase tracking-widest">
-            Réseau de carburant en temps réel
+            {t('Réseau de carburant en temps réel')}
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-            Carte & recherche des stations
+            {t('Carte & recherche des stations')}
           </h1>
         </div>
 
@@ -199,7 +201,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 viewLayout === 'split' ? 'chip-selected' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
-              Carte et liste
+              {t('Carte et liste')}
             </button>
             <button
               onClick={() => setViewLayout('mapOnly')}
@@ -207,7 +209,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 viewLayout === 'mapOnly' ? 'chip-selected' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
-              Carte
+              {t('Carte')}
             </button>
             <button
               onClick={() => setViewLayout('listOnly')}
@@ -215,7 +217,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 viewLayout === 'listOnly' ? 'chip-selected' : 'bg-neutral-900 text-neutral-300 hover:text-white'
               }`}
             >
-              Liste
+              {t('Liste')}
             </button>
           </div>
         </div>
@@ -229,7 +231,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
             <input
               type="text"
-              placeholder="Quartier, ville ou enseigne (Agoè, Kara, Shell…)"
+              placeholder={t('Quartier, ville ou enseigne (Agoè, Kara, Shell…)')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-black border border-neutral-700 text-white pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-white font-mono-code"
@@ -246,7 +248,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
-              Tous
+              {t('Tous')}
             </button>
             <button
               onClick={() => setSelectedFuel('SUPER')}
@@ -256,7 +258,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
-              Super
+              {t('Super')}
             </button>
             <button
               onClick={() => setSelectedFuel('GAZOLE')}
@@ -266,7 +268,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
-              Gazole
+              {t('Gazole')}
             </button>
             <button
               onClick={() => setSelectedFuel('MELANGE')}
@@ -276,7 +278,7 @@ export const MapView: React.FC<MapViewProps> = ({
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
-              Mélange
+              {t('Mélange')}
             </button>
             <button
               onClick={() => setSelectedFuel('KEROSENE')}
@@ -286,13 +288,13 @@ export const MapView: React.FC<MapViewProps> = ({
                   : 'bg-black text-neutral-300 border border-neutral-700 hover:border-white'
               }`}
             >
-              Kérosène
+              {t('Kérosène')}
             </button>
           </div>
 
           {/* Sort Dropdown */}
           <div className="md:col-span-3 flex items-center md:justify-end gap-2">
-            <span className="text-neutral-400 uppercase text-[11px]">Trier:</span>
+            <span className="text-neutral-400 uppercase text-[11px]">{t('Trier :')}</span>
             <select
               value={sortBy}
               onChange={(e) => {
@@ -303,9 +305,9 @@ export const MapView: React.FC<MapViewProps> = ({
               }}
               className="bg-black text-white border border-neutral-700 px-3 py-1.5 text-xs font-mono-code focus:outline-none"
             >
-              <option value="queue">Attente la plus courte</option>
-              <option value="stock">Stock le plus élevé</option>
-              <option value="distance">Proximité</option>
+              <option value="queue">{t('Attente la plus courte')}</option>
+              <option value="stock">{t('Stock le plus élevé')}</option>
+              <option value="distance">{t('Proximité')}</option>
             </select>
           </div>
         </div>
@@ -319,11 +321,11 @@ export const MapView: React.FC<MapViewProps> = ({
               onChange={(e) => setOnlyInStock(e.target.checked)}
               className="accent-white cursor-pointer"
             />
-            <span className=" font-semibold">Afficher uniquement les stations avec du stock réel</span>
+            <span className=" font-semibold">{t('Afficher uniquement les stations avec du stock réel')}</span>
           </label>
 
           <span className="font-bold text-white">
-            {filtered.length} station(s) trouvée(s) sur {stations.length}
+            {t('{n} station(s) trouvée(s) sur {total}', { n: filtered.length, total: stations.length })}
           </span>
         </div>
         {locateError && <p role="alert" className="text-amber-300 font-bold">{locateError}</p>}

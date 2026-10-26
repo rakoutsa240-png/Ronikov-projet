@@ -1,6 +1,7 @@
 import React from 'react';
 import { Home, MapPin, Ticket, User, Crown, Store, ShieldCheck } from 'lucide-react';
 import { UserRole } from '../types';
+import { t } from '../i18n';
 
 interface BottomNavProps {
   activeTab: string;
@@ -13,20 +14,20 @@ interface BottomNavProps {
 // which keep the menu in the header.
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, userRole, activeTicketCount }) => {
   const items = [
-    { id: 'home', label: 'Accueil', Icon: Home },
-    { id: 'map', label: 'Stations', Icon: MapPin },
-    { id: 'history', label: 'Tickets', Icon: Ticket, badge: activeTicketCount },
+    { id: 'home', label: t('Accueil'), Icon: Home },
+    { id: 'map', label: t('Stations'), Icon: MapPin },
+    { id: 'history', label: t('Tickets'), Icon: Ticket, badge: activeTicketCount },
     userRole === 'ADMIN'
       ? { id: 'admin', label: 'Admin', Icon: ShieldCheck }
       : userRole === 'STATION_PRO' || userRole === 'ATTENDANT'
-        ? { id: 'pro', label: 'Espace Pro', Icon: Store }
+        ? { id: 'pro', label: t('Espace Pro'), Icon: Store }
         : { id: 'premium', label: 'Premium', Icon: Crown },
-    { id: 'profile', label: 'Profil', Icon: User },
+    { id: 'profile', label: t('Profil'), Icon: User },
   ];
 
   return (
     <nav
-      aria-label="Menu principal"
+      aria-label={t('Menu principal')}
       className="xl:hidden fixed bottom-0 inset-x-0 z-40 bg-neutral-950/95 backdrop-blur border-t border-neutral-800 pb-[env(safe-area-inset-bottom)]"
     >
       <div className="grid grid-cols-5 max-w-lg mx-auto">

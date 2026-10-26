@@ -3,6 +3,7 @@ import { Eye, EyeOff, KeyRound, X } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { AuthUser } from '../types';
 import { useModal } from '../useModal';
+import { t } from '../i18n';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -50,7 +51,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       setDone(true);
       onChanged(user);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Serveur Pleino injoignable. Réessayez plus tard.');
+      setError(err instanceof ApiError ? err.message : t('Serveur Pleino injoignable. Réessayez plus tard.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +67,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         {!forced && (
           <button
             onClick={onClose}
-            aria-label="Fermer"
+            aria-label={t('Fermer')}
             className="absolute top-4 right-4 p-1.5 border border-black hover:bg-black hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
@@ -75,11 +76,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
         <div className="border-b border-black pb-3 space-y-1">
           <h2 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-            <KeyRound className="w-6 h-6" /> Nouveau mot de passe
+            <KeyRound className="w-6 h-6" /> {t('Nouveau mot de passe')}
           </h2>
           {forced && (
             <p className="text-xs text-neutral-600 font-sans">
-              Vous êtes connecté avec un mot de passe temporaire. Choisissez le vôtre pour continuer.
+              {t('Vous êtes connecté avec un mot de passe temporaire. Choisissez le vôtre pour continuer.')}
             </p>
           )}
         </div>
@@ -87,10 +88,10 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         {done ? (
           <div className="space-y-4">
             <p role="status" className="text-xs font-bold bg-emerald-50 border border-emerald-600 text-emerald-800 p-3 font-sans">
-              Mot de passe changé. Vos autres appareils ont été déconnectés.
+              {t('Mot de passe changé. Vos autres appareils ont été déconnectés.')}
             </p>
             <button onClick={onClose} className="w-full py-3 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800">
-              Continuer
+              {t('Continuer')}
             </button>
           </div>
         ) : (
@@ -98,7 +99,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             {knownPassword === undefined && (
               <div className="space-y-1">
                 <label htmlFor="current-password" className="text-xs font-bold block">
-                  {forced ? 'Mot de passe temporaire' : 'Mot de passe actuel'}
+                  {forced ? t('Mot de passe temporaire') : t('Mot de passe actuel')}
                 </label>
                 <input
                   id="current-password"
@@ -114,7 +115,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
             <div className="space-y-1">
               <label htmlFor="new-password" className="text-xs font-bold block">
-                Nouveau mot de passe
+                {t('Nouveau mot de passe')}
               </label>
               <div className="flex border border-black">
                 <input
@@ -130,13 +131,13 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  aria-label={showPassword ? t('Masquer le mot de passe') : t('Afficher le mot de passe')}
                   className="px-3 border-l border-black text-neutral-600 hover:text-black"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-neutral-500 font-sans">8 caractères minimum.</p>
+              <p className="text-[11px] text-neutral-500 font-sans">{t('8 caractères minimum.')}</p>
             </div>
 
             {error && (
@@ -150,11 +151,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               disabled={isSubmitting}
               className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800 transition-colors border border-black"
             >
-              Enregistrer
+              {t('Enregistrer')}
             </button>
             {forced && (
               <button type="button" onClick={onLogout} className="w-full text-xs text-neutral-600 font-bold underline hover:text-black">
-                Se déconnecter
+                {t('Se déconnecter')}
               </button>
             )}
           </form>

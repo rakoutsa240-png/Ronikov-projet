@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { reportLabel } from '../../shared/reports';
 import { Station } from '../types';
-import { isStale, timeAgo } from '../time';
+import { isStale, staleSince, timeAgo } from '../time';
+import { t, tServer } from '../i18n';
 
 // Re-renders every minute so "il y a 3 min" keeps counting.
 export function useNow(intervalMs = 60_000) {
@@ -29,18 +30,17 @@ export const StationFreshness: React.FC<{ station: Station; className?: string; 
       {station.checkedAt && (
         <span className={`inline-flex items-center gap-1 ${stale ? 'text-amber-300' : 'text-neutral-400'}`}>
           <RefreshCw className="w-3 h-3" />
-          {stale ? 'Pas mis à jour depuis ' : 'Mis à jour '}
-          {stale ? timeAgo(station.checkedAt, now).replace(/^il y a /, '') : timeAgo(station.checkedAt, now)}
+          {stale ? staleSince(station.checkedAt, now) : t('Mis à jour {time}', { time: timeAgo(station.checkedAt, now) })}
         </span>
       )}
       {reports.slice(0, maxReports).map((r) => (
         <span
           key={`${r.kind}-${r.fuelType ?? ''}`}
           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/40 text-red-300 font-semibold"
-          title={`${r.count} client${r.count > 1 ? 's' : ''}, ${timeAgo(r.lastAt, now)}`}
+          title={`${r.count > 1 ? t('{n} clients', { n: r.count }) : t('1 client')}, ${timeAgo(r.lastAt, now)}`}
         >
           <AlertTriangle className="w-3 h-3" />
-          {reportLabel(r)}
+          {tServer(reportLabel(r))}
           {r.count > 1 ? ` (${r.count})` : ''}
         </span>
       ))}
