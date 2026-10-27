@@ -652,7 +652,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer stations={stations} />
 
       <HelpButton hideOnPhone={activeTab === 'station-detail'} />
 

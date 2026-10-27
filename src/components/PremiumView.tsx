@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ShieldCheck, Check, Star, Zap, Clock, Smartphone, Sparkles, ArrowRight, CheckCircle2, ShieldAlert, Award } from 'lucide-react';
-import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
+import { Check, Star, CheckCircle2 } from 'lucide-react';
 import { SERVICE_FEE_XOF } from '../../shared/reservations';
 import { t } from '../i18n';
 
@@ -34,8 +33,6 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
     }
   };
 
-  const partnerBrands: StationBrandType[] = ['TotalEnergies', 'Shell', 'Sanol', 'Cap', 'Somayaf'];
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono-code text-white">
       {/* Top Banner Card matching dark background */}
@@ -43,46 +40,26 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         {/* Ambient Top Glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10 border-b border-white/15 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-400 text-black text-xs font-black rounded-full">
-              <Star className="w-3.5 h-3.5 fill-black" /> {t('Abonnement privilège Togo')}
+              <Star className="w-3.5 h-3.5 fill-black" /> {t('Abonnement')}
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-              {t('Pass prioritaire')} <span className="text-amber-400">{t('Pleino Premium')}</span>
+              <span className="text-amber-400">{t('Pleino Premium')}</span>
             </h1>
 
             <p className="text-xs sm:text-sm text-brand-100/85 font-sans max-w-3xl leading-relaxed">
-              {t('Garantissez votre accès au carburant même en période de forte tension ou de pénurie nationale. Profitez de la file prioritaire dans les stations du réseau et de zéro frais de réservation.')}
+              {t('Réservez sans frais : les {fee} FCFA de frais de réservation sont offerts sur chacun de vos tickets. Envoyez votre demande, un administrateur Pleino active le pass sur votre compte.', { fee: SERVICE_FEE_XOF })}
             </p>
           </div>
 
           {isPremium && (
             <div className="p-4 border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-extrabold text-xs rounded-xl inline-flex items-center gap-2 shrink-0 shadow-lg">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> {t('Pass prioritaire actif')}
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> {t('Pass Premium actif')}
             </div>
           )}
-        </div>
-
-        {/* Network Stations Interactive Logo Strip */}
-        <div className="space-y-3 relative z-10 pt-2">
-          <div className="text-[11px] uppercase font-bold text-amber-400 tracking-widest flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t('Accès express valable sur toutes les enseignes partenaires du Togo')}</span>
-          </div>
-
-          <div className="flex items-center gap-4 overflow-x-auto py-2">
-            {partnerBrands.map((brand) => (
-              <div
-                key={brand}
-                className="bg-white/10 border border-white/15 p-2 rounded-xl flex items-center gap-2.5 shrink-0 hover:border-amber-400 transition-colors"
-              >
-                <StationBrandLogo brand={brand} size="sm" interactive={true} showBadge={false} />
-                <span className="text-xs font-extrabold text-neutral-200">{brand}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -118,10 +95,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t('Zéro frais de réservation sur chaque commande')}
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t('File express coupe-file en station')}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t("Notifications de vos tickets dans l'application")}
+                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t('Valable dans toutes les stations où l’on réserve avec Pleino')}
               </li>
             </ul>
           </div>
@@ -152,7 +126,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
               <span className="text-xs font-bold text-amber-400">{t('Forfait annuel')}</span>
               <span className="px-2.5 py-0.5 bg-amber-400 text-black text-[11px] font-black uppercase rounded shadow">
-                {t('2 Mois offerts')}
+                {t('4 mois offerts')}
               </span>
             </div>
 
@@ -161,19 +135,14 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
             </div>
 
             <p className="text-xs text-neutral-300 font-sans leading-relaxed">
-              {t('Économisez 5 000 FCFA par an et profitez de la garantie absolue Pleino en toutes saisons sans interruption.')}
+              {t('Payez 20 000 FCFA au lieu de 30 000 FCFA pour 12 mois : 10 000 FCFA d’économie.')}
             </p>
 
             <ul className="space-y-2 text-xs text-neutral-300 pt-2 font-sans">
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t('Tous les avantages du forfait mensuel')}
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t('Réservation prioritaire garantie en période de pénurie')}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {t("Ligne d'assistance prioritaire dédiée 24h/24")}
-              </li>
+
             </ul>
           </div>
 
@@ -208,7 +177,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
       {/* Comparison Table with Dark Glass Theme */}
       <div className="border border-neutral-800 p-6 sm:p-8 bg-black/85 backdrop-blur-xl rounded-2xl space-y-6 shadow-2xl">
         <div className="border-b border-neutral-800 pb-4">
-          <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">{t('Comparatif officiel')}</span>
+          <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">{t('Comparatif')}</span>
           <h2 className="text-2xl font-black text-white tracking-tight">
             {t('Tableau comparatif des avantages')}
           </h2>
@@ -228,21 +197,6 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
                 <td className="p-3.5 font-bold text-white">{t('Frais de réservation par commande')}</td>
                 <td className="p-3.5 text-neutral-400">{SERVICE_FEE_XOF} FCFA</td>
                 <td className="p-3.5 font-black text-emerald-400">{t('0 FCFA (gratuit)')}</td>
-              </tr>
-              <tr className="hover:bg-neutral-900/50 transition-colors">
-                <td className="p-3.5 font-bold text-white">{t('Accès à la file prioritaire en station')}</td>
-                <td className="p-3.5 text-neutral-400">{t('Non')}</td>
-                <td className="p-3.5 font-black text-amber-300">{t('Oui, accès coupe-file')}</td>
-              </tr>
-              <tr className="hover:bg-neutral-900/50 transition-colors">
-                <td className="p-3.5 font-bold text-white">{t('Réservation prioritaire en pénurie')}</td>
-                <td className="p-3.5 text-neutral-400">{t('Quota standard')}</td>
-                <td className="p-3.5 font-black text-amber-300">{t('Oui, quota réservé garanti')}</td>
-              </tr>
-              <tr className="hover:bg-neutral-900/50 transition-colors">
-                <td className="p-3.5 font-bold text-white">{t('Assistance client téléphonique 24h/24')}</td>
-                <td className="p-3.5 text-neutral-400">{t('Standard')}</td>
-                <td className="p-3.5 font-black text-amber-300">{t('Ligne prioritaire dédiée')}</td>
               </tr>
             </tbody>
           </table>

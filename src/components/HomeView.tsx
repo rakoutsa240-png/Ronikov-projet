@@ -11,7 +11,7 @@ import { StationFreshness } from './StationFreshness';
 import { enableAlerts, useAlertPermission } from '../alerts';
 import { useNow } from '../storage';
 import { timeLeft } from '../time';
-import { MapPin, ShieldCheck, ArrowRight, Clock, Zap, CheckCircle2, ChevronRight, Phone, Award, Sparkles, Smile, Star, Heart, Fuel, Smartphone, QrCode } from 'lucide-react';
+import { MapPin, ShieldCheck, ArrowRight, CheckCircle2, ChevronRight, Star, Fuel, Smartphone, QrCode } from 'lucide-react';
 import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
 import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
 import customerBg from '../assets/images/happy_customer_refuel_1785888766342.webp';
@@ -107,6 +107,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const favoriteStations = stations.filter((s) => favoriteIds.includes(s.id));
   // Live figures from the stations the API returned.
   const cities = [...new Set(stations.map((s) => s.city))];
+  // Every review counts once, whatever the station.
+  const reviewCount = stations.reduce((sum, s) => sum + (s.rating?.count ?? 0), 0);
+  const reviewAverage = reviewCount ? stations.reduce((sum, s) => sum + (s.rating ? s.rating.average * s.rating.count : 0), 0) / reviewCount : 0;
   const totalLiters = stations.reduce(
     (sum, s) => sum + FUEL_TYPES.reduce((acc, f) => acc + Math.max(0, s.stock[f]?.availableLiters ?? 0), 0),
     0,
@@ -219,10 +222,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {/* The road that links the steps: horizontal on large screens, one piece per step on phones */}
             <span aria-hidden="true" className="hidden md:block absolute top-6 left-[12.5%] right-[12.5%] border-t-2 border-dashed border-amber-400/40" />
             {[
-              { icon: MapPin, title: t('Localiser'), text: t('Trouvez les stations proches qui ont votre carburant (Super, Gazole, Mélange), avec le niveau de stock en temps réel.') },
+              { icon: MapPin, title: t('Localiser'), text: t('Trouvez les stations proches qui ont votre carburant (Super, Gazole, Mélange), avec le stock mis à jour par chaque station.') },
               { icon: Fuel, title: t('Réserver'), text: t('Choisissez votre volume en litres ou en FCFA. Le carburant est aussitôt mis de côté pour vous à la station.') },
               { icon: Smartphone, title: t('Payer'), text: t('Réglez avec Mixx by Yas (ex-TMoney) ou Flooz (Moov Africa). Vous recevez un code unique valable 2 heures.') },
-              { icon: CheckCircle2, title: t('Récupérer'), text: t('Montrez votre code au pompiste, la pompe est débloquée. Servez-vous et repartez sans attendre !') },
+              { icon: CheckCircle2, title: t('Récupérer'), text: t('Montrez votre code au pompiste : il le valide et vous sert exactement vos litres. Repartez sans attendre !') },
             ].map((step, i) => (
               <li key={step.title} className="reveal relative flex md:flex-col md:items-center md:text-center gap-5 md:gap-4">
                 {i < 3 && (
@@ -250,7 +253,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-mono-code font-bold uppercase text-amber-400 tracking-widest block">
-              {t('Stations partenaires en direct')}
+              {t('Stations partenaires')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               {t('Stations à Lomé, attente la plus courte')}
@@ -283,14 +286,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase text-amber-400 tracking-widest block">
-              {t('Service client et accueil')}
+              {t('Sur place')}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {t('Des sourires à chaque plein')}
+              {t('Comment ça se passe à la station')}
             </h2>
-          </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 chip-selected text-xs font-extrabold rounded-full">
-            <Smile className="w-4 h-4" /> {t('Satisfaction garantie')}
           </div>
         </div>
 
@@ -298,32 +298,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {[
             {
               img: heroBg,
-              alt: t('Station-service moderne à Lomé'),
-              tag: t('Pompes modernes'),
-              title: t('Des pompes rapides et connectées'),
-              text: t('Des stations équipées de jauges précises, reliées en direct à Pleino pour que le stock affiché soit le vrai.'),
-              who: t('TotalEnergies et Sanol'),
-              end: (
-                <div className="flex text-amber-400" aria-label={t('5 étoiles sur 5')}>
-                  {[0, 1, 2, 3, 4].map((i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />)}
-                </div>
-              ),
+              alt: t('Station-service à Lomé'),
+              tag: t('Stock du jour'),
+              title: t('Le stock mis à jour par la station'),
+              text: t('Le gérant met à jour ses cuves et le temps d’attente dans l’Espace Pro. Chaque fiche affiche l’heure de la dernière mise à jour, et les clients peuvent signaler un problème.'),
+              who: t('{n} stations sur Pleino', { n: stations.length }),
             },
             {
               img: managerBg,
-              alt: t('Gérante de station souriante au Togo'),
-              tag: t('Gérants et pompistes formés'),
-              title: t('Un accueil pro et souriant'),
-              text: t('« Nous accueillons chaque conducteur avec plaisir. Valider un code QR prend moins de 10 secondes ! »'),
-              who: t('Ablavi K., superviseure'),
+              alt: t('Gérante de station au Togo'),
+              tag: t('Pompistes'),
+              title: t('Un ticket validé en quelques secondes'),
+              text: t('Le pompiste scanne le QR code de votre ticket ou tape son code. Chaque ticket ne sert qu’une fois, pour les litres réservés.'),
+              who: t('Code ou QR code'),
             },
             {
               img: customerBg,
-              alt: t('Client satisfait qui fait le plein au Togo'),
-              tag: t('Clients satisfaits'),
-              title: t('Faites comme Kofi : réservez votre plein'),
-              text: t("« Je ne perds plus de temps le matin avant d'aller au bureau. Mon réservoir est plein en un clin d'œil ! »"),
-              who: t('Kofi M., conducteur à Lomé'),
+              alt: t('Conducteur qui fait le plein au Togo'),
+              tag: t('Avis des clients'),
+              title: t('Des notes données par de vrais clients'),
+              text: t('Seuls les clients servis avec un ticket Pleino peuvent noter une station, une fois par ticket. La note moyenne s’affiche sur chaque fiche.'),
+              who: reviewCount > 0 ? t('{n} avis, note moyenne {avg} sur 5', { n: reviewCount, avg: num(reviewAverage, { maximumFractionDigits: 1 }) }) : t('Pas encore d’avis'),
               onClick: onNavigateMap,
             },
           ].map((card) => (
@@ -352,11 +347,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
                 <div className="pt-3 border-t border-neutral-800 flex items-center justify-between text-xs font-bold text-neutral-400">
                   <span>{card.who}</span>
-                  {card.end ?? (card.onClick && (
+                  {card.onClick && (
                     <span className="inline-flex items-center gap-1 text-amber-400">
                       {t('Voir la carte')} <ChevronRight className="w-3.5 h-3.5" />
                     </span>
-                  ))}
+                  )}
                 </div>
               </div>
             </article>
@@ -408,7 +403,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             },
             {
               q: t('Quels modes de paiement sont acceptés au Togo ?'),
-              a: t('Pleino accepte Mixx by Yas (ex-TMoney, Togocom), Flooz (Moov Africa) ainsi que les cartes bancaires Visa et Mastercard.'),
+              a: t('Pleino accepte Mixx by Yas (ex-TMoney, Togocom) et Flooz (Moov Africa). Les cartes bancaires ne sont pas encore acceptées.'),
             },
             {
               q: t('Comment le pompiste valide-t-il ma réservation ?'),

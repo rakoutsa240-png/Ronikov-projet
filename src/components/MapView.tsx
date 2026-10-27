@@ -185,7 +185,7 @@ export const MapView: React.FC<MapViewProps> = ({
       <div className="border-b-2 border-neutral-700/80 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 font-mono-code">
         <div>
           <div className="hidden sm:block text-xs text-amber-400 font-bold uppercase tracking-widest">
-            {t('Réseau de carburant en temps réel')}
+            {t('Stock mis à jour par les stations')}
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
             {t('Carte & recherche des stations')}

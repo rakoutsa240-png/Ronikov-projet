@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Station, FuelType, PaymentMethod, Reservation, Voucher } from '../types';
 import { Gauge } from './Gauge';
-import { MixxByYasBadge, MoovAfricaBadge, CardPaymentBadge, PaymentMethodLabel } from './PaymentLogos';
+import { MixxByYasBadge, MoovAfricaBadge, PaymentMethodLabel } from './PaymentLogos';
 import { TicketCard } from './TicketCard';
 import { X, Check, ShieldCheck, ArrowRight, Printer, Copy, Clock, AlertTriangle, Phone, Smartphone, CreditCard, Gift } from 'lucide-react';
 import { api, ApiError } from '../api';
@@ -81,7 +81,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
       .then((mine) => setVouchers(mine.vouchers.filter((v) => v.status === 'AVAILABLE' && worksAt(v, station))))
       .catch(() => {});
     setPhoneNumber(last.phone ?? formatLocalPhone(defaultPaymentPhone));
-    setPaymentMethod(last.paymentMethod ?? 'MIXX_BY_YAS');
+    // Bank cards are not offered: a card chosen before falls back to Mixx by Yas.
+    setPaymentMethod(last.paymentMethod && last.paymentMethod !== 'CARD' ? last.paymentMethod : 'MIXX_BY_YAS');
     // Drivers usually ask for an amount ("5 000 de super"), so FCFA comes first.
     setInputMode(last.inputMode ?? 'fcfa');
     setLiters(last.liters ?? 10);
@@ -433,10 +434,10 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
 
             <div className="space-y-3">
               <label className="text-xs font-mono-code font-bold text-neutral-200 block">
-                {t('Sélectionner le mode de paiement Mobile Money Togo / Carte')}
+                {t('Choisir le paiement Mobile Money')}
               </label>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-code text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono-code text-xs">
                 {/* Mixx by Yas (Togocom) */}
                 <button
                   onClick={() => setPaymentMethod('MIXX_BY_YAS')}
@@ -461,17 +462,6 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                   <MoovAfricaBadge selected={paymentMethod === 'MOOV_MONEY' || paymentMethod === 'FLOOZ'} />
                 </button>
 
-                {/* Bank Card */}
-                <button
-                  onClick={() => setPaymentMethod('CARD')}
-                  className={`p-3.5 border font-bold flex flex-col items-start justify-center transition-all rounded-xl relative ${
-                    paymentMethod === 'CARD'
-                      ? 'border-2 border-amber-400 bg-amber-400/10 text-white shadow-lg shadow-amber-400/10'
-                      : 'border-neutral-800 bg-black/60 text-neutral-300 hover:border-neutral-700'
-                  }`}
-                >
-                  <CardPaymentBadge selected={paymentMethod === 'CARD'} />
-                </button>
               </div>
             </div>
 
@@ -479,7 +469,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             {(paymentMethod === 'MIXX_BY_YAS' || paymentMethod === 'MOOV_MONEY' || paymentMethod === 'TMONEY' || paymentMethod === 'FLOOZ') && (
               <div className="space-y-2 border border-neutral-800 p-4 bg-black/60 rounded-xl font-mono-code">
                 <label className="text-xs font-bold block text-neutral-200">
-                  {t('Numéro de téléphone pour la validation push USSD')}
+                  {t('Numéro Mobile Money qui paie')}
                 </label>
                 <div className="flex border border-neutral-700 bg-neutral-900 rounded-lg overflow-hidden focus-within:border-amber-400">
                   <span className="px-3 py-2 bg-neutral-800 border-r border-neutral-700 font-bold text-xs text-amber-300 flex items-center">
@@ -498,9 +488,9 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 <p className="text-xs text-neutral-400 flex items-center gap-1.5 mt-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>
-                    {t('Un pop-up de confirmation PIN sera envoyé directement sur votre ligne Togo')}{' '}
+                    {t('Le paiement se fait depuis ce numéro')}{' '}
                     <strong className="text-amber-300">
-                      {paymentMethod === 'MIXX_BY_YAS' || paymentMethod === 'TMONEY' ? 'mixx by yas (Togocom)' : 'Moov Africa Flooz'}
+                      {paymentMethod === 'MIXX_BY_YAS' || paymentMethod === 'TMONEY' ? 'Mixx by Yas (Togocom)' : 'Moov Africa Flooz'}
                     </strong>
                   </span>
                 </p>
