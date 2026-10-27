@@ -6,6 +6,8 @@ export interface FuelStock {
   maxCapacityLiters: number;
   pricePerLiter: number; // in XOF (FCFA)
   status: 'AVAILABLE' | 'LOW' | 'OUT_OF_STOCK';
+  // Set for a few days after the price went down: the price before and when it dropped (API only).
+  priceDrop?: { previousPrice: number; at: string };
 }
 
 export interface Station {
@@ -211,7 +213,7 @@ export interface StationReport {
 
 // A fuel voucher. AVAILABLE: can be used for a booking. UNCLAIMED: a contest code nobody typed yet.
 // A station's voucher (validStationId) works only there; a Pleino one (null) at every partner station.
-export type VoucherSource = 'GIFT' | 'CONTEST' | 'LOYALTY';
+export type VoucherSource = 'GIFT' | 'CONTEST' | 'LOYALTY' | 'REFERRAL';
 export type VoucherStatus = 'AVAILABLE' | 'UNCLAIMED' | 'USED' | 'EXPIRED' | 'CANCELLED';
 
 export interface Voucher {
@@ -241,4 +243,26 @@ export interface AdminVoucher extends Voucher {
   ownerName: string | null;
   ownerPhone: string | null;
   claimedAt: string | null;
+}
+
+// A client's referral code and how many friends it brought.
+export interface MyReferral {
+  code: string;
+  amountXOF: number; // what each side gets
+  invited: number; // accounts created with the code
+  rewarded: number; // friends whose first ticket was served, so both got a voucher
+  maxRewards: number;
+}
+
+// What a station sold over a period: tickets served (by when they were served), litres, money.
+export interface StationSales {
+  days: number;
+  tickets: number;
+  liters: number;
+  revenueXOF: number; // fuel paid by clients, vouchers included (the service fee is Pleino's)
+  voucherXOF: number; // part of the revenue paid with vouchers
+  byFuel: { type: FuelType; tickets: number; liters: number; revenueXOF: number }[];
+  byDay: { date: string; liters: number; revenueXOF: number }[]; // YYYY-MM-DD, every day of the period
+  byHour: { hour: number; tickets: number }[]; // 0 to 23, Lomé time
+  previous: { liters: number; revenueXOF: number }; // the period just before, to compare
 }

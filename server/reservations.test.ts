@@ -155,7 +155,7 @@ describe('validating at the pump', () => {
     expect(again.body.error).toMatch(/déjà été utilisé/);
 
     const notes = await client.get('/api/notifications').expect(200);
-    expect(notes.body[0]).toMatchObject({ title: 'Carburant Servi', read: false });
+    expect(notes.body[0]).toMatchObject({ title: 'Carburant servi', read: false });
   });
 
   it('accepts the signed QR code and refuses an edited one', async () => {

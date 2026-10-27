@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  type AnyPgColumn,
   boolean,
   check,
   customType,
@@ -33,7 +34,7 @@ export const reportKindEnum = pgEnum('report_kind', ['NO_FUEL', 'LONG_QUEUE', 'W
 
 // GIFT: given by an admin to an account. CONTEST: a code to hand out, claimed by whoever types it first.
 // LOYALTY: earned automatically for the litres a client was served.
-export const voucherSourceEnum = pgEnum('voucher_source', ['GIFT', 'CONTEST', 'LOYALTY']);
+export const voucherSourceEnum = pgEnum('voucher_source', ['GIFT', 'CONTEST', 'LOYALTY', 'REFERRAL']);
 
 export const stations = pgTable('stations', {
   id: text('id').primaryKey(),
@@ -103,9 +104,18 @@ export const users = pgTable(
     suspendedAt: timestamp('suspended_at', { withTimezone: true }),
     // When the profile photo was last set (null: no photo). Versions the photo's address.
     photoUpdatedAt: timestamp('photo_updated_at', { withTimezone: true }),
+    // The code this user shares to invite friends (AMI-7KQ2M9), made the first time they open it.
+    referralCode: text('referral_code'),
+    // Who invited this user, and when both got their referral voucher (after this user's first ticket served).
+    referredBy: uuid('referred_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+    referralRewardedAt: timestamp('referral_rewarded_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('users_phone_idx').on(t.phone)],
+  (t) => [
+    uniqueIndex('users_phone_idx').on(t.phone),
+    uniqueIndex('users_referral_code_idx').on(t.referralCode),
+    index('users_referred_by_idx').on(t.referredBy),
+  ],
 );
 
 // Which stations a manager (STATION_PRO) runs, or the one station an attendant (ATTENDANT) works at.

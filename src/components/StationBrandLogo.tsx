@@ -192,19 +192,19 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               <div className="p-3.5 bg-black/70 border border-neutral-800 rounded-xl space-y-2.5">
                 <div className="flex justify-between items-center text-neutral-300">
                   <span className="font-bold flex items-center gap-1.5">
-                    <Fuel className="w-3.5 h-3.5 text-amber-400" /> {t('Pompes & Automates :')}
+                    <Fuel className="w-3.5 h-3.5 text-amber-400" /> {t('Pompes et automates :')}
                   </span>
                   <span className="text-emerald-400 font-bold">{t('100% Compatibles QR Code')}</span>
                 </div>
                 <div className="flex justify-between items-center text-neutral-300">
                   <span className="font-bold flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Garantie Carburant :')}
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Garantie carburant :')}
                   </span>
                   <span className="text-amber-400 font-bold">{t('Normes ISO / Européennes')}</span>
                 </div>
                 <div className="flex justify-between items-center text-neutral-300">
                   <span className="font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('Paiement Accepté :')}
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('Paiement accepté :')}
                   </span>
                   <span className="text-white font-bold">{t('TMoney, Flooz, Carte Visa')}</span>
                 </div>
@@ -213,7 +213,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
               <div className="p-3.5 bg-amber-400/10 border border-amber-400/30 rounded-xl space-y-1">
                 <div className="text-xs font-extrabold text-amber-300 flex items-center gap-1.5 uppercase">
                   <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>{t('Personnalisation de Logo & Design')}</span>
+                  <span>{t('Personnalisation du logo et du design')}</span>
                 </div>
                 <p className="text-xs text-neutral-300 font-sans leading-relaxed">
                   {t("Chaque station partenaire affiche son identité visuelle propre. Vous pourrez bientôt télécharger vos propres logos de stations personnalisés depuis l'Espace Pro.")}
@@ -228,7 +228,7 @@ export const StationBrandLogo: React.FC<StationBrandLogoProps> = ({
                 onClick={() => setShowDetailsModal(false)}
                 className="w-full py-3 bg-amber-400 text-black font-black text-xs rounded-xl hover:bg-amber-300 active:scale-98 transition-all shadow-lg shadow-amber-400/20"
               >
-                {t("Fermer l'Aperçu du Logo")}
+                {t("Fermer l'aperçu du logo")}
               </button>
             </div>
           </div>

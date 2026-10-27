@@ -17,6 +17,7 @@ import {
 } from '../auth';
 import type { Db } from '../db/client';
 import { users } from '../db/schema';
+import { findReferrer, getMyReferral } from '../referrals';
 
 const phone = z
   .string()
@@ -34,6 +35,7 @@ const registerBody = z.object({
   phone,
   email: z.string().trim().email().max(120).optional().or(z.literal('').transform(() => undefined)),
   password: z.string().min(8, 'Mot de passe : 8 caractères minimum').max(200),
+  referralCode: z.string().trim().max(20).optional(),
 });
 
 const loginBody = z.object({ phone, password: z.string().min(1).max(200) });
@@ -63,7 +65,12 @@ export function authRouter(db: Db, { secureCookies }: { secureCookies: boolean }
       res.status(400).json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' });
       return;
     }
-    const { name, phone, email, password } = parsed.data;
+    const { name, phone, email, password, referralCode } = parsed.data;
+    const referrer = referralCode ? await findReferrer(db, referralCode) : null;
+    if (referralCode && !referrer) {
+      res.status(400).json({ error: 'Code de parrainage inconnu. Vérifiez-le ou laissez la case vide.' });
+      return;
+    }
 
     const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.phone, phone));
     if (existing) {
@@ -74,7 +81,7 @@ export function authRouter(db: Db, { secureCookies }: { secureCookies: boolean }
     // Sign-up always creates a client; only an admin can grant other roles.
     const [user] = await db
       .insert(users)
-      .values({ name, phone, email: email ?? null, passwordHash: await hashPassword(password) })
+      .values({ name, phone, email: email ?? null, passwordHash: await hashPassword(password), referredBy: referrer?.id ?? null })
       .onConflictDoNothing({ target: users.phone })
       .returning();
     if (!user) {
@@ -132,6 +139,11 @@ export function authRouter(db: Db, { secureCookies }: { secureCookies: boolean }
     // Other devices are signed out; this one stays signed in.
     await deleteOtherSessions(db, user.id, readCookie(req, SESSION_COOKIE)!);
     res.json(await toAuthUser(db, updated));
+  });
+
+  // The code to share with friends, and how many it brought.
+  router.get('/referral', requireRole(), async (req, res) => {
+    res.json(await getMyReferral(db, req.user!.id));
   });
 
   router.post('/auth/logout', async (req, res) => {

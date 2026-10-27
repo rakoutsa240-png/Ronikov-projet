@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthUser } from '../types';
-import { X, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { X, ArrowRight, Eye, EyeOff, MessageCircle } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { useModal } from '../useModal';
 import { t } from '../i18n';
+import { whatsappUrl } from '../contact';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAuthenticated: (user: AuthUser, password: string) => void; // password: to replace a temporary one without retyping
   reason?: string; // why sign-in is asked, e.g. to book
+  referralCode?: string; // from a friend's invitation link: opens on the sign-up form, code filled in
+  onOpenLegal?: (page: 'terms' | 'privacy') => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -17,6 +20,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onAuthenticated,
   reason,
+  referralCode: invitedWith,
+  onOpenLegal,
 }) => {
   useModal(isOpen, onClose);
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +33,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotHelp, setShowForgotHelp] = useState(false);
+  const [referralCode, setReferralCode] = useState(invitedWith ?? '');
+  useEffect(() => {
+    if (isOpen && invitedWith) {
+      setMode('register');
+      setReferralCode(invitedWith);
+    }
+  }, [isOpen, invitedWith]);
 
   // The role comes from the server: sign-up always creates a client account.
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +50,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const user =
         mode === 'login'
           ? await api.login(phone, password)
-          : await api.register({ name, phone, password, email: email || undefined });
+          : await api.register({ name, phone, password, email: email || undefined, referralCode: referralCode.trim() || undefined });
       setPassword('');
       onAuthenticated(user, password);
       onClose();
@@ -159,11 +171,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             )}
             {mode === 'login' && showForgotHelp && (
-              <p className="text-[11px] text-neutral-700 font-sans bg-neutral-100 border border-neutral-300 p-2.5">
-                {t("Contactez l'équipe Pleino depuis le numéro de votre compte. Un administrateur vous donnera un mot de passe temporaire ; à la connexion suivante, vous choisirez le vôtre.")}
-              </p>
+              <div className="text-[11px] text-neutral-700 font-sans bg-neutral-100 border border-neutral-300 p-2.5 space-y-2">
+                <p>{t("Contactez l'équipe Pleino depuis le numéro de votre compte. Un administrateur vous donnera un mot de passe temporaire ; à la connexion suivante, vous choisirez le vôtre.")}</p>
+                <a
+                  href={whatsappUrl(t('Bonjour Pleino, j’ai oublié mon mot de passe. Mon numéro de compte est : {phone}', { phone: phone || '…' }))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-black font-bold rounded"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" /> {t('Écrire à Pleino sur WhatsApp')}
+                </a>
+              </div>
             )}
           </div>
+
+          {mode === 'register' && (
+            <div className="space-y-1">
+              <label htmlFor="referral-code" className="text-xs font-bold block text-black">{t('Code de parrainage (facultatif)')}</label>
+              <input
+                id="referral-code"
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                placeholder="AMI-XXXXXX"
+                autoCapitalize="characters"
+                autoComplete="off"
+                className="w-full p-2.5 border border-black text-xs font-bold uppercase focus:outline-none"
+              />
+            </div>
+          )}
+
+          {mode === 'register' && (
+            <p className="text-[11px] text-neutral-600 font-sans">
+              {t('En créant un compte, vous acceptez les')}{' '}
+              <button type="button" onClick={() => onOpenLegal?.('terms')} className="underline font-bold hover:text-black">
+                {t('conditions d’utilisation')}
+              </button>{' '}
+              {t('et la')}{' '}
+              <button type="button" onClick={() => onOpenLegal?.('privacy')} className="underline font-bold hover:text-black">
+                {t('politique de confidentialité')}
+              </button>
+              .
+            </p>
+          )}
 
           {error && (
             <p role="alert" className="text-xs font-bold text-red-700 border border-red-700 bg-red-50 p-2">

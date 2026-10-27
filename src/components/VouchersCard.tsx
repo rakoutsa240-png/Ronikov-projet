@@ -114,7 +114,8 @@ export const VouchersCard: React.FC = () => {
                   </div>
                   <div className="text-xs text-neutral-200">{where(v)}</div>
                   {v.source === 'LOYALTY' && <div className="text-[11px] text-amber-300 font-bold">{t('Bon fidélité')}</div>}
-                  {v.label && v.source !== 'LOYALTY' && <div className="text-[11px] text-neutral-400">{v.label}</div>}
+                  {v.source === 'REFERRAL' && <div className="text-[11px] text-amber-300 font-bold">{t('Bon parrainage')}</div>}
+                  {v.label && v.source !== 'LOYALTY' && v.source !== 'REFERRAL' && <div className="text-[11px] text-neutral-400">{v.label}</div>}
                 </li>
               ))}
             </ul>

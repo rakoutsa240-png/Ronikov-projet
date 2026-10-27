@@ -3,10 +3,13 @@ import {parseHash, routeToHash} from './routes';
 
 describe('routes', () => {
   it('gives each page its own address and reads it back', () => {
-    for (const tab of ['home', 'map', 'history', 'premium', 'profile', 'pro', 'admin'] as const) {
+    for (const tab of ['home', 'map', 'history', 'premium', 'profile', 'pro', 'admin', 'terms', 'privacy'] as const) {
       expect(parseHash(routeToHash({tab}))).toEqual({tab});
     }
     expect(routeToHash({tab: 'station-detail', stationId: 'st-01'})).toBe('#/station/st-01');
+    // The Play Store asks for the privacy policy's address.
+    expect(routeToHash({tab: 'privacy'})).toBe('#/confidentialite');
+    expect(routeToHash({tab: 'terms'})).toBe('#/conditions');
     expect(parseHash('#/station/st-01')).toEqual({tab: 'station-detail', stationId: 'st-01'});
   });
 

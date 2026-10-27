@@ -1,7 +1,8 @@
 import React from 'react';
-import { Fuel, ShieldCheck, MapPin, Phone, Mail } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Logo } from './Logo';
 import { t } from '../i18n';
+import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_DISPLAY, whatsappUrl } from '../contact';
 
 export const Footer: React.FC = () => {
   return (
@@ -51,11 +52,21 @@ export const Footer: React.FC = () => {
           {/* Col 4: Service Client */}
           <div className="space-y-3">
             <h4 className="font-bold text-white border-b border-white/15 pb-1">
-              {t('Assistance 24h/7j')}
+              {t('Nous contacter')}
             </h4>
             <div className="space-y-2 text-white/85">
-              <p>{t('Service Client Togo')}: +228 90 00 00 00</p>
-              <p>Email: contact@pleino.tg</p>
+              <p>
+                {t('Service Client Togo')} :{' '}
+                <a href={`tel:${SUPPORT_PHONE}`} className="text-white hover:underline whitespace-nowrap">{SUPPORT_PHONE_DISPLAY}</a>
+              </p>
+              <p>
+                <a href={whatsappUrl(t('Bonjour Pleino, j’ai besoin d’aide :'))} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[#25D366] font-bold hover:underline">
+                  <MessageCircle className="w-3.5 h-3.5" /> {t('Écrire sur WhatsApp')}
+                </a>
+              </p>
+              <p className="break-all">
+                Email : <a href={`mailto:${SUPPORT_EMAIL}`} className="text-white hover:underline">{SUPPORT_EMAIL}</a>
+              </p>
               <p className="text-[11px] text-white/55 font-sans pt-1">
                 {t('Paiements via Mixx by Yas (Togocom) et Flooz (Moov Africa).')}
               </p>
@@ -69,6 +80,8 @@ export const Footer: React.FC = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <a href="#/carte" className="hover:text-white">{t('Stations & carte')}</a>
             <a href="#/premium" className="hover:text-white">{t('Pass Premium')}</a>
+            <a href="#/conditions" className="hover:text-white">{t('Conditions d’utilisation')}</a>
+            <a href="#/confidentialite" className="hover:text-white">{t('Confidentialité')}</a>
           </div>
         </div>
       </div>

@@ -113,7 +113,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               activeTab === 'prices' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
-            {t('Prix Officiels Togo')}
+            {t('Prix officiels Togo')}
           </button>
           <button
             onClick={() => setActiveTab('stations')}
@@ -267,7 +267,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               className="px-6 py-3 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition-colors rounded-xl flex items-center gap-2 self-start md:self-auto shadow-lg"
             >
               <Save className="w-4 h-4" />
-              <span>{t('Enregistrer les Prix')}</span>
+              <span>{t('Enregistrer les prix')}</span>
             </button>
           </div>
 
@@ -292,7 +292,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                 <div className="space-y-1">
                   <label className="text-[11px] text-neutral-400 font-bold uppercase block">
-                    {t('Prix Officiel (FCFA / Litre)')}
+                    {t('Prix officiel (FCFA / litre)')}
                   </label>
                   <input
                     type="number"

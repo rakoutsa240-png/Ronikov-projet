@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, lt, ne, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, lt, lte, ne, type SQL } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
@@ -148,11 +148,14 @@ export function adminRouter(db: Db) {
       }
       if (next.pricePerLiterXof !== row.pricePerLiterXof) {
         await tx.insert(stationPrices).values({ stationId, fuelType: fuel.data, pricePerLiterXof: next.pricePerLiterXof });
+        const drop = row.pricePerLiterXof - next.pricePerLiterXof;
         await notifyFavorites(
           tx,
           stationId,
-          `Nouveau prix du ${label}`,
-          `${station.name} : ${next.pricePerLiterXof} FCFA/L au lieu de ${row.pricePerLiterXof} FCFA/L.`,
+          drop > 0 ? `Prix en baisse : ${label}` : `Nouveau prix du ${label}`,
+          drop > 0
+            ? `${station.name} : ${next.pricePerLiterXof} FCFA/L au lieu de ${row.pricePerLiterXof} FCFA/L, soit ${drop} FCFA de moins par litre. Réservez vos litres à ce prix.`
+            : `${station.name} : ${next.pricePerLiterXof} FCFA/L au lieu de ${row.pricePerLiterXof} FCFA/L.`,
         );
       }
       await audit(tx, req.user!.id, 'stock.update', `station:${stationId}:${fuel.data}`, {
@@ -257,6 +260,14 @@ export function adminRouter(db: Db) {
       await tx.insert(fuelPrices).values(prices.map((p) => ({ fuelType: p.type, officialPriceXof: p.officialPriceXOF, effectiveFrom: now })));
       if (applyToAllStations) {
         for (const p of prices) {
+          const [before] = await tx
+            .select({ price: fuelPrices.officialPriceXof })
+            .from(fuelPrices)
+            .where(and(eq(fuelPrices.fuelType, p.type), lte(fuelPrices.effectiveFrom, now)))
+            .orderBy(desc(fuelPrices.effectiveFrom), desc(fuelPrices.id))
+            .offset(1)
+            .limit(1);
+          const drop = before ? before.price - p.officialPriceXOF : 0;
           const changed = await tx
             .update(fuelStocks)
             .set({ pricePerLiterXof: p.officialPriceXOF, updatedAt: now })
@@ -269,8 +280,10 @@ export function adminRouter(db: Db) {
             await notifyFavoritesOnce(
               tx,
               changed.map((c) => c.stationId),
-              `Nouveau prix du ${FUEL_LABELS[p.type]}`,
-              `Le ${FUEL_LABELS[p.type]} passe à ${p.officialPriceXOF} FCFA/L dans vos stations favorites.`,
+              drop > 0 ? `Prix en baisse : ${FUEL_LABELS[p.type]}` : `Nouveau prix du ${FUEL_LABELS[p.type]}`,
+              drop > 0
+                ? `Le ${FUEL_LABELS[p.type]} baisse à ${p.officialPriceXOF} FCFA/L dans vos stations favorites, soit ${drop} FCFA de moins par litre.`
+                : `Le ${FUEL_LABELS[p.type]} passe à ${p.officialPriceXOF} FCFA/L dans vos stations favorites.`,
             );
           }
         }
@@ -346,7 +359,7 @@ export function adminRouter(db: Db) {
         await tx.insert(notifications).values({
           userId,
           type: 'PREMIUM',
-          title: 'Pass Premium Activé',
+          title: 'Pass Premium activé',
           message: 'Votre pass prioritaire Pleino est actif : vos prochaines réservations sont sans frais de service.',
         });
       }

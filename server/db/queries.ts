@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, isNull, lt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, lt, lte, sql } from 'drizzle-orm';
 import { REPORT_WINDOW_HOURS } from '../../shared/reports';
 import { computeStockStatus, FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 import type { FuelPriceGlobal, FuelStock, FuelType, PriceChange, Station, StationRating, StationReport } from '../../shared/types';
@@ -40,8 +40,28 @@ export function summarizeReports(rows: ReportRow[], checkedAt: Date): StationRep
 
 export const reportWindowStart = () => new Date(Date.now() - REPORT_WINDOW_HOURS * 3_600_000);
 
+// A price that went down stays marked as a drop for this many days.
+export const PRICE_DROP_DAYS = 3;
+
+// The last two prices of every station and fuel, newest first.
+function lastTwoPrices(db: Db) {
+  const ranked = db
+    .select({
+      stationId: stationPrices.stationId,
+      fuelType: stationPrices.fuelType,
+      price: stationPrices.pricePerLiterXof,
+      at: stationPrices.effectiveFrom,
+      rank: sql<number>`row_number() over (partition by ${stationPrices.stationId}, ${stationPrices.fuelType} order by ${stationPrices.effectiveFrom} desc, ${stationPrices.id} desc)`
+        .mapWith(Number)
+        .as('rank'),
+    })
+    .from(stationPrices)
+    .as('ranked');
+  return db.select().from(ranked).where(lte(ranked.rank, 2)).orderBy(asc(ranked.rank));
+}
+
 export async function listStations(db: Db): Promise<Station[]> {
-  const [stationRows, stockRows, reportRows, ratingRows] = await Promise.all([
+  const [stationRows, stockRows, reportRows, ratingRows, priceRows] = await Promise.all([
     db.select().from(stations).orderBy(asc(stations.id)),
     db.select().from(fuelStocks),
     db.select().from(stationReports).where(gte(stationReports.createdAt, reportWindowStart())),
@@ -55,15 +75,34 @@ export async function listStations(db: Db): Promise<Station[]> {
       .from(reviews)
       .where(isNull(reviews.hiddenAt))
       .groupBy(reviews.stationId),
+    lastTwoPrices(db),
   ]);
   const ratingByStation = new Map<string, StationRating>(
     ratingRows.map((r) => [r.stationId, { average: Math.round(r.average * 10) / 10, count: r.count }]),
   );
 
+  // Latest change first: a drop is when it went below the one before, recently, and still holds.
+  const pricesByFuel = new Map<string, { price: number; at: Date }[]>();
+  for (const row of priceRows) {
+    const key = `${row.stationId}:${row.fuelType}`;
+    pricesByFuel.set(key, [...(pricesByFuel.get(key) ?? []), { price: row.price, at: row.at }]);
+  }
+  const dropSince = Date.now() - PRICE_DROP_DAYS * 86_400_000;
+
   const stockByStation = new Map<string, Partial<Record<FuelType, FuelStock>>>();
   for (const row of stockRows) {
     const stock = stockByStation.get(row.stationId) ?? {};
     stock[row.fuelType] = toFuelStock(row);
+    const [latest, before] = pricesByFuel.get(`${row.stationId}:${row.fuelType}`) ?? [];
+    if (
+      latest &&
+      before &&
+      latest.price < before.price &&
+      latest.price === row.pricePerLiterXof &&
+      latest.at.getTime() >= dropSince
+    ) {
+      stock[row.fuelType]!.priceDrop = { previousPrice: before.price, at: latest.at.toISOString() };
+    }
     stockByStation.set(row.stationId, stock);
   }
 

@@ -22,6 +22,7 @@ import {
   readQrPayload,
   type TicketKeys,
 } from './tickets';
+import { awardReferral } from './referrals';
 import { attachVoucher, awardLoyaltyVouchers, lockUsableVoucher, releaseVoucher, voucherWorksAt } from './vouchers';
 
 // A refusal the client should see, with its HTTP status.
@@ -199,7 +200,7 @@ export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser
       tx,
       user.id,
       'RESERVATION',
-      'Réservation Confirmée',
+      'Réservation confirmée',
       `Votre ticket de ${input.liters} L ${FUEL_LABELS[input.fuelType]} est actif chez ${stock.stationName} pendant ${RESERVATION_VALIDITY_MINUTES / 60} h.`,
       input.stationId,
     );
@@ -303,16 +304,16 @@ export async function validateTicket(db: Db, keys: TicketKeys, staff: AuthUser, 
 
     if (row.status === 'PENDING' && row.expiresAt <= new Date()) {
       await releasePending(tx, row, 'EXPIRED');
-      return { ok: false as const, id: row.id, message: 'Impossible: Ce ticket est expiré.' };
+      return { ok: false as const, id: row.id, message: 'Impossible : ce ticket est expiré.' };
     }
     if (row.status === 'VALIDATED') {
-      return { ok: false as const, id: row.id, message: 'Attention: Ce code a déjà été utilisé et validé à la pompe.' };
+      return { ok: false as const, id: row.id, message: 'Attention : ce code a déjà été utilisé et validé à la pompe.' };
     }
     if (row.status !== 'PENDING') {
       return {
         ok: false as const,
         id: row.id,
-        message: `Impossible: Ce ticket est ${row.status === 'EXPIRED' ? 'expiré' : 'annulé'}.`,
+        message: `Impossible : ce ticket est ${row.status === 'EXPIRED' ? 'expiré' : 'annulé'}.`,
       };
     }
 
@@ -336,11 +337,12 @@ export async function validateTicket(db: Db, keys: TicketKeys, staff: AuthUser, 
       liters: row.liters,
     });
     await awardLoyaltyVouchers(tx, row.userId);
+    await awardReferral(tx, row.userId);
     await notify(
       tx,
       row.userId,
       'RESERVATION',
-      'Carburant Servi',
+      'Carburant servi',
       `Votre ticket de ${row.liters} L ${FUEL_LABELS[row.fuelType]} a été validé à la pompe.`,
       row.stationId,
     );
@@ -371,7 +373,7 @@ export async function expireDueReservations(db: Db): Promise<number> {
         tx,
         row.userId,
         'RESERVATION',
-        'Ticket Expiré',
+        'Ticket expiré',
         `Votre ticket de ${row.liters} L ${FUEL_LABELS[row.fuelType]} a expiré sans être utilisé.`,
         row.stationId,
       );

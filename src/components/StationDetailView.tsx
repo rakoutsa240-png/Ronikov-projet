@@ -8,6 +8,7 @@ import { directionsUrl } from '../geo';
 import { FavoriteButton } from './FavoriteButton';
 import { StationFreshness, useNow } from './StationFreshness';
 import { RatingBadge } from './StarRating';
+import { PriceDrop } from './PriceDrop';
 import { reportLabel } from '../../shared/reports';
 import { timeAgo } from '../time';
 import { num, t, tServer } from '../i18n';
@@ -206,6 +207,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                 <div className="text-right shrink-0">
                   <div className="text-lg font-extrabold text-amber-300 tabular-nums">{stock.pricePerLiter}</div>
                   <div className="text-xs text-neutral-400">FCFA/L</div>
+                  <PriceDrop stock={stock} className="text-[11px] mt-1" />
                 </div>
               </li>
             );
@@ -236,6 +238,11 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                     <span className="text-neutral-400">{t('Prix officiel :')}</span>
                     <span className="font-bold text-white">{stock.pricePerLiter} FCFA / L</span>
                   </div>
+                  {stock.priceDrop && (
+                    <div className="flex justify-end">
+                      <PriceDrop stock={stock} className="text-[11px]" />
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-neutral-400">{t('État de la pompe :')}</span>
                     <span
