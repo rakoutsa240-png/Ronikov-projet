@@ -593,7 +593,8 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'pro' && (
+        {/* Opened straight from its address, the page waits for the stations instead of crashing. */}
+        {activeTab === 'pro' && stations.length > 0 && (
           <ProDashboard
             managedStation={stations.find((s) => s.id === proStationId) ?? stations[0]}
             stationChoices={userRole === 'ADMIN' ? stations : stations.filter((s) => currentUser?.managedStationIds.includes(s.id))}

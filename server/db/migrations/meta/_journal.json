@@ -78,6 +78,13 @@
       "when": 1792166122682,
       "tag": "0010_profile_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793087819299,
+      "tag": "0011_vouchers",
+      "breakpoints": true
     }
   ]
 }

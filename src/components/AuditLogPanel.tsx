@@ -73,6 +73,12 @@ export function describeEntry(entry: AuditEntry, stationName: (id: string) => st
       return t('Avis client masqué à {station}', { station });
     case 'review.show':
       return t('Avis client réaffiché à {station}', { station });
+    case 'voucher.gift':
+      return t('Bon d’essence de {amount} FCFA offert à {user}', { amount: d.amountXof, user });
+    case 'voucher.codes':
+      return t('{n} code(s) de bon d’essence de {amount} FCFA créés', { n: d.count, amount: d.amountXof }) + (d.label ? ` (${d.label})` : '');
+    case 'voucher.cancel':
+      return t('Bon d’essence {code} retiré', { code: d.code });
     default:
       return `${entry.action} (${entry.target})`;
   }

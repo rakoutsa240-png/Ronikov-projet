@@ -7,6 +7,7 @@ import { QrScanner } from './QrScanner';
 import { StationFreshness } from './StationFreshness';
 import { AttendantsPanel } from './AttendantsPanel';
 import { ReviewsPanel } from './ReviewsPanel';
+import { VouchersPanel } from './VouchersPanel';
 import { Avatar } from './Avatar';
 import { num, t, tServer } from '../i18n';
 
@@ -482,6 +483,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
 
       {!isAttendant && <AttendantsPanel stationId={managedStation.id} stationName={managedStation.name} />}
       {!isAttendant && <ReviewsPanel stationId={managedStation.id} />}
+      {!isAttendant && <VouchersPanel stationId={managedStation.id} stationName={managedStation.name} />}
     </div>
   );
 };

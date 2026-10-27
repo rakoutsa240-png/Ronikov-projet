@@ -109,6 +109,11 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               <span className="font-bold text-amber-400 text-sm">
                 {num(reservation.totalAmountXOF)} FCFA
               </span>
+              {!!reservation.voucherDiscountXOF && (
+                <span className="block text-[11px] text-emerald-400 font-bold">
+                  {t('Bon d’essence : −{amount} FCFA', { amount: num(reservation.voucherDiscountXOF) })}
+                </span>
+              )}
             </div>
             <div>
               <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Mode paiement :')}</span>

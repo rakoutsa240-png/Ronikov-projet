@@ -31,6 +31,10 @@ export const managerRequestStatusEnum = pgEnum('manager_request_status', ['PENDI
 
 export const reportKindEnum = pgEnum('report_kind', ['NO_FUEL', 'LONG_QUEUE', 'WRONG_PRICE', 'CLOSED']);
 
+// GIFT: given by an admin to an account. CONTEST: a code to hand out, claimed by whoever types it first.
+// LOYALTY: earned automatically for the litres a client was served.
+export const voucherSourceEnum = pgEnum('voucher_source', ['GIFT', 'CONTEST', 'LOYALTY']);
+
 export const stations = pgTable('stations', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -149,6 +153,8 @@ export const reservations = pgTable(
     pricePerLiterXof: integer('price_per_liter_xof').notNull(),
     fuelAmountXof: integer('fuel_amount_xof').notNull(),
     serviceFeeXof: integer('service_fee_xof').notNull(),
+    // What a fuel voucher took off the price; totalXof is what was left to pay.
+    voucherDiscountXof: integer('voucher_discount_xof').notNull().default(0),
     totalXof: integer('total_xof').notNull(),
     paymentMethod: paymentMethodEnum('payment_method').notNull(),
     paymentPhone: text('payment_phone').notNull(),
@@ -322,3 +328,34 @@ export const userPhotos = pgTable('user_photos', {
   image: bytea('image').notNull(),
   contentType: text('content_type').notNull(),
 });
+
+// Fuel vouchers: an amount in FCFA taken off one booking. A station's manager gives vouchers that only
+// work at that station (stationId); an admin's have no stationId and work at every partner station.
+// A contest code has no owner until someone claims it. Booking with a voucher sets reservationId;
+// cancelling or expiry of that ticket clears it.
+export const vouchers = pgTable(
+  'vouchers',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    code: text('code').notNull(),
+    amountXof: integer('amount_xof').notNull(),
+    source: voucherSourceEnum('source').notNull(),
+    label: text('label'),
+    stationId: text('station_id').references(() => stations.id, { onDelete: 'cascade' }),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'cascade' }),
+    claimedAt: timestamp('claimed_at', { withTimezone: true }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    reservationId: uuid('reservation_id').references(() => reservations.id, { onDelete: 'set null' }),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('vouchers_code_idx').on(t.code),
+    uniqueIndex('vouchers_reservation_idx').on(t.reservationId),
+    index('vouchers_owner_idx').on(t.ownerId, t.expiresAt),
+    index('vouchers_created_idx').on(t.createdAt),
+    check('vouchers_amount_check', sql`${t.amountXof} > 0`),
+  ],
+);

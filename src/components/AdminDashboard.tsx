@@ -5,6 +5,7 @@ import { StationBrandLogo } from './StationBrandLogo';
 import { AdminUsersPanel } from './AdminUsersPanel';
 import { AuditLogPanel } from './AuditLogPanel';
 import { ReviewsPanel } from './ReviewsPanel';
+import { VouchersPanel } from './VouchersPanel';
 import { AddStationForm } from './AddStationForm';
 import { FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 import { num, t } from '../i18n';
@@ -30,7 +31,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   currentUserId,
 }) => {
   const [showAddStation, setShowAddStation] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'accounts' | 'incidents' | 'reviews' | 'journal'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'prices' | 'stations' | 'accounts' | 'incidents' | 'reviews' | 'vouchers' | 'journal'>('overview');
   const [priceError, setPriceError] = useState<string | null>(null);
   const [editingPrices, setEditingPrices] = useState<FuelPriceGlobal[]>(globalPrices);
   const [applyToAllStations, setApplyToAllStations] = useState<boolean>(true);
@@ -145,6 +146,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             }`}
           >
             {t('Avis clients')}
+          </button>
+          <button
+            onClick={() => setActiveTab('vouchers')}
+            className={`px-3.5 py-2 rounded-lg transition-all ${
+              activeTab === 'vouchers' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
+            }`}
+          >
+            {t('Bons d’essence')}
           </button>
           <button
             onClick={() => setActiveTab('journal')}
@@ -407,6 +416,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* REVIEWS TAB */}
       {activeTab === 'reviews' && <ReviewsPanel canHide />}
+      {activeTab === 'vouchers' && <VouchersPanel />}
 
       {/* INCIDENTS TAB */}
       {activeTab === 'incidents' && (
