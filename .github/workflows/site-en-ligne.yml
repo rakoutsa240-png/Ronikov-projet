@@ -20,3 +20,5 @@ jobs:
           curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 20 --retry-all-errors "$SITE/api/health" | grep -q '"ok":true'
           curl --fail --silent --show-error --max-time 60 --retry 2 --retry-delay 10 "$SITE/" | grep -q 'Pleino'
           echo "Le site répond."
+          echo "--- bons : $(curl -s --max-time 60 -o /dev/null -w '%{http_code}' "$SITE/api/vouchers/mine") (401 = nouvelle version, 404 = ancienne)"
+          curl -s --max-time 60 "$SITE/api/vouchers/mine"; echo
