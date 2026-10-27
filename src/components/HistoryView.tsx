@@ -134,7 +134,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       badgeBg: 'bg-amber-400/20 text-amber-300 border-amber-400/40',
       accentText: 'text-amber-400',
       codeText: 'text-amber-300',
-      brandTag: t('STATION AGRÉÉE TOGO'),
+      brandTag: t('STATION'),
     };
   };
 

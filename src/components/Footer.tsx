@@ -1,10 +1,18 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Logo } from './Logo';
+import { Station } from '../types';
 import { t } from '../i18n';
 import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_DISPLAY, whatsappUrl } from '../contact';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  stations: Station[];
+}
+
+// Cities and brands come from the stations on the map, so the list never claims more than Pleino has.
+export const Footer: React.FC<FooterProps> = ({ stations }) => {
+  const cities = [...new Set(stations.map((s) => s.city))].sort((a: string, b: string) => a.localeCompare(b, 'fr'));
+  const brands = [...new Set(stations.map((s) => s.brand))].sort((a: string, b: string) => a.localeCompare(b, 'fr'));
   return (
     <footer className="theme-fixed bg-brand-950 text-white font-mono-code pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -23,29 +31,24 @@ export const Footer: React.FC = () => {
           {/* Col 2: Villes & Couverture Togo */}
           <div className="space-y-3">
             <h4 className="font-bold text-white border-b border-white/15 pb-1">
-              {t('Couverture nationale')}
+              {t('Villes couvertes')}
             </h4>
             <ul className="space-y-1.5 text-white/70">
-              <li>Lomé (Golfe & Agoè-Nyivé)</li>
-              <li>Tsévié (Maritime)</li>
-              <li>Atakpamé (Plateaux)</li>
-              <li>Sokodé (Centrale)</li>
-              <li>Kara (Kara)</li>
-              <li>Dapaong (Savanes)</li>
+              {cities.map((city) => (
+                <li key={city}>{city}</li>
+              ))}
             </ul>
           </div>
 
           {/* Col 3: Partenaires & Services */}
           <div className="space-y-3">
             <h4 className="font-bold text-white border-b border-white/15 pb-1">
-              {t('Réseaux partenaires')}
+              {t('Enseignes sur la carte')}
             </h4>
             <ul className="space-y-1.5 text-white/70">
-              <li>TotalEnergies Marketing Togo</li>
-              <li>Vivo Energy Togo (Shell)</li>
-              <li>Sanol Togo</li>
-              <li>Cap Petroleum</li>
-              <li>Somayaf & Oryx</li>
+              {brands.map((brand) => (
+                <li key={brand}>{brand}</li>
+              ))}
             </ul>
           </div>
 

@@ -75,7 +75,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
               </span>
               {station.isPartner && (
                 <span className="inline-flex items-center gap-1.5 text-xs border border-amber-400/60 bg-amber-400/10 text-amber-300 px-2.5 py-0.5 font-bold uppercase rounded-md shadow">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Partenaire sécurisé')}
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Partenaire Pleino')}
                 </span>
               )}
             </div>
@@ -149,7 +149,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         <div className="border-b border-neutral-800 pb-3 flex justify-between items-end">
           <div>
             <span className="text-xs text-amber-400 font-bold uppercase tracking-widest block flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {t('Jauge de stock en direct')}
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {t('Stock déclaré par la station')}
             </span>
             <h2 className="text-2xl font-black text-white tracking-tight">
               {t('Disponibilité des carburants')}
@@ -235,7 +235,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
 
                 <div className="border-t border-neutral-800/80 pt-3 text-xs space-y-1.5 text-neutral-300">
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">{t('Prix officiel :')}</span>
+                    <span className="text-neutral-400">{t('Prix :')}</span>
                     <span className="font-bold text-white">{stock.pricePerLiter} FCFA / L</span>
                   </div>
                   {stock.priceDrop && (

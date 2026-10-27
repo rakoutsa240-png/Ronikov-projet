@@ -1,6 +1,5 @@
 import React from 'react';
 import { PaymentMethod } from '../types';
-import { Smartphone, CreditCard, CheckCircle2 } from 'lucide-react';
 import { t } from '../i18n';
 
 interface PaymentLogoProps {
@@ -76,31 +75,6 @@ export const MoovAfricaBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md' 
   );
 };
 
-export const CardPaymentBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md' | 'lg' }> = ({ selected, size = 'md' }) => {
-  const isSm = size === 'sm';
-  return (
-    <div className={`flex items-center gap-2.5 transition-all ${isSm ? 'scale-90' : ''}`}>
-      {/* Visual Logo Emblem */}
-      <div className={`relative flex items-center justify-center font-black rounded-xl overflow-hidden shadow-md shrink-0 ${
-        isSm ? 'w-8 h-8' : 'w-10 h-10'
-      } bg-gradient-to-br from-neutral-800 via-neutral-900 to-black text-amber-400 border border-neutral-700`}>
-        <CreditCard className="w-5 h-5 text-amber-400" />
-      </div>
-
-      <div className="text-left">
-        <div className="flex items-center gap-1.5">
-          <span className={`font-black tracking-tight font-mono-code ${selected ? 'text-amber-300' : 'text-white'}`}>
-            {t('Carte Bancaire')}
-          </span>
-        </div>
-        <p className="text-[11px] text-neutral-400 font-sans leading-none mt-0.5">
-          Visa / Mastercard / Ecobank
-        </p>
-      </div>
-    </div>
-  );
-};
-
 export const PaymentMethodLabel: React.FC<{ method: PaymentMethod; showDetails?: boolean }> = ({ method, showDetails = true }) => {
   if (method === 'MIXX_BY_YAS' || method === 'TMONEY') {
     return (
@@ -124,10 +98,11 @@ export const PaymentMethodLabel: React.FC<{ method: PaymentMethod; showDetails?:
     );
   }
 
+  // Old tickets only: cards are no longer offered.
   return (
     <span className="inline-flex items-center gap-1.5 font-mono-code">
       <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 border border-neutral-700 font-black text-[11px] rounded uppercase shadow-sm">
-        {t('Carte Visa/MC')}
+        {t('Carte bancaire')}
       </span>
     </span>
   );
