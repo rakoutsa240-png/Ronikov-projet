@@ -8,6 +8,7 @@ import { StationFreshness } from './StationFreshness';
 import { AttendantsPanel } from './AttendantsPanel';
 import { ReviewsPanel } from './ReviewsPanel';
 import { VouchersPanel } from './VouchersPanel';
+import { SalesPanel } from './SalesPanel';
 import { Avatar } from './Avatar';
 import { num, t, tServer } from '../i18n';
 
@@ -192,7 +193,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
               <Clock className="w-3 h-3 text-amber-400" /> {t('Attente déclarée')}
             </span>
             <span className="text-3xl font-black text-amber-300 my-0.5 block">{queueTime} {t('MIN')}</span>
-            <span className="text-[11px] text-emerald-400 font-bold uppercase block">{t('Flux en Direct')}</span>
+            <span className="text-[11px] text-emerald-400 font-bold uppercase block">{t('Flux en direct')}</span>
           </div>
         )}
       </div>
@@ -214,7 +215,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
             <form onSubmit={handleVerifyCodeSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold block text-neutral-300">
-                  {t('Saisir le code du ticket (ex: RNK-AB7K-Q3)')}
+                  {t('Saisir le code du ticket (ex. : RNK-AB7K-Q3)')}
                 </label>
                 <div className="flex border border-neutral-700 rounded-xl overflow-hidden bg-black/80 focus-within:border-amber-400 transition-colors">
                   <input
@@ -481,6 +482,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
         )}
       </div>
 
+      {!isAttendant && <SalesPanel stationId={managedStation.id} />}
       {!isAttendant && <AttendantsPanel stationId={managedStation.id} stationName={managedStation.name} />}
       {!isAttendant && <ReviewsPanel stationId={managedStation.id} />}
       {!isAttendant && <VouchersPanel stationId={managedStation.id} stationName={managedStation.name} />}

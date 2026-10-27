@@ -85,8 +85,19 @@ describe('favourites', () => {
     await admin.patch('/api/stations/st-01/stock/SUPER').send({ pricePerLiter: 700 }).expect(200);
     await admin.put('/api/prices').send({ prices: [{ type: 'GAZOLE', officialPriceXOF: 699 }], applyToAllStations: true }).expect(200);
 
-    const titles = (await notificationsOf('90000001')).map((n) => n.title).sort();
-    expect(titles).toEqual(['Nouveau prix du Gazole (Diesel)', 'Nouveau prix du Super Sans Plomb', 'Super Sans Plomb de retour']);
+    const notes = await notificationsOf('90000001');
+    expect(notes.map((n) => n.title).sort()).toEqual(['Prix en baisse : Gazole (Diesel)', 'Prix en baisse : Super Sans Plomb', 'Super Sans Plomb de retour']);
+    expect(notes.find((n) => n.title === 'Prix en baisse : Super Sans Plomb')!.message).toMatch(/700 FCFA\/L au lieu de \d+ FCFA\/L, soit \d+ FCFA de moins par litre/);
+    // The stations show the drop for a few days.
+    const station = (await request(app).get('/api/stations/st-01').expect(200)).body;
+    expect(station.stock.SUPER.priceDrop).toMatchObject({ previousPrice: expect.any(Number) });
+    expect(station.stock.SUPER.priceDrop.previousPrice).toBeGreaterThan(700);
+    expect(station.stock.KEROSENE.priceDrop).toBeUndefined();
+
+    // A rise is a plain "new price", and the drop badge goes away.
+    await admin.patch('/api/stations/st-01/stock/SUPER').send({ pricePerLiter: 720 }).expect(200);
+    expect((await notificationsOf('90000001')).map((n) => n.title)).toContain('Nouveau prix du Super Sans Plomb');
+    expect((await request(app).get('/api/stations/st-01')).body.stock.SUPER.priceDrop).toBeUndefined();
     // Nobody else starred these stations.
     expect((await notificationsOf('90000003')).filter((n) => n.title.includes('retour'))).toEqual([]);
   });

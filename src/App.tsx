@@ -12,6 +12,7 @@ import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { DynamicBackground } from './components/DynamicBackground';
 import { BottomNav } from './components/BottomNav';
+import { HelpButton } from './components/HelpButton';
 import { PageSkeleton } from './components/Skeleton';
 import { getFavorites, loadJSON, replaceFavorites, saveJSON, setFavoritesSaver, useOnline } from './storage';
 import { ReportStationModal } from './components/ReportStationModal';
@@ -30,6 +31,7 @@ const AdminDashboard = named(() => import('./components/AdminDashboard'), 'Admin
 const PremiumView = named(() => import('./components/PremiumView'), 'PremiumView');
 const UserProfileView = named(() => import('./components/UserProfileView'), 'UserProfileView');
 const PumpScreen = named(() => import('./components/PumpScreen'), 'PumpScreen');
+const LegalView = named(() => import('./components/LegalView'), 'LegalView');
 
 const pageFallback = <PageSkeleton />;
 
@@ -37,6 +39,7 @@ const pageFallback = <PageSkeleton />;
 const STATIONS_KEY = 'ronikov.stations';
 const PRICES_KEY = 'ronikov.prices';
 const TICKETS_KEY = 'ronikov.tickets';
+const REFERRAL_KEY = 'ronikov.referral';
 
 
 export default function App() {
@@ -161,6 +164,8 @@ export default function App() {
 
   const handleAuthenticated = (user: AuthUser, password?: string) => {
     setCurrentUser(user);
+    saveJSON(REFERRAL_KEY, null);
+    setInvitationCode(undefined);
     setAuthChecked(true);
     if (user.mustChangePassword) setPasswordModal({ forced: true, currentPassword: password });
     // Signing in to book goes straight on to the booking.
@@ -295,6 +300,25 @@ export default function App() {
       setSelectedStation(stations[0]);
     }
   }, [stations]);
+
+  // A friend's invitation link (?parrain=AMI-…): the code is kept on the phone until the sign-up.
+  const [invitationCode, setInvitationCode] = useState<string | undefined>(() => loadJSON<string | null>(REFERRAL_KEY, null) ?? undefined);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('parrain');
+    if (!code) return;
+    saveJSON(REFERRAL_KEY, code);
+    setInvitationCode(code);
+    setJustInvited(true);
+    params.delete('parrain');
+    const query = params.toString();
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+  }, []);
+  // Once the visitor knows they are not signed in, the sign-up form opens with the code filled in.
+  const [justInvited, setJustInvited] = useState(false);
+  useEffect(() => {
+    if (authChecked && justInvited && !currentUser) setIsAuthModalOpen(true);
+  }, [authChecked, justInvited]);
 
   // Modals state
   const [isBookingModalOpen, setIsBookingModalOpen] = useState<boolean>(false);
@@ -620,11 +644,17 @@ export default function App() {
             currentUserId={currentUser?.id}
           />
         )}
+
+        {(activeTab === 'terms' || activeTab === 'privacy') && (
+          <LegalView page={activeTab} onBack={() => (window.history.length > 1 ? window.history.back() : setActiveTab('home'))} />
+        )}
         </Suspense>
       </main>
 
       {/* Footer */}
       <Footer />
+
+      <HelpButton hideOnPhone={activeTab === 'station-detail'} />
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} activeTicketCount={activeTicketCount} />
 
@@ -673,6 +703,13 @@ export default function App() {
           setPendingReport(null);
         }}
         onAuthenticated={handleAuthenticated}
+        referralCode={currentUser ? undefined : invitationCode}
+        onOpenLegal={(page) => {
+          setIsAuthModalOpen(false);
+          setPendingBooking(false);
+          setPendingReport(null);
+          navigate(page);
+        }}
       />
 
       <ChangePasswordModal

@@ -3,6 +3,7 @@ import { AuthUser, Reservation, Station, UserRole } from '../types';
 import { ManagerRequestCard } from './ManagerRequestCard';
 import { ProfilePhoto } from './ProfilePhoto';
 import { VouchersCard } from './VouchersCard';
+import { ReferralCard } from './ReferralCard';
 import { User, ShieldCheck, Star, Fuel, Ticket, Wallet, MapPin, Crown, LogIn, LogOut, ChevronRight, Phone, Mail, Building2, KeyRound } from 'lucide-react';
 import { locale, num, t } from '../i18n';
 
@@ -133,6 +134,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       </div>
 
       <VouchersCard />
+
+      <ReferralCard />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold">
         <ProfileLink icon={Ticket} label={t('Mes réservations')} detail={active.length ? t('{n} ticket(s) à récupérer', { n: active.length }) : t('Historique de vos tickets')} onClick={() => onNavigate('history')} />

@@ -24,6 +24,6 @@ describe('timeLeft', () => {
     expect(timeLeft('2026-10-18T13:05:00Z', now)).toBe('1 h 05');
     expect(timeLeft('2026-10-18T13:00:00Z', now)).toBe('1 h');
     expect(timeLeft('2026-10-18T12:12:00Z', now)).toBe('12 min');
-    expect(timeLeft('2026-10-18T12:00:20Z', now)).toBe("moins d'1 min");
+    expect(timeLeft('2026-10-18T12:00:20Z', now)).toBe("moins d’une minute");
   });
 });

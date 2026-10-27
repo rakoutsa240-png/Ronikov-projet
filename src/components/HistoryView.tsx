@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Reservation, Station, TicketReview } from '../types';
-import { Ticket, Clock, CheckCircle2, MessageSquareHeart, AlertOctagon, Printer, Copy, XCircle, MapPin, Sparkles, ShieldCheck, QrCode, Fuel, Maximize2, X } from 'lucide-react';
+import { Ticket, Clock, CheckCircle2, MessageSquareHeart, AlertOctagon, Printer, Copy, XCircle, MapPin, Sparkles, ShieldCheck, QrCode, Fuel, Maximize2, X, Navigation } from 'lucide-react';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
 import { PaymentMethodLabel } from './PaymentLogos';
 import { QRCodeImage } from './QRCodeImage';
@@ -11,6 +11,7 @@ import { ReviewModal } from './ReviewModal';
 import { Stars } from './StarRating';
 import { Avatar } from './Avatar';
 import { REVIEW_WINDOW_DAYS } from '../../shared/reviews';
+import { directionsUrl } from '../geo';
 import { locale, num, t } from '../i18n';
 
 interface HistoryViewProps {
@@ -273,6 +274,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             {filteredReservations.map((res) => {
               const brand = res.stationBrand || detectBrand(res.stationName);
               const theme = getBrandTheme(brand);
+              const ticketStation = stations?.find((s) => s.id === res.stationId);
 
               return (
                 <div
@@ -452,6 +454,18 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         <Printer className="w-3.5 h-3.5" />
                         <span>{t('Imprimer le reçu et le QR code')}</span>
                       </button>
+
+                      {ticketStation && (
+                        <a
+                          href={directionsUrl(ticketStation)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
+                        >
+                          <Navigation className="w-3.5 h-3.5" />
+                          <span>{t('Itinéraire')}</span>
+                        </a>
+                      )}
                     </div>
 
                     {!offline && <button

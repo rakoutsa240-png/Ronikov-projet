@@ -119,7 +119,7 @@ describe('accounts', () => {
     const me = await client.get('/api/me').expect(200);
     expect(me.body.isPremium).toBe(true);
     const notes = await client.get('/api/notifications').expect(200);
-    expect(notes.body[0]).toMatchObject({ type: 'PREMIUM', title: 'Pass Premium Activé' });
+    expect(notes.body[0]).toMatchObject({ type: 'PREMIUM', title: 'Pass Premium activé' });
     await admin.patch(`/api/users/${id}`).send({ isPremium: false }).expect(200);
   });
 

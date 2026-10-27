@@ -26,10 +26,10 @@ export const STALE_AFTER_HOURS = 6;
 export const isStale = (iso: string | undefined, now = Date.now()) =>
   iso !== undefined && now - new Date(iso).getTime() > STALE_AFTER_HOURS * 3_600_000;
 
-// Time left on a ticket: "1 h 45", "1 h", "12 min", "moins d'1 min".
+// Time left on a ticket: "1 h 45", "1 h", "12 min", "moins d’une minute".
 export function timeLeft(expiresAt: string, now = Date.now()): string {
   const minutes = Math.floor((new Date(expiresAt).getTime() - now) / 60_000);
-  if (Number.isNaN(minutes) || minutes < 1) return t("moins d'1 min");
+  if (Number.isNaN(minutes) || minutes < 1) return t("moins d’une minute");
   if (minutes < 60) return `${minutes} min`;
   const rest = minutes % 60;
   return `${Math.floor(minutes / 60)} h${rest ? ` ${String(rest).padStart(2, '0')}` : ''}`;

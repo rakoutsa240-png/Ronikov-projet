@@ -16,3 +16,16 @@ export function normalizeVoucherCode(input: string): string | null {
   if (raw.length !== 8 || [...raw].some((c) => !VOUCHER_CODE_ALPHABET.includes(c))) return null;
   return `BON-${raw.slice(0, 4)}-${raw.slice(4)}`;
 }
+
+// Referrals: when a friend who signed up with your code gets their first ticket served, you each get
+// a Pleino voucher of REFERRAL_AMOUNT_XOF. One person can earn it for MAX_REFERRAL_REWARDS friends.
+export const REFERRAL_AMOUNT_XOF = 500;
+export const REFERRAL_VALIDITY_DAYS = 60;
+export const MAX_REFERRAL_REWARDS = 20;
+
+// "ami 7kq2" -> "AMI-7KQ2"; null when it cannot be a referral code.
+export function normalizeReferralCode(input: string): string | null {
+  const raw = input.toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/^AMI/, '');
+  if (raw.length !== 6 || [...raw].some((c) => !VOUCHER_CODE_ALPHABET.includes(c))) return null;
+  return `AMI-${raw}`;
+}

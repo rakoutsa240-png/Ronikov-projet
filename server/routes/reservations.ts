@@ -16,6 +16,7 @@ import {
   ReservationError,
   validateTicket,
 } from '../reservations';
+import { stationSales } from '../sales';
 import type { TicketKeys } from '../tickets';
 
 const PAYMENT_METHODS: PaymentMethod[] = ['MIXX_BY_YAS', 'MOOV_MONEY', 'CARD', 'TMONEY', 'FLOOZ'];
@@ -90,6 +91,16 @@ export function reservationsRouter(db: Db, keys: TicketKeys) {
       return;
     }
     res.json(await listStationReservations(db, String(req.params.id)));
+  });
+
+  // What the station sold: for its managers and admins, not for attendants.
+  router.get('/stations/:id/sales', requireRole('STATION_PRO', 'ADMIN'), async (req, res) => {
+    if (!canManageStation(req.user!, String(req.params.id))) {
+      res.status(403).json({ error: 'Cette station ne fait pas partie des vôtres' });
+      return;
+    }
+    const days = req.query.days === '30' ? 30 : 7;
+    res.json(await stationSales(db, String(req.params.id), days));
   });
 
   // Each wrong code costs a try, so codes cannot be guessed from the pump terminal.

@@ -248,7 +248,7 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif-1',
-    title: 'Réservation Confirmée',
+    title: 'Réservation confirmée',
     message: 'Votre code RNK-8942-X7 est valide pour 15L de Super chez TotalEnergies Agoè.',
     timestamp: 'Il y a 15 min',
     read: false,

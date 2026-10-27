@@ -1,4 +1,4 @@
-import type { AdminUser, AdminVoucher, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, ReviewsSummary, Station, StationReview, TicketReview, MyVouchers, Voucher } from './types';
+import type { AdminUser, AdminVoucher, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, ReviewsSummary, Station, StationReview, TicketReview, MyVouchers, Voucher, MyReferral, StationSales } from './types';
 import { tServer } from './i18n';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
@@ -59,7 +59,7 @@ export const api = {
       throw e;
     }),
   login: (phone: string, password: string) => request<AuthUser>('POST', '/auth/login', { phone, password }),
-  register: (data: { name: string; phone: string; password: string; email?: string }) =>
+  register: (data: { name: string; phone: string; password: string; email?: string; referralCode?: string }) =>
     request<AuthUser>('POST', '/auth/register', data),
   logout: () => request<void>('POST', '/auth/logout'),
   changePassword: (currentPassword: string, newPassword: string) =>
@@ -157,6 +157,9 @@ export const api = {
   saveFavorites: (stationIds: string[]) => request<string[]>('PUT', '/favorites', { stationIds }),
 
   myVouchers: () => request<MyVouchers>('GET', '/vouchers/mine'),
+  myReferral: () => request<MyReferral>('GET', '/referral'),
+  stationSales: (stationId: string, days: 7 | 30, signal?: AbortSignal) =>
+    request<StationSales>('GET', `/stations/${encodeURIComponent(stationId)}/sales?days=${days}`, undefined, signal),
   claimVoucher: (code: string) => request<Voucher>('POST', '/vouchers/claim', { code }),
   allVouchers: () => request<AdminVoucher[]>('GET', '/vouchers'),
   // A gift to one account (phone) or contest codes to hand out (count).

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Station, FuelType } from '../types';
 import { StationBrandLogo, StationBrandType } from './StationBrandLogo';
-import { formatDistance } from '../geo';
+import { directionsUrl, formatDistance } from '../geo';
 import { FavoriteButton } from './FavoriteButton';
 import { StationFreshness } from './StationFreshness';
 import { RatingBadge } from './StarRating';
-import { ShieldCheck, MapPin, Clock, ChevronRight } from 'lucide-react';
+import { PriceDrop } from './PriceDrop';
+import { ShieldCheck, MapPin, Clock, ChevronRight, Navigation } from 'lucide-react';
 import { num, t } from '../i18n';
 
 interface StationCardProps {
@@ -91,6 +92,7 @@ export const StationCard: React.FC<StationCardProps> = ({
               <div className="min-w-0">
                 <div className="font-bold text-white truncate">{f.label}</div>
                 <div className="text-neutral-400 tabular-nums">{stStock.pricePerLiter} F/L</div>
+                <PriceDrop stock={stStock} className="text-[10px] mt-0.5" />
               </div>
               <div className="h-2 rounded-full bg-neutral-800 overflow-hidden" title={t('{n}% du stock', { n: percent })}>
                 <div
@@ -124,6 +126,16 @@ export const StationCard: React.FC<StationCardProps> = ({
         >
           {t('Voir la station')}
         </button>
+        <a
+          href={directionsUrl(station)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t('Itinéraire')}
+          title={t('Itinéraire')}
+          className="p-2.5 border border-neutral-700 hover:border-amber-400 text-white rounded-full transition-colors shrink-0"
+        >
+          <Navigation className="w-4 h-4" />
+        </a>
         <button
           onClick={() => onBook(station)}
           disabled={!canBook}

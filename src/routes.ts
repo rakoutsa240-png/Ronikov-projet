@@ -1,6 +1,6 @@
 // Each page has its own address (#/carte, #/station/st-01…), so the phone's back button,
 // a refresh or a shared link land on the same page.
-export type Tab = 'home' | 'map' | 'station-detail' | 'history' | 'premium' | 'profile' | 'pro' | 'admin';
+export type Tab = 'home' | 'map' | 'station-detail' | 'history' | 'premium' | 'profile' | 'pro' | 'admin' | 'terms' | 'privacy';
 
 export interface Route {
   tab: Tab;
@@ -15,6 +15,8 @@ const PATHS: Record<Exclude<Tab, 'station-detail'>, string> = {
   profile: 'profil',
   pro: 'pro',
   admin: 'admin',
+  terms: 'conditions',
+  privacy: 'confidentialite',
 };
 
 export function routeToHash({ tab, stationId }: Route): string {
