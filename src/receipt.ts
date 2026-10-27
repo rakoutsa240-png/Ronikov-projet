@@ -50,6 +50,7 @@ export function receiptLines(r: Reservation): [string, string][] {
     ['', ''],
     [t('Carburant'), fcfa(fuelAmount)],
     [t('Frais de service'), r.serviceFeeXOF > 0 ? fcfa(r.serviceFeeXOF) : t('Offerts')],
+    ...(r.voucherDiscountXOF ? [[t('Bon d’essence'), `− ${fcfa(r.voucherDiscountXOF)}`] as [string, string]] : []),
     [t('Total payé'), fcfa(r.totalAmountXOF)],
     [t('Paiement'), t(PAYMENT_NAMES[r.paymentMethod])],
     [t('Payé depuis'), maskPhone(r.phonePayment)],

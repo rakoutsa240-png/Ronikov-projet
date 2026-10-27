@@ -49,8 +49,9 @@ export interface Reservation {
   fuelLabel: string;
   liters: number;
   pricePerLiter: number;
-  totalAmountXOF: number;
+  totalAmountXOF: number; // what was paid, after any fuel voucher
   serviceFeeXOF: number;
+  voucherDiscountXOF?: number; // taken off by a fuel voucher, 0 without one
   paymentMethod: PaymentMethod;
   phonePayment: string;
   status: ReservationStatus;
@@ -206,4 +207,38 @@ export interface StationReport {
   fuelType: FuelType | null;
   count: number;
   lastAt: string; // ISO date of the latest one
+}
+
+// A fuel voucher. AVAILABLE: can be used for a booking. UNCLAIMED: a contest code nobody typed yet.
+// A station's voucher (validStationId) works only there; a Pleino one (null) at every partner station.
+export type VoucherSource = 'GIFT' | 'CONTEST' | 'LOYALTY';
+export type VoucherStatus = 'AVAILABLE' | 'UNCLAIMED' | 'USED' | 'EXPIRED' | 'CANCELLED';
+
+export interface Voucher {
+  id: string;
+  code: string;
+  amountXOF: number;
+  source: VoucherSource;
+  label: string | null;
+  status: VoucherStatus;
+  validStationId: string | null;
+  validStationName: string | null;
+  expiresAt: string; // ISO date
+  createdAt: string; // ISO date
+  usedAt: string | null;
+  reservationId: string | null; // the booking it was used for
+  usedStationName: string | null; // where it was used
+}
+
+// GET /api/vouchers/mine: the client's vouchers and how far they are from the next loyalty one.
+export interface MyVouchers {
+  vouchers: Voucher[];
+  loyalty: { litersServed: number; stepLiters: number; amountXOF: number; litersToNext: number };
+}
+
+// A voucher as the admin console lists it (GET /api/vouchers).
+export interface AdminVoucher extends Voucher {
+  ownerName: string | null;
+  ownerPhone: string | null;
+  claimedAt: string | null;
 }

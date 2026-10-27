@@ -371,6 +371,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       <span className="font-extrabold text-emerald-400 text-sm">
                         {num(res.totalAmountXOF)} FCFA
                       </span>
+                      {!!res.voucherDiscountXOF && (
+                        <span className="block text-[11px] text-emerald-400 font-bold">
+                          {t('Bon d’essence : −{amount} FCFA', { amount: num(res.voucherDiscountXOF) })}
+                        </span>
+                      )}
                       <div className="mt-1">
                         <PaymentMethodLabel method={res.paymentMethod} showDetails={false} />
                       </div>

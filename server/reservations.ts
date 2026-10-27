@@ -22,6 +22,7 @@ import {
   readQrPayload,
   type TicketKeys,
 } from './tickets';
+import { attachVoucher, awardLoyaltyVouchers, lockUsableVoucher, releaseVoucher, voucherWorksAt } from './vouchers';
 
 // A refusal the client should see, with its HTTP status.
 export class ReservationError extends Error {
@@ -72,6 +73,7 @@ function toReservation(row: JoinedRow, code: string, qrPayload?: string): Reserv
     pricePerLiter: r.pricePerLiterXof,
     totalAmountXOF: r.totalXof,
     serviceFeeXOF: r.serviceFeeXof,
+    voucherDiscountXOF: r.voucherDiscountXof,
     paymentMethod: r.paymentMethod,
     phonePayment: r.paymentPhone,
     status: r.status,
@@ -120,6 +122,7 @@ export interface NewReservation {
   liters: number;
   paymentMethod: PaymentMethod;
   paymentPhone: string;
+  voucherId?: string; // one of the client's fuel vouchers, taken off the price
 }
 
 export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser, input: NewReservation) {
@@ -130,7 +133,7 @@ export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser
   const { id } = await db.transaction(async (tx) => {
     // Lock this tank so two bookings cannot both take the last litres.
     const [stock] = await tx
-      .select({ stock: fuelStocks, isActive: stations.isActive, stationName: stations.name })
+      .select({ stock: fuelStocks, isActive: stations.isActive, isPartner: stations.isPartner, stationName: stations.name })
       .from(fuelStocks)
       .innerJoin(stations, eq(stations.id, fuelStocks.stationId))
       .where(and(eq(fuelStocks.stationId, input.stationId), eq(fuelStocks.fuelType, input.fuelType)))
@@ -148,6 +151,14 @@ export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser
     const fee = user.isPremium ? 0 : SERVICE_FEE_XOF;
     const now = new Date();
 
+    // A voucher is used once, in full: whatever it is worth above the price is not kept.
+    const voucher = input.voucherId ? await lockUsableVoucher(tx, user.id, input.voucherId) : null;
+    if (input.voucherId && !voucher) throw new ReservationError(409, 'Ce bon d’essence n’est plus utilisable.');
+    if (voucher && !voucherWorksAt(voucher, { id: input.stationId, isPartner: stock.isPartner })) {
+      throw new ReservationError(409, 'Ce bon d’essence ne marche pas dans cette station.');
+    }
+    const discount = voucher ? Math.min(voucher.amountXof, fuelAmount + fee) : 0;
+
     let inserted: ReservationRow | undefined;
     for (let attempt = 0; !inserted && attempt < 5; attempt++) {
       const code = generateTicketCode();
@@ -162,7 +173,8 @@ export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser
           pricePerLiterXof: price,
           fuelAmountXof: fuelAmount,
           serviceFeeXof: fee,
-          totalXof: fuelAmount + fee,
+          voucherDiscountXof: discount,
+          totalXof: fuelAmount + fee - discount,
           paymentMethod: input.paymentMethod,
           paymentPhone: input.paymentPhone,
           paymentStatus: 'PAID', // payments are simulated for now
@@ -176,6 +188,7 @@ export async function createReservation(db: Db, keys: TicketKeys, user: AuthUser
         .returning();
     }
     if (!inserted) throw new Error('Could not generate a unique ticket code');
+    if (voucher) await attachVoucher(tx, voucher.id, inserted.id, now);
 
     await tx
       .update(fuelStocks)
@@ -247,6 +260,8 @@ async function releasePending(tx: Tx, row: ReservationRow, status: 'CANCELLED' |
     .update(fuelStocks)
     .set({ reservedLiters: sql`greatest(${fuelStocks.reservedLiters} - ${row.liters}, 0)`, updatedAt: new Date() })
     .where(and(eq(fuelStocks.stationId, row.stationId), eq(fuelStocks.fuelType, row.fuelType)));
+  // After the tank, in the same order as a booking takes its locks.
+  await releaseVoucher(tx, row.id);
 }
 
 export async function cancelReservation(db: Db, keys: TicketKeys, user: AuthUser, reservationId: string) {
@@ -320,6 +335,7 @@ export async function validateTicket(db: Db, keys: TicketKeys, staff: AuthUser, 
       fuelType: row.fuelType,
       liters: row.liters,
     });
+    await awardLoyaltyVouchers(tx, row.userId);
     await notify(
       tx,
       row.userId,

@@ -13,6 +13,7 @@ import { communityRouter } from './routes/community';
 import { photosRouter } from './routes/photos';
 import { reservationsRouter } from './routes/reservations';
 import { reviewsRouter } from './routes/reviews';
+import { vouchersRouter } from './routes/vouchers';
 import type { TicketKeys } from './tickets';
 
 const stationsQuery = z.object({
@@ -44,6 +45,7 @@ export function createApp(db: Db, { ticketKeys, secureCookies = false, trustProx
   app.use('/api', communityRouter(db));
   app.use('/api', reviewsRouter(db));
   app.use('/api', photosRouter(db));
+  app.use('/api', vouchersRouter(db));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });

@@ -57,6 +57,12 @@ describe('English texts', () => {
       'Your 10 L Unleaded petrol ticket is active at Total Bè for 2 h.',
     );
     expect(tServer('Signalement : Plus de Gazole')).toBe('Report: No more diesel');
+    expect(tServer('Bravo ! Vos 200 L servis vous rapportent un bon d’essence de 1 000 FCFA, valable 60 jours.')).toBe(
+      'Well done! Your 200 L served earn you a 1 000 FCFA fuel voucher, valid 60 days.',
+    );
+    expect(tServer('Total Bè vous offre un bon d’essence de 2 000 FCFA, valable dans cette station. Utilisez-le à votre prochaine réservation.')).toBe(
+      'Total Bè gives you a 2 000 FCFA fuel voucher, valid at this station. Use it on your next booking.',
+    );
     expect(tServer('Un texte inconnu')).toBe('Un texte inconnu');
   });
 });

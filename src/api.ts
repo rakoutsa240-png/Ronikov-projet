@@ -1,4 +1,4 @@
-import type { AdminUser, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, ReviewsSummary, Station, StationReview, TicketReview } from './types';
+import type { AdminUser, AdminVoucher, Attendant, AuditEntry, AuthUser, FuelPriceGlobal, FuelType, ManagerRequest, NotificationItem, PaymentMethod, PriceChange, ReportKind, Reservation, ReviewsSummary, Station, StationReview, TicketReview, MyVouchers, Voucher } from './types';
 import { tServer } from './i18n';
 
 // In development Vite forwards /api to the API server; set VITE_API_URL when the API lives elsewhere.
@@ -75,6 +75,7 @@ export const api = {
     liters: number;
     paymentMethod: PaymentMethod;
     paymentPhone: string;
+    voucherId?: string;
   }) => request<Reservation>('POST', '/reservations', data),
   myReservations: () => request<Reservation[]>('GET', '/reservations/mine'),
   allReservations: () => request<Reservation[]>('GET', '/reservations'),
@@ -154,6 +155,14 @@ export const api = {
   hideReview: (id: number, hidden: boolean) => request<StationReview>('PATCH', `/reviews/${id}`, { hidden }),
   favorites: () => request<string[]>('GET', '/favorites'),
   saveFavorites: (stationIds: string[]) => request<string[]>('PUT', '/favorites', { stationIds }),
+
+  myVouchers: () => request<MyVouchers>('GET', '/vouchers/mine'),
+  claimVoucher: (code: string) => request<Voucher>('POST', '/vouchers/claim', { code }),
+  allVouchers: () => request<AdminVoucher[]>('GET', '/vouchers'),
+  // A gift to one account (phone) or contest codes to hand out (count).
+  createVouchers: (data: { amountXof: number; validDays: number; label?: string; phone?: string; count?: number }) =>
+    request<AdminVoucher[]>('POST', '/vouchers', data),
+  cancelVoucher: (id: string) => request<AdminVoucher>('POST', `/vouchers/${encodeURIComponent(id)}/cancel`),
 
   notifications: () => request<NotificationItem[]>('GET', '/notifications'),
   markNotificationsRead: () => request<void>('POST', '/notifications/read-all'),

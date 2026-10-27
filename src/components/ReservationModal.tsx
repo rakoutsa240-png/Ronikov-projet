@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Station, FuelType, PaymentMethod, Reservation } from '../types';
+import { Station, FuelType, PaymentMethod, Reservation, Voucher } from '../types';
 import { Gauge } from './Gauge';
 import { MixxByYasBadge, MoovAfricaBadge, CardPaymentBadge, PaymentMethodLabel } from './PaymentLogos';
 import { TicketCard } from './TicketCard';
-import { X, Check, ShieldCheck, ArrowRight, Printer, Copy, Clock, AlertTriangle, Phone, Smartphone, CreditCard } from 'lucide-react';
+import { X, Check, ShieldCheck, ArrowRight, Printer, Copy, Clock, AlertTriangle, Phone, Smartphone, CreditCard, Gift } from 'lucide-react';
 import { api, ApiError } from '../api';
 import { MAX_LITERS_PER_RESERVATION, SERVICE_FEE_XOF } from '../../shared/reservations';
 import { FUEL_LABELS, FUEL_TYPES } from '../../shared/stock';
 import { useModal } from '../useModal';
 import { loadJSON, saveJSON } from '../storage';
-import { num, t } from '../i18n';
+import { locale, num, t } from '../i18n';
 
 interface ReservationModalProps {
   station: Station | null;
@@ -34,6 +34,10 @@ interface LastBooking {
 }
 const FCFA_PRESETS = [2000, 5000, 10000, 20000];
 
+// A station's voucher works there only; Pleino's at every partner station (the API checks it too).
+const worksAt = (v: Voucher, station: Station | null) =>
+  !!station && (v.validStationId === null ? station.isPartner : v.validStationId === station.id);
+
 // "+22890123456" -> "90 12 34 56"
 const formatLocalPhone = (phone?: string) =>
   (phone ?? '').replace(/^\+228/, '').replace(/(\d{2})(?=\d)/g, '$1 ');
@@ -57,6 +61,8 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [generatedReservation, setGeneratedReservation] = useState<Reservation | null>(null);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [voucherId, setVoucherId] = useState<string | null>(null);
 
   useModal(isOpen, onClose);
 
@@ -67,6 +73,13 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
     setStep(1);
     setPaymentError(null);
     setGeneratedReservation(null);
+    setVoucherId(null);
+    // The client's fuel vouchers that can still be used; none when signed out or offline.
+    setVouchers([]);
+    api
+      .myVouchers()
+      .then((mine) => setVouchers(mine.vouchers.filter((v) => v.status === 'AVAILABLE' && worksAt(v, station))))
+      .catch(() => {});
     setPhoneNumber(last.phone ?? formatLocalPhone(defaultPaymentPhone));
     setPaymentMethod(last.paymentMethod ?? 'MIXX_BY_YAS');
     // Drivers usually ask for an amount ("5 000 de super"), so FCFA comes first.
@@ -106,7 +119,9 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   const totalFuelCost = liters * pricePerLiter;
   // Shown for information: the API computes the amount actually charged.
   const serviceFee = isUserPremium ? 0 : SERVICE_FEE_XOF;
-  const totalPayable = totalFuelCost + serviceFee;
+  const voucher = vouchers.find((v) => v.id === voucherId) ?? null;
+  const voucherDiscount = voucher ? Math.min(voucher.amountXOF, totalFuelCost + serviceFee) : 0;
+  const totalPayable = totalFuelCost + serviceFee - voucherDiscount;
 
   // Payment is simulated; the API creates the ticket and its code.
   const handleProcessPayment = async () => {
@@ -120,6 +135,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         liters,
         paymentMethod,
         paymentPhone: phoneNumber,
+        ...(voucherId ? { voucherId } : {}),
       });
       setGeneratedReservation(reservation);
       onCompleteReservation(reservation);
@@ -360,10 +376,60 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 <span className="text-neutral-300">{t('Frais de réservation')}</span>
                 <span className="font-semibold text-white">{isUserPremium ? t('Offerts (Premium)') : `${serviceFee} FCFA`}</span>
               </div>
+              {voucher && (
+                <div className="flex justify-between gap-3 text-emerald-400">
+                  <span>{t('Bon d’essence')}</span>
+                  <span className="font-semibold">−{num(voucherDiscount)} FCFA</span>
+                </div>
+              )}
               <p className="text-xs text-neutral-400 pt-1">
                 {t('Carburant gardé pour vous 2 heures à {station}. Sans passage, le ticket expire et les litres retournent à la station.', { station: station.name })}
               </p>
             </div>
+
+            {vouchers.length > 0 && (
+              <fieldset className="space-y-2">
+                <legend className="text-xs font-mono-code font-bold text-neutral-200 flex items-center gap-1.5 mb-2">
+                  <Gift className="w-4 h-4 text-emerald-400" />
+                  {t('Utiliser un bon d’essence')}
+                </legend>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {[null, ...vouchers].map((v) => {
+                    const selected = (v?.id ?? null) === voucherId;
+                    return (
+                      <button
+                        key={v?.id ?? 'none'}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setVoucherId(v?.id ?? null)}
+                        className={`p-3 text-left border rounded-xl transition-all ${
+                          selected ? 'border-2 border-emerald-400 bg-emerald-400/10 text-white' : 'border-neutral-800 bg-black/60 text-neutral-300 hover:border-neutral-700'
+                        }`}
+                      >
+                        {v ? (
+                          <>
+                            <span className="font-black text-emerald-300 block">{num(v.amountXOF)} FCFA</span>
+                            <span className="text-xs text-neutral-300 block">
+                              {v.validStationId ? t('Bon de la station') : t('Bon Pleino')}
+                            </span>
+                            <span className="text-xs text-neutral-400 block">
+                              {t('Valable jusqu’au {date}', { date: new Date(v.expiresAt).toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-bold block py-1.5">{t('Ne pas utiliser de bon')}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {voucher && voucher.amountXOF > voucherDiscount && (
+                  <p className="text-xs text-amber-300">
+                    {t('Un bon s’utilise en une seule fois : les {amount} FCFA en trop seront perdus.', { amount: num(voucher.amountXOF - voucherDiscount) })}
+                  </p>
+                )}
+              </fieldset>
+            )}
 
             <div className="space-y-3">
               <label className="text-xs font-mono-code font-bold text-neutral-200 block">

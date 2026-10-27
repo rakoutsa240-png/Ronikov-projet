@@ -30,6 +30,7 @@ const createBody = z.object({
     .string()
     .refine((value) => normalizeTogoPhone(value) !== null, 'Numéro de paiement togolais invalide')
     .transform((value) => normalizeTogoPhone(value)!),
+  voucherId: z.string().uuid().optional(),
 });
 
 const validateBody = z.object({ code: z.string().min(1).max(200) });
