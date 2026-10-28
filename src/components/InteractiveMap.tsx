@@ -134,7 +134,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     >
       <div className="bg-neutral-900 text-white border-b-2 border-black px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-code">
         <div className="flex items-center gap-3">
-          <span className="font-extrabold tracking-wider text-sm">{t('Carte des stations')}</span>
+          <span className="font-extrabold text-sm">{t('Carte des stations')}</span>
           <span className="px-2.5 py-0.5 bg-black text-emerald-400 border border-emerald-500 font-bold rounded text-xs">
             {t('{n} stations', { n: visible.length })}
           </span>
@@ -208,7 +208,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                 {selectedStation.district}, {selectedStation.city}
               </span>
               {selectedStation.isPartner && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-mono-code bg-brand-500/15 text-brand-400 px-2 py-0.5 font-bold rounded-full">
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono-code bg-brand-500/15 text-active px-2 py-0.5 font-bold rounded-full">
                   <ShieldCheck className="w-3.5 h-3.5" /> {t('Partenaire')}
                 </span>
               )}

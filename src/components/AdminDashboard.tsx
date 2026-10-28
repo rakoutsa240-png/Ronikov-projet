@@ -101,7 +101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="flex border border-neutral-700 bg-neutral-900 rounded-xl p-1 text-xs font-bold text-neutral-300 flex-wrap self-start md:self-auto">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'overview' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -109,7 +109,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('prices')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'prices' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -117,7 +117,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('stations')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'stations' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -125,7 +125,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('accounts')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'accounts' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -133,7 +133,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('incidents')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'incidents' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -141,7 +141,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'reviews' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -149,7 +149,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('vouchers')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'vouchers' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -157,7 +157,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('journal')}
-            className={`px-3.5 py-2 rounded-lg transition-all ${
+            className={`px-3.5 py-2 rounded-lg transition ${
               activeTab === 'journal' ? 'bg-amber-400 text-black font-black shadow-md' : 'hover:text-white'
             }`}
           >
@@ -172,7 +172,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {/* Key Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
-              <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+              <span className="text-xs text-amber-400 font-bold block">
                 {t('Volumétrie financière')}
               </span>
               <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono-code">
@@ -184,7 +184,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
-              <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+              <span className="text-xs text-amber-400 font-bold block">
                 {t('Réservations totales')}
               </span>
               <div className="text-2xl sm:text-3xl font-black text-white font-mono-code">
@@ -196,7 +196,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
-              <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+              <span className="text-xs text-amber-400 font-bold block">
                 {t('Stations partenaires')}
               </span>
               <div className="text-2xl sm:text-3xl font-black text-amber-300 font-mono-code">
@@ -208,7 +208,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl space-y-2 shadow-2xl">
-              <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+              <span className="text-xs text-amber-400 font-bold block">
                 {t('Taux de disponibilité')}
               </span>
               <div className="text-2xl sm:text-3xl font-black text-white font-mono-code">
@@ -235,7 +235,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 const totalLiters = stations.reduce((acc, s) => acc + (s.stock[fuel]?.availableLiters || 0), 0);
                 return (
                   <div key={fuel} className="p-4 border border-neutral-800 bg-black/60 rounded-xl space-y-1">
-                    <span className="text-[11px] text-amber-400 uppercase block font-bold tracking-wider">
+                    <span className="text-[11px] text-amber-400 block font-bold">
                       {t(FUEL_LABELS[fuel])}
                     </span>
                     <div className="text-2xl font-black text-white">
@@ -272,7 +272,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           {priceSaveSuccess && (
-            <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn">
+            <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn motion-reduce:animate-none">
               {t('Prix officiels et pompes synchronisés dans le système national !')}
             </div>
           )}
@@ -291,7 +291,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] text-neutral-400 font-bold uppercase block">
+                  <label className="text-[11px] text-neutral-400 font-bold block">
                     {t('Prix officiel (FCFA / litre)')}
                   </label>
                   <input
@@ -357,7 +357,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {stations.map((st) => (
               <div
                 key={st.id}
-                className="p-4 border border-neutral-800 hover:border-amber-400/80 transition-all rounded-xl bg-black/60 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="p-4 border border-neutral-800 hover:border-amber-400/80 transition rounded-xl bg-black/60 flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-4">
                   <StationBrandLogo
@@ -369,7 +369,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   />
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 text-[11px] font-black uppercase rounded">
+                      <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 text-[11px] font-black rounded">
                         {st.brand}
                       </span>
                       <span className="text-xs font-bold text-neutral-400">
@@ -397,7 +397,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   <button
                     onClick={() => onToggleStationPartner(st.id)}
-                    className="px-4 py-2 border border-neutral-700 bg-black/80 rounded-xl text-xs font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all text-white"
+                    className="px-4 py-2 border border-neutral-700 bg-black/80 rounded-xl text-xs font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition text-white"
                   >
                     {st.isPartner ? t('Suspendre la station') : t('Activer comme partenaire')}
                   </button>
@@ -439,7 +439,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 >
                   <span className={`text-xs font-bold flex items-center gap-2 ${empty ? 'text-rose-300' : 'text-amber-300'}`}>
                     <AlertTriangle className="w-4 h-4 shrink-0" />
-                    {empty ? t('Rupture') : t('Stock faible')} — {t(FUEL_LABELS[fuel])} — {station.name}
+                    {empty ? t('Rupture') : t('Stock faible')} : {t(FUEL_LABELS[fuel])}, {station.name}
                   </span>
                   <span className="text-xs text-neutral-300">
                     {t('{n} L libres', { n: num(stock.availableLiters) })} / {num(stock.maxCapacityLiters)} L

@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ stations }) => {
             <p className="text-white/70 font-sans text-xs leading-relaxed">
               {t('Plateforme togolaise de localisation, réservation et paiement anticipé de carburant en stations-service.')}
             </p>
-            <div className="text-xs text-white/55 font-bold uppercase">
+            <div className="text-xs text-white/55 font-bold">
               {t('République togolaise — Togo')}
             </div>
           </div>
@@ -63,7 +63,7 @@ export const Footer: React.FC<FooterProps> = ({ stations }) => {
                 <a href={`tel:${SUPPORT_PHONE}`} className="text-white hover:underline whitespace-nowrap">{SUPPORT_PHONE_DISPLAY}</a>
               </p>
               <p>
-                <a href={whatsappUrl(t('Bonjour Pleino, j’ai besoin d’aide :'))} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[#25D366] font-bold hover:underline">
+                <a href={whatsappUrl(t('Bonjour Pleino, j’ai besoin d’aide :'))} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-whatsapp font-bold hover:underline">
                   <MessageCircle className="w-3.5 h-3.5" /> {t('Écrire sur WhatsApp')}
                 </a>
               </p>

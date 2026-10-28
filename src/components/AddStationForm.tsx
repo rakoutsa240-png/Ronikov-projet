@@ -94,11 +94,11 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Nom')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Nom')}</span>
           <input required value={form.name} onChange={set('name')} placeholder="Oryx Adidogomé" className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Enseigne')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Enseigne')}</span>
           <select value={form.brand} onChange={set('brand')} className={inputClass}>
             {STATION_BRANDS.map((b) => (
               <option key={b} value={b}>
@@ -108,29 +108,29 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
           </select>
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Quartier')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Quartier')}</span>
           <input required value={form.district} onChange={set('district')} placeholder="Adidogomé" className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Ville')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Ville')}</span>
           <input required value={form.city} onChange={set('city')} className={inputClass} />
         </label>
         <label className="space-y-1 sm:col-span-2">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Adresse')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Adresse')}</span>
           <input required value={form.address} onChange={set('address')} placeholder={t('Route de Kpalimé, près du marché')} className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Téléphone')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Téléphone')}</span>
           <input required value={form.phone} onChange={set('phone')} placeholder="+228 22 00 00 00" className={inputClass} />
         </label>
         <label className="space-y-1">
-          <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Horaires')}</span>
+          <span className="text-neutral-400 font-bold text-[11px]">{t('Horaires')}</span>
           <input required value={form.operatingHours} onChange={set('operatingHours')} className={inputClass} />
         </label>
       </div>
 
       <div className="space-y-1">
-        <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Position GPS')}</span>
+        <span className="text-neutral-400 font-bold text-[11px]">{t('Position GPS')}</span>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
           <input value={form.lat} onChange={set('lat')} placeholder={t('Latitude (ex. 6.1725)')} inputMode="decimal" className={inputClass} />
           <input value={form.lng} onChange={set('lng')} placeholder={t('Longitude (ex. 1.2314)')} inputMode="decimal" className={inputClass} />
@@ -147,7 +147,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
       </div>
 
       <div className="space-y-1">
-        <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Services')}</span>
+        <span className="text-neutral-400 font-bold text-[11px]">{t('Services')}</span>
         <div className="flex flex-wrap gap-2">
           {AMENITIES.map((a) => (
             <label key={a} className="flex items-center gap-1.5 px-2 py-1 border border-neutral-800 rounded-md cursor-pointer">
@@ -164,7 +164,7 @@ export const AddStationForm: React.FC<AddStationFormProps> = ({ onAdded, onClose
       </div>
 
       <div className="space-y-1">
-        <span className="text-neutral-400 font-bold uppercase text-[11px]">{t('Stock de départ en litres (vide si inconnu)')}</span>
+        <span className="text-neutral-400 font-bold text-[11px]">{t('Stock de départ en litres (vide si inconnu)')}</span>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {FUELS.map(({ type, label }) => (
             <label key={type} className="space-y-1">

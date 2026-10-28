@@ -65,11 +65,11 @@ export const PumpScreen: React.FC<PumpScreenProps> = ({ reservation, onClose, st
           </p>
         </div>
 
-        <div className="bg-white text-[#0f1f18] rounded-3xl p-5 flex flex-col items-center gap-4 shadow-xl shadow-black/20">
+        <div className="bg-white text-ticket-ink rounded-3xl p-5 flex flex-col items-center gap-4 shadow-xl shadow-black/20">
           <QRCodeImage value={ticketQrPayload(reservation)} size={size} className="border-0 shadow-none p-0" />
-          <div className="w-full border-t-2 border-dashed border-[#d5ddd9]" />
-          <div className="font-code text-3xl font-bold tracking-widest">{reservation.code}</div>
-          <p className="text-xs font-medium text-[#5a6661] -mt-2">{t('Le code est enregistré sur ce téléphone')}</p>
+          <div className="w-full border-t-2 border-dashed border-ticket-rule" />
+          <div className="font-code text-3xl font-bold">{reservation.code}</div>
+          <p className="text-xs font-medium text-ticket-muted -mt-2">{t('Le code est enregistré sur ce téléphone')}</p>
         </div>
 
         {active ? (

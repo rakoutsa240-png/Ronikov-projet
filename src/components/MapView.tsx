@@ -41,7 +41,7 @@ const StationSheet: React.FC<{
 }> = ({ stations, fuel, sortBy, distanceTo, onView }) => (
   <section
     aria-label={t('Liste des stations')}
-    className="lg:hidden relative bg-black rounded-t-[28px] shadow-[0_-10px_30px_-10px_rgba(0,0,0,.25)] px-4 pt-2.5 pb-3"
+    className="lg:hidden relative bg-black rounded-t-[28px] shadow-sheet px-4 pt-2.5 pb-3"
   >
     <div aria-hidden="true" className="mx-auto w-10 h-1.5 rounded-full bg-neutral-700" />
     <div className="flex items-baseline justify-between gap-3 pt-3 pb-1">
@@ -184,7 +184,7 @@ export const MapView: React.FC<MapViewProps> = ({
       {/* Page Title Header */}
       <div className="border-b-2 border-neutral-700/80 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 font-mono-code">
         <div>
-          <div className="hidden sm:block text-xs text-amber-400 font-bold uppercase tracking-widest">
+          <div className="hidden sm:block text-xs text-amber-400 font-bold">
             {t('Stock mis à jour par les stations')}
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
@@ -294,7 +294,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
           {/* Sort Dropdown */}
           <div className="md:col-span-3 flex items-center md:justify-end gap-2">
-            <span className="text-neutral-400 uppercase text-[11px]">{t('Trier :')}</span>
+            <span className="text-neutral-400 text-[11px]">{t('Trier :')}</span>
             <select
               value={sortBy}
               onChange={(e) => {

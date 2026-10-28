@@ -176,7 +176,7 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
                 {user.name}
                 {user.isPremium && <Crown className="w-3.5 h-3.5 text-amber-400" aria-label={t('Premium')} />}
                 {user.isSuspended && (
-                  <span className="px-1.5 py-0.5 bg-rose-500 text-white text-[10px] font-black rounded uppercase">{t('Suspendu')}</span>
+                  <span className="px-1.5 py-0.5 bg-rose-500 text-white text-[10px] font-black rounded">{t('Suspendu')}</span>
                 )}
               </div>
               <div className="text-neutral-400">{user.phone}</div>
@@ -247,7 +247,7 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({ stations, curr
                 {t('Pompiste à {station}', { station: stations.find((s) => s.id === user.managedStationIds[0])?.name ?? t('une station') })}
               </span>
             ) : (
-              <span className="text-neutral-500">—</span>
+              <span className="text-neutral-500">{t('Aucune station')}</span>
             )}
 
             <label className="flex items-center gap-2 font-bold text-neutral-200">

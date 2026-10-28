@@ -68,7 +68,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         {/* Monthly Plan Card */}
         <div
           onClick={() => setSelectedPlan('monthly')}
-          className={`p-8 border rounded-2xl transition-all cursor-pointer space-y-6 bg-black/85 backdrop-blur-xl flex flex-col justify-between shadow-2xl relative ${
+          className={`p-8 border rounded-2xl transition cursor-pointer space-y-6 bg-black/85 backdrop-blur-xl flex flex-col justify-between shadow-2xl relative ${
             selectedPlan === 'monthly'
               ? 'border-amber-400 ring-2 ring-amber-400/30 bg-amber-400/5'
               : 'border-neutral-800 hover:border-neutral-700'
@@ -77,7 +77,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
               <span className="text-xs font-bold text-neutral-400">{t('Forfait mensuel')}</span>
-              <span className="px-2.5 py-0.5 bg-neutral-800 border border-neutral-700 text-neutral-300 text-[11px] font-bold uppercase rounded">
+              <span className="px-2.5 py-0.5 bg-neutral-800 border border-neutral-700 text-neutral-300 text-[11px] font-bold rounded">
                 {t('Sans engagement')}
               </span>
             </div>
@@ -103,7 +103,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <button
             onClick={handleSubscribe}
             disabled={isPremium || isSending}
-            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black tracking-wider transition-all rounded-xl border shadow-lg ${
+            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black transition rounded-xl border shadow-lg ${
               selectedPlan === 'monthly'
                 ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300 shadow-amber-400/20'
                 : 'bg-neutral-900 text-white border-neutral-700 hover:border-neutral-500'
@@ -116,7 +116,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         {/* Yearly Plan Card */}
         <div
           onClick={() => setSelectedPlan('yearly')}
-          className={`p-8 border rounded-2xl transition-all cursor-pointer space-y-6 bg-black/85 backdrop-blur-xl flex flex-col justify-between shadow-2xl relative ${
+          className={`p-8 border rounded-2xl transition cursor-pointer space-y-6 bg-black/85 backdrop-blur-xl flex flex-col justify-between shadow-2xl relative ${
             selectedPlan === 'yearly'
               ? 'border-amber-400 ring-2 ring-amber-400/30 bg-amber-400/5'
               : 'border-neutral-800 hover:border-neutral-700'
@@ -125,7 +125,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
               <span className="text-xs font-bold text-amber-400">{t('Forfait annuel')}</span>
-              <span className="px-2.5 py-0.5 bg-amber-400 text-black text-[11px] font-black uppercase rounded shadow">
+              <span className="px-2.5 py-0.5 bg-amber-400 text-black text-[11px] font-black rounded shadow">
                 {t('4 mois offerts')}
               </span>
             </div>
@@ -149,7 +149,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
           <button
             onClick={handleSubscribe}
             disabled={isPremium || isSending}
-            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black tracking-wider transition-all rounded-xl border shadow-lg ${
+            className={`w-full py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black transition rounded-xl border shadow-lg ${
               selectedPlan === 'yearly'
                 ? 'bg-amber-400 text-black border-amber-300 hover:bg-amber-300 shadow-amber-400/20'
                 : 'bg-neutral-900 text-white border-neutral-700 hover:border-neutral-500'
@@ -164,7 +164,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
         <div
           ref={messageRef}
           role={subscribedMessage.ok ? 'status' : 'alert'}
-          className={`p-4 border text-xs font-bold text-center rounded-xl animate-fadeIn ${
+          className={`p-4 border text-xs font-bold text-center rounded-xl animate-fadeIn motion-reduce:animate-none ${
             subscribedMessage.ok
               ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
               : 'bg-red-500/20 border-red-500/50 text-red-300'
@@ -177,7 +177,7 @@ export const PremiumView: React.FC<PremiumViewProps> = ({
       {/* Comparison Table with Dark Glass Theme */}
       <div className="border border-neutral-800 p-6 sm:p-8 bg-black/85 backdrop-blur-xl rounded-2xl space-y-6 shadow-2xl">
         <div className="border-b border-neutral-800 pb-4">
-          <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">{t('Comparatif')}</span>
+          <span className="text-xs text-amber-400 font-bold block">{t('Comparatif')}</span>
           <h2 className="text-2xl font-black text-white tracking-tight">
             {t('Tableau comparatif des avantages')}
           </h2>

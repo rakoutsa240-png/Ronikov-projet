@@ -71,11 +71,11 @@ export const VouchersCard: React.FC = () => {
         <input
           id="voucher-code"
           value={code}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
           placeholder="BON-XXXX-XXXX"
           autoCapitalize="characters"
           autoComplete="off"
-          className="flex-1 px-3 py-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-sm font-mono-code text-white uppercase focus:outline-none focus:border-amber-400"
+          className="flex-1 px-3 py-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-sm font-mono-code text-white focus:outline-none focus:border-amber-400"
         />
         <button
           type="submit"

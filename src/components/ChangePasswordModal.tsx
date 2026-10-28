@@ -90,7 +90,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <p role="status" className="text-xs font-bold bg-emerald-50 border border-emerald-600 text-emerald-800 p-3 font-sans">
               {t('Mot de passe changé. Vos autres appareils ont été déconnectés.')}
             </p>
-            <button onClick={onClose} className="w-full py-3 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800">
+            <button onClick={onClose} className="w-full py-3 bg-black text-white font-bold text-xs hover:bg-neutral-800">
               {t('Continuer')}
             </button>
           </div>
@@ -149,7 +149,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800 transition-colors border border-black"
+              className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs hover:bg-neutral-800 transition-colors border border-black"
             >
               {t('Enregistrer')}
             </button>

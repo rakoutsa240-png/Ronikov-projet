@@ -89,7 +89,7 @@ export const AttendantsPanel: React.FC<AttendantsPanelProps> = ({ stationId, sta
   return (
     <section className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-5">
       <div className="border-b border-neutral-800 pb-4">
-        <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest flex items-center gap-1.5">
+        <span className="text-xs text-amber-400 font-bold block flex items-center gap-1.5">
           <Users className="w-3.5 h-3.5" /> {t('Équipe de la station')}
         </span>
         <h2 className="text-2xl font-black text-white tracking-tight">{t('Mes pompistes')}</h2>

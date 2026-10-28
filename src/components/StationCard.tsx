@@ -38,7 +38,7 @@ export const StationCard: React.FC<StationCardProps> = ({
     liters <= 0 ? 'bg-red-500' : percent < 25 ? 'bg-amber-400' : 'bg-brand-500';
 
   return (
-    <div className="reveal group bg-black border border-neutral-800 hover:border-brand-500/60 transition-all duration-300 p-5 rounded-2xl flex flex-col justify-between gap-4 text-white shadow-lg shadow-black/5 hover:shadow-xl">
+    <div className="@container reveal group bg-black border border-neutral-800 hover:border-brand-500/60 transition duration-300 p-5 rounded-2xl flex flex-col justify-between gap-4 text-white shadow-lg shadow-black/5 hover:shadow-xl">
       {/* Header: brand logo, name, favourite */}
       <div className="flex items-start gap-3">
         <StationBrandLogo brand={station.brand as StationBrandType} size="md" interactive={false} showBadge={false} className="shrink-0" />
@@ -64,7 +64,7 @@ export const StationCard: React.FC<StationCardProps> = ({
         <RatingBadge rating={station.rating} />
         {station.isPartner && (
           <span
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-500/15 text-brand-400 font-semibold"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-500/15 text-active font-semibold"
             title={t('Station partenaire vérifiée Pleino')}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -119,10 +119,10 @@ export const StationCard: React.FC<StationCardProps> = ({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 @max-[16rem]:flex-wrap">
         <button
           onClick={() => onViewDetails(station)}
-          className="flex-1 py-2.5 px-3 border border-neutral-700 hover:bg-neutral-900 text-white text-xs font-bold rounded-full transition-colors"
+          className="flex-1 @max-[16rem]:basis-full py-2.5 px-3 border border-neutral-700 hover:bg-neutral-900 text-white text-xs font-bold rounded-full transition-colors"
         >
           {t('Voir la station')}
         </button>

@@ -80,7 +80,7 @@ export const SalesPanel: React.FC<SalesPanelProps> = ({ stationId }) => {
     <section className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-5 text-white">
       <div className="border-b border-neutral-800 pb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest flex items-center gap-1.5">
+          <span className="text-xs text-amber-400 font-bold block flex items-center gap-1.5">
             <BarChart3 className="w-3.5 h-3.5" /> {t('Tickets servis')}
           </span>
           <h2 className="text-2xl font-black tracking-tight">{t('Mes ventes')}</h2>
@@ -106,21 +106,21 @@ export const SalesPanel: React.FC<SalesPanelProps> = ({ stationId }) => {
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-xl space-y-1">
-              <span className="text-[11px] text-neutral-400 uppercase font-bold block">{t('Litres vendus')}</span>
+              <span className="text-[11px] text-neutral-400 font-bold block">{t('Litres vendus')}</span>
               <span className="text-xl font-black block tabular-nums">{num(data.liters)} L</span>
               <Trend now={data.liters} before={data.previous.liters} />
             </div>
             <div className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-xl space-y-1">
-              <span className="text-[11px] text-neutral-400 uppercase font-bold block">{t('Montant des ventes')}</span>
+              <span className="text-[11px] text-neutral-400 font-bold block">{t('Montant des ventes')}</span>
               <span className="text-xl font-black block tabular-nums">{num(data.revenueXOF)} F</span>
               <Trend now={data.revenueXOF} before={data.previous.revenueXOF} />
             </div>
             <div className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-xl space-y-1">
-              <span className="text-[11px] text-neutral-400 uppercase font-bold block">{t('Tickets servis')}</span>
+              <span className="text-[11px] text-neutral-400 font-bold block">{t('Tickets servis')}</span>
               <span className="text-xl font-black block tabular-nums">{num(data.tickets)}</span>
             </div>
             <div className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-xl space-y-1">
-              <span className="text-[11px] text-neutral-400 uppercase font-bold block flex items-center gap-1">
+              <span className="text-[11px] text-neutral-400 font-bold block flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {t('Heure de pointe')}
               </span>
               <span className="text-xl font-black block tabular-nums">{peak ? `${peak.hour} h – ${peak.hour + 1} h` : '—'}</span>
@@ -166,7 +166,7 @@ export const SalesPanel: React.FC<SalesPanelProps> = ({ stationId }) => {
             <table className="w-full text-sm">
               <caption className="sr-only">{t('Ventes par carburant')}</caption>
               <thead>
-                <tr className="text-left text-[11px] uppercase text-neutral-400">
+                <tr className="text-left text-[11px] text-neutral-400">
                   <th className="py-2 font-bold">{t('Carburant')}</th>
                   <th className="py-2 font-bold text-right">{t('Tickets')}</th>
                   <th className="py-2 font-bold text-right">{t('Litres')}</th>

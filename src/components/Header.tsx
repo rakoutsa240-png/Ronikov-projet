@@ -65,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`px-3 py-1.5 text-sm font-semibold transition-all whitespace-nowrap rounded-md ${
+                    className={`px-3 py-1.5 text-sm font-semibold transition whitespace-nowrap rounded-md ${
                       isActive
                         ? 'bg-white text-brand-800 border border-white'
                         : 'text-white/80 hover:text-white hover:bg-white/10 border border-transparent'
@@ -118,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* User Profile Button */}
             <button
               onClick={() => (isSignedIn ? setActiveTab('profile') : onOpenAuth())}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-mono-code font-bold transition-all border ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-mono-code font-bold transition border ${
                 activeTab === 'profile'
                   ? 'bg-amber-400 text-black border-amber-300 shadow-md'
                   : 'bg-white text-brand-800 border-white hover:bg-brand-50'
