@@ -174,7 +174,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         <button
           onClick={onClose}
           aria-label={t('Fermer')}
-          className="absolute top-4 right-4 p-2 border border-neutral-700 hover:border-amber-400 bg-neutral-900/90 text-neutral-300 hover:text-white rounded-xl transition-all z-20"
+          className="absolute top-4 right-4 p-2 border border-neutral-700 hover:border-amber-400 bg-neutral-900/90 text-neutral-300 hover:text-white rounded-xl transition z-20"
         >
           <X className="w-5 h-5" />
         </button>
@@ -182,7 +182,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         {/* Header & Step Indicator */}
         <div className="border-b border-neutral-800 pb-4 space-y-3 relative z-10 pr-12">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2.5 py-1 chip-selected text-[11px] font-mono-code font-black uppercase rounded shadow">
+            <span className="px-2.5 py-1 chip-selected text-[11px] font-mono-code font-black rounded shadow">
               {t('Réservation Pleino')}
             </span>
             <span className="text-xs font-mono-code text-neutral-400 font-bold">
@@ -225,7 +225,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                       key={f}
                       disabled={!isAvailable}
                       onClick={() => setSelectedFuel(f)}
-                      className={`p-3.5 text-left border font-mono-code transition-all rounded-xl ${
+                      className={`p-3.5 text-left border font-mono-code transition rounded-xl ${
                         !isAvailable
                           ? 'opacity-40 border-neutral-900 bg-neutral-900/40 text-neutral-500 cursor-not-allowed'
                           : isSelected
@@ -253,7 +253,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 <div className="flex border border-neutral-800 rounded-lg overflow-hidden font-mono-code text-xs bg-black">
                   <button
                     onClick={() => switchInputMode('fcfa')}
-                    className={`px-3 py-2 text-sm font-bold transition-all ${
+                    className={`px-3 py-2 text-sm font-bold transition ${
                       inputMode === 'fcfa' ? 'chip-selected' : 'bg-neutral-900 text-neutral-400 hover:text-white'
                     }`}
                   >
@@ -261,7 +261,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                   </button>
                   <button
                     onClick={() => switchInputMode('liters')}
-                    className={`px-3 py-2 text-sm font-bold transition-all ${
+                    className={`px-3 py-2 text-sm font-bold transition ${
                       inputMode === 'liters' ? 'chip-selected' : 'bg-neutral-900 text-neutral-400 hover:text-white'
                     }`}
                   >
@@ -294,7 +294,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                         key={i}
                         disabled={preset > maxLiters || preset < MIN_LITERS}
                         onClick={() => setLiters(preset)}
-                        className={`py-3 text-sm border font-bold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                        className={`py-3 text-sm border font-bold rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${
                           liters === preset ? 'chip-selected shadow' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
@@ -327,7 +327,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                         key={i}
                         disabled={preset > maxLiters * pricePerLiter || preset < MIN_LITERS * pricePerLiter}
                         onClick={() => setFcfaAmount(preset)}
-                        className={`py-3 text-sm border font-bold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                        className={`py-3 text-sm border font-bold rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${
                           fcfaAmount === preset ? 'chip-selected shadow' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
@@ -355,7 +355,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               <button
                 disabled={!canBook}
                 onClick={() => setStep(3)}
-                className="w-full sm:w-auto justify-center px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto justify-center px-6 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs hover:bg-amber-300 transition rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span>{t('Continuer vers le paiement')}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -403,7 +403,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                         type="button"
                         aria-pressed={selected}
                         onClick={() => setVoucherId(v?.id ?? null)}
-                        className={`p-3 text-left border rounded-xl transition-all ${
+                        className={`p-3 text-left border rounded-xl transition ${
                           selected ? 'border-2 border-emerald-400 bg-emerald-400/10 text-white' : 'border-neutral-800 bg-black/60 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
@@ -441,7 +441,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 {/* Mixx by Yas (Togocom) */}
                 <button
                   onClick={() => setPaymentMethod('MIXX_BY_YAS')}
-                  className={`p-3.5 border font-bold flex flex-col items-start justify-center transition-all rounded-xl relative ${
+                  className={`p-3.5 border font-bold flex flex-col items-start justify-center transition rounded-xl relative ${
                     paymentMethod === 'MIXX_BY_YAS' || paymentMethod === 'TMONEY'
                       ? 'border-2 border-yellow-400 bg-yellow-400/10 text-white shadow-lg shadow-yellow-400/10'
                       : 'border-neutral-800 bg-black/60 text-neutral-300 hover:border-neutral-700'
@@ -453,7 +453,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
                 {/* Moov Africa (Flooz) */}
                 <button
                   onClick={() => setPaymentMethod('MOOV_MONEY')}
-                  className={`p-3.5 border font-bold flex flex-col items-start justify-center transition-all rounded-xl relative ${
+                  className={`p-3.5 border font-bold flex flex-col items-start justify-center transition rounded-xl relative ${
                     paymentMethod === 'MOOV_MONEY' || paymentMethod === 'FLOOZ'
                       ? 'border-2 border-blue-400 bg-blue-500/10 text-white shadow-lg shadow-blue-500/10'
                       : 'border-neutral-800 bg-black/60 text-neutral-300 hover:border-neutral-700'
@@ -512,7 +512,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             <div className="pt-2 flex justify-between">
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-neutral-300 font-mono-code font-bold text-xs hover:border-amber-400 rounded-xl transition-all"
+                className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-neutral-300 font-mono-code font-bold text-xs hover:border-amber-400 rounded-xl transition"
               >
                 {t('Retour')}
               </button>
@@ -520,7 +520,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
               <button
                 disabled={isProcessing}
                 onClick={handleProcessPayment}
-                className="px-8 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs tracking-wider hover:bg-amber-300 transition-all rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-8 py-3.5 bg-amber-400 text-black font-mono-code font-black text-xs hover:bg-amber-300 transition rounded-xl shadow-lg shadow-amber-400/20 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
                   <>

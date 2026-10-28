@@ -198,7 +198,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       <div className="bg-black border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/5 space-y-6">
         <div className="border-b border-neutral-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="text-xs text-amber-400 font-bold uppercase tracking-widest flex items-center gap-2 mb-1">
+            <div className="text-xs text-amber-400 font-bold flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-amber-400" />
               {t('Historique de vos tickets sécurisés')}
             </div>
@@ -219,7 +219,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           <div className="flex gap-1 overflow-x-auto border border-neutral-800 bg-neutral-900 rounded-full p-1 text-xs font-bold text-neutral-300 max-w-full">
             <button
               onClick={() => setFilterStatus('ALL')}
-              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition ${
                 filterStatus === 'ALL' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
@@ -227,7 +227,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </button>
             <button
               onClick={() => setFilterStatus('PENDING')}
-              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition ${
                 filterStatus === 'PENDING' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
@@ -235,7 +235,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </button>
             <button
               onClick={() => setFilterStatus('VALIDATED')}
-              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition ${
                 filterStatus === 'VALIDATED' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
@@ -243,7 +243,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </button>
             <button
               onClick={() => setFilterStatus('ENDED')}
-              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition-all ${
+              className={`px-3.5 py-2 rounded-full whitespace-nowrap transition ${
                 filterStatus === 'ENDED' ? 'chip-selected font-extrabold' : 'hover:text-white'
               }`}
             >
@@ -279,7 +279,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
               return (
                 <div
                   key={res.id}
-                  className={`border transition-all p-6 rounded-2xl bg-black/85 backdrop-blur-xl space-y-6 relative overflow-hidden shadow-2xl ${
+                  className={`border transition p-6 rounded-2xl bg-black/85 backdrop-blur-xl space-y-6 relative overflow-hidden shadow-2xl ${
                     res.status === 'PENDING'
                       ? `${theme.cardBorder}`
                       : 'border-neutral-800/80 opacity-80'
@@ -305,7 +305,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       <div className="space-y-1.5 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           {getStatusBadge(res.status)}
-                          <span className={`hidden sm:inline px-2 py-0.5 text-[11px] font-black uppercase rounded border ${theme.badgeBg}`}>
+                          <span className={`hidden sm:inline px-2 py-0.5 text-[11px] font-black rounded border ${theme.badgeBg}`}>
                             {theme.brandTag}
                           </span>
                         </div>
@@ -324,10 +324,10 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     {/* Code Badge Box with Real Scannable QR Code */}
                     {res.status === 'PENDING' && (
                     <div className="bg-black/95 text-white p-4 border border-neutral-700 rounded-2xl text-center w-full sm:w-auto sm:min-w-[240px] shadow-2xl shrink-0 flex flex-col items-center justify-center space-y-2">
-                      <span className="text-[11px] text-neutral-400 uppercase tracking-widest block font-bold">
+                      <span className="text-[11px] text-neutral-400 block font-bold">
                         {t('Code sécurisé pompiste')}
                       </span>
-                      <div className={`text-2xl font-black font-code tracking-widest ${theme.codeText}`}>
+                      <div className={`text-2xl font-black font-code ${theme.codeText}`}>
                         {res.code}
                       </div>
 
@@ -357,19 +357,19 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                   {/* Order Details Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs border-b border-neutral-800/80 pb-5">
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[11px] uppercase font-bold flex items-center gap-1">
+                      <span className="text-neutral-400 block text-[11px] font-bold flex items-center gap-1">
                         <Fuel className="w-3 h-3 text-amber-400" /> {t('Carburant :')}
                       </span>
                       <span className={`font-black text-sm ${theme.accentText}`}>{t(res.fuelLabel)}</span>
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Quantité réservée :')}</span>
+                      <span className="text-neutral-400 block text-[11px] font-bold">{t('Quantité réservée :')}</span>
                       <span className="font-extrabold text-white text-sm">{t('{n} Litres', { n: res.liters })}</span>
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Montant payé :')}</span>
+                      <span className="text-neutral-400 block text-[11px] font-bold">{t('Montant payé :')}</span>
                       <span className="font-extrabold text-emerald-400 text-sm">
                         {num(res.totalAmountXOF)} FCFA
                       </span>
@@ -384,7 +384,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     </div>
 
                     <div className="bg-black/60 p-3.5 rounded-xl border border-neutral-800/80 space-y-1">
-                      <span className="text-neutral-400 block text-[11px] uppercase font-bold">
+                      <span className="text-neutral-400 block text-[11px] font-bold">
                         {res.status === 'VALIDATED' ? t('SERVI LE :') : res.status === 'PENDING' ? t("VALIDE JUSQU'À :") : t('RÉSERVÉ LE :')}
                       </span>
                       <span className="font-extrabold text-amber-300 text-sm">
@@ -425,7 +425,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         onReviewed && (
                           <button
                             onClick={() => setReviewTicket(res)}
-                            className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition-all flex items-center gap-2 text-amber-300"
+                            className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition flex items-center gap-2 text-amber-300"
                           >
                             <MessageSquareHeart className="w-4 h-4" />
                             <span>{res.servedBy ? t('Donner mon avis sur la station et {name}', { name: res.servedBy }) : t('Donner mon avis')}</span>
@@ -441,7 +441,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     <div className="flex flex-wrap items-center gap-3">
                       <button
                         onClick={() => copyCode(res.code, res.id)}
-                        className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
+                        className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition flex items-center gap-2 text-white shadow-md"
                       >
                         <Copy className="w-3.5 h-3.5" />
                         <span>{copiedId === res.id ? t('Code copié !') : t('Copier le code')}</span>
@@ -449,7 +449,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
                       <button
                         onClick={() => setActiveTicketModal(res)}
-                        className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition-all flex items-center gap-2 text-amber-300 shadow-md"
+                        className="px-4 py-2.5 border border-amber-400/80 bg-amber-400/10 hover:bg-amber-400 hover:text-black rounded-xl font-bold transition flex items-center gap-2 text-amber-300 shadow-md"
                       >
                         <Printer className="w-3.5 h-3.5" />
                         <span>{t('Imprimer le reçu et le QR code')}</span>
@@ -460,7 +460,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                           href={directionsUrl(ticketStation)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:border-amber-400 transition-all flex items-center gap-2 text-white shadow-md"
+                          className="px-4 py-2.5 border border-neutral-700 bg-black/80 rounded-xl font-bold hover:border-amber-400 transition flex items-center gap-2 text-white shadow-md"
                         >
                           <Navigation className="w-3.5 h-3.5" />
                           <span>{t('Itinéraire')}</span>
@@ -470,7 +470,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
                     {!offline && <button
                       onClick={() => handleCancel(res)}
-                      className="px-4 py-2.5 border border-rose-500/40 text-rose-400 bg-rose-500/10 hover:bg-rose-500 hover:text-white rounded-xl font-bold uppercase text-xs transition-colors"
+                      className="px-4 py-2.5 border border-rose-500/40 text-rose-400 bg-rose-500/10 hover:bg-rose-500 hover:text-white rounded-xl font-bold text-xs transition-colors"
                     >
                       {t('Annuler la réservation')}
                     </button>}

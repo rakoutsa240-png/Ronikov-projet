@@ -34,8 +34,8 @@ export const Gauge: React.FC<GaugeProps> = ({
         )}
         <div className={`w-full border h-3 overflow-hidden p-0.5 relative rounded-full ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-slate-100 border-slate-300'}`}>
           <div
-            className={`gauge-fill h-full transition-all duration-500 ease-out rounded-full ${darkMode ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : 'bg-black'}`}
-            style={{ width: `${percentage}%` }}
+            className={`gauge-fill h-full w-full origin-left transition-transform duration-500 ease-out rounded-full ${darkMode ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : 'bg-black'}`}
+            style={{ transform: `scaleX(${percentage / 100})` }}
           />
         </div>
         {sublabel && (
@@ -58,7 +58,7 @@ export const Gauge: React.FC<GaugeProps> = ({
   return (
     <div className={`inline-flex flex-col items-center justify-center ${className}`}>
       <div className="relative inline-flex items-center justify-center">
-        <svg
+        <svg aria-hidden="true"
           width={dimensions.width}
           height={dimensions.width}
           className="transform -rotate-90"
@@ -83,7 +83,7 @@ export const Gauge: React.FC<GaugeProps> = ({
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
             fill="transparent"
-            className="transition-all duration-700 ease-out"
+            className="transition duration-700 ease-out"
           />
         </svg>
 

@@ -108,12 +108,12 @@ export const VouchersPanel: React.FC<VouchersPanelProps> = ({ stationId, station
 
   const inputClass = 'w-full px-3 py-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400';
   const chip = (selected: boolean) =>
-    `px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selected ? 'chip-selected' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'}`;
+    `px-3 py-2 rounded-lg border text-xs font-bold transition ${selected ? 'chip-selected' : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700'}`;
 
   return (
     <section className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-5">
       <div className="border-b border-neutral-800 pb-4">
-        <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest flex items-center gap-1.5">
+        <span className="text-xs text-amber-400 font-bold block flex items-center gap-1.5">
           <Gift className="w-3.5 h-3.5" /> {t('Offrir du carburant')}
         </span>
         <h2 className="text-2xl font-black text-white tracking-tight">{t('Bons d’essence')}</h2>

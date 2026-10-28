@@ -101,7 +101,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     <div className="fixed inset-0 z-50 overflow-hidden font-mono-code">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity animate-fadeIn" 
+        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity animate-fadeIn motion-reduce:animate-none" 
         onClick={onClose} 
       />
 
@@ -134,7 +134,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 {unreadCount > 0 && (
                   <button
                     onClick={onMarkAllRead}
-                    className="text-[11px] uppercase font-bold text-amber-300 hover:text-white border border-neutral-700 hover:border-amber-400 px-2.5 py-1 rounded-lg transition-colors"
+                    className="text-[11px] font-bold text-amber-300 hover:text-white border border-neutral-700 hover:border-amber-400 px-2.5 py-1 rounded-lg transition-colors"
                   >
                     {t('Tout lire')}
                   </button>
@@ -165,7 +165,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                   return (
                     <div
                       key={n.id}
-                      className={`p-4 border rounded-xl transition-all space-y-2.5 relative overflow-hidden ${
+                      className={`p-4 border rounded-xl transition space-y-2.5 relative overflow-hidden ${
                         !n.read
                           ? `${accent.unreadBorder} shadow-lg`
                           : 'border-neutral-800/90 bg-black/60 opacity-80'
@@ -220,7 +220,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           <div className="pt-2 border-t border-neutral-800">
             <button
               onClick={onClose}
-              className="w-full py-3 bg-amber-400 text-black text-xs font-black tracking-wider hover:bg-amber-300 active:scale-98 transition-all rounded-xl shadow-lg shadow-amber-400/20"
+              className="w-full py-3 bg-amber-400 text-black text-xs font-black hover:bg-amber-300 active:scale-98 transition rounded-xl shadow-lg shadow-amber-400/20"
             >
               {t('Fermer les notifications')}
             </button>

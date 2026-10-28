@@ -11,7 +11,7 @@ import { StationFreshness } from './StationFreshness';
 import { enableAlerts, useAlertPermission } from '../alerts';
 import { useNow } from '../storage';
 import { timeLeft } from '../time';
-import { MapPin, ShieldCheck, ArrowRight, CheckCircle2, ChevronRight, Star, Fuel, Smartphone, QrCode } from 'lucide-react';
+import { MapPin, ArrowRight, CheckCircle2, ChevronRight, Star, Fuel, Smartphone, QrCode } from 'lucide-react';
 import heroBg from '../assets/images/gas_station_bg_1785887453945.webp';
 import managerBg from '../assets/images/station_manager_happy_1785888750849.webp';
 import customerBg from '../assets/images/happy_customer_refuel_1785888766342.webp';
@@ -41,17 +41,17 @@ const ActiveTicketCard: React.FC<{ ticket: Reservation; onOpen: () => void }> = 
     <div className="theme-fixed bg-brand-800 rounded-3xl p-2.5">
       <button
         onClick={onOpen}
-        className="w-full bg-white text-[#0f1f18] rounded-2xl p-3 flex items-center gap-3 text-left shadow-[0_8px_24px_-14px_rgba(0,60,40,.3)] hover:bg-brand-50"
+        className="w-full bg-white text-ticket-ink rounded-2xl p-3 flex items-center gap-3 text-left shadow-ticket hover:bg-brand-50"
       >
-        <Suspense fallback={<QrCode className="w-[68px] h-[68px] shrink-0 text-[#0f1f18]" />}>
+        <Suspense fallback={<QrCode className="w-[68px] h-[68px] shrink-0 text-ticket-ink" />}>
           <QRCodeImage value={ticket.qrPayload ?? ticket.code} size={68} className="shrink-0 border-0 shadow-none p-0" />
         </Suspense>
         <span className="flex-1 min-w-0">
-          <span className="block text-[11px] font-extrabold uppercase tracking-widest text-brand-700">
+          <span className="block text-[11px] font-extrabold text-brand-700">
             {t('Ticket en cours')} • {timeLeft(ticket.expiresAt, now)}
           </span>
-          <span className="block font-code text-xl font-bold tracking-wider">{ticket.code}</span>
-          <span className="block text-sm font-medium text-[#5a6661] truncate">
+          <span className="block font-code text-xl font-bold">{ticket.code}</span>
+          <span className="block text-sm font-medium text-ticket-muted truncate">
             {ticket.liters} L {t(ticket.fuelLabel)} • {ticket.stationName}
           </span>
         </span>
@@ -207,9 +207,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div aria-hidden="true" className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative">
           <div className="space-y-3 max-w-2xl">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
-              {t('Comment ça marche')}
-            </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               {t('Votre carburant réservé en 4 étapes')}
             </h2>
@@ -237,7 +234,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="flex-1 rounded-2xl bg-white/5 border border-white/10 p-5 space-y-2 md:w-full">
                   <div className="flex md:justify-center items-center gap-2 text-amber-400">
                     <step.icon className="w-5 h-5" aria-hidden="true" />
-                    <span className="text-xs font-bold uppercase tracking-widest">{t('Étape {n}', { n: i + 1 })}</span>
+                    <span className="text-xs font-bold">{t('Étape {n}', { n: i + 1 })}</span>
                   </div>
                   <h3 className="text-xl font-bold tracking-tight">{step.title}</h3>
                   <p className="text-sm text-brand-100/80 leading-relaxed">{step.text}</p>
@@ -252,9 +249,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-mono-code font-bold uppercase text-amber-400 tracking-widest block">
-              {t('Stations partenaires')}
-            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               {t('Stations à Lomé, attente la plus courte')}
             </h2>
@@ -262,7 +256,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           <button
             onClick={onNavigateMap}
-            className="px-4 py-2 border border-neutral-700 bg-black text-xs font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all flex items-center gap-1.5 self-start sm:self-auto rounded-full text-white"
+            className="px-4 py-2 border border-neutral-700 bg-black text-xs font-bold hover:bg-amber-400 hover:text-black hover:border-amber-400 transition flex items-center gap-1.5 self-start sm:self-auto rounded-full text-white"
           >
             <span>{t('Voir toutes les stations')}</span>
             <ChevronRight className="w-4 h-4" />
@@ -285,9 +279,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase text-amber-400 tracking-widest block">
-              {t('Sur place')}
-            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               {t('Comment ça se passe à la station')}
             </h2>
@@ -364,9 +355,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="reveal theme-fixed relative overflow-hidden bg-brand-800 text-white p-8 md:p-12 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div aria-hidden="true" className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-amber-400/15 blur-3xl" />
           <div className="relative space-y-4 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-amber-400 text-black text-[11px] font-extrabold uppercase rounded-full">
-              <ShieldCheck className="w-3.5 h-3.5" /> {t('Espace Pro stations-service')}
-            </div>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
               {t('Vous gérez une station-service au Togo ?')}
             </h2>
@@ -387,9 +375,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* FAQ Section: questions open one at a time */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-8">
         <div className="text-center">
-          <span className="text-xs font-bold uppercase text-amber-400 tracking-widest block">
-            {t('Des questions ?')}
-          </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             {t('Foire aux questions')}
           </h2>

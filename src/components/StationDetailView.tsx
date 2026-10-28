@@ -52,7 +52,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
       {/* Top Back Navigation */}
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 bg-black/80 backdrop-blur-md text-neutral-300 hover:text-white hover:border-amber-400 transition-all text-xs font-bold rounded-xl shadow-lg"
+        className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 bg-black/80 backdrop-blur-md text-neutral-300 hover:text-white hover:border-amber-400 transition text-xs font-bold rounded-xl shadow-lg"
       >
         <ArrowLeft className="w-4 h-4 text-amber-400" />
         <span>{t('Retour aux stations')}</span>
@@ -74,7 +74,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                 {station.district} • {station.city}
               </span>
               {station.isPartner && (
-                <span className="inline-flex items-center gap-1.5 text-xs border border-amber-400/60 bg-amber-400/10 text-amber-300 px-2.5 py-0.5 font-bold uppercase rounded-md shadow">
+                <span className="inline-flex items-center gap-1.5 text-xs border border-amber-400/60 bg-amber-400/10 text-amber-300 px-2.5 py-0.5 font-bold rounded-md shadow">
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> {t('Partenaire Pleino')}
                 </span>
               )}
@@ -98,7 +98,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           {/* Booking CTA (on phones it lives in the bar fixed at the bottom of the screen) */}
           <button
             onClick={() => onBook(station)}
-            className="hidden md:flex px-8 py-4 bg-amber-400 text-black font-black text-xs tracking-wider hover:bg-amber-300 transition-all items-center justify-center gap-2 rounded-xl shadow-lg shadow-amber-400/20 shrink-0 border border-amber-300"
+            className="hidden md:flex px-8 py-4 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition items-center justify-center gap-2 rounded-xl shadow-lg shadow-amber-400/20 shrink-0 border border-amber-300"
           >
             <span>{t('Réserver dans cette station')}</span>
             <ChevronRight className="w-4 h-4" />
@@ -108,7 +108,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
         {/* Quick Info Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs relative z-10">
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t('Attente estimée')}</div>
+            <div className="text-neutral-400 text-[11px] font-bold">{t('Attente estimée')}</div>
             <div className="text-lg font-black text-amber-400 flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-400" />
               <span>{station.queueTimeMinutes} min</span>
@@ -116,12 +116,12 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t("Horaires d'ouverture")}</div>
+            <div className="text-neutral-400 text-[11px] font-bold">{t("Horaires d'ouverture")}</div>
             <div className="text-sm font-bold text-white">{t(station.operatingHours)}</div>
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t('Téléphone de la station')}</div>
+            <div className="text-neutral-400 text-[11px] font-bold">{t('Téléphone de la station')}</div>
             <div className="text-sm font-bold text-white flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
               <a href={`tel:${station.phone.replace(/\s/g, '')}`} className="whitespace-nowrap text-[13px] sm:text-sm hover:text-amber-300">
@@ -131,7 +131,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
           </div>
 
           <div className="p-3.5 bg-black/60 border border-neutral-800 rounded-xl space-y-1">
-            <div className="text-neutral-400 uppercase text-[11px] font-bold">{t('Itinéraire')}</div>
+            <div className="text-neutral-400 text-[11px] font-bold">{t('Itinéraire')}</div>
             <a
               href={directionsUrl(station)}
               target="_blank"
@@ -148,7 +148,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
       <div className="space-y-4">
         <div className="border-b border-neutral-800 pb-3 flex justify-between items-end">
           <div>
-            <span className="text-xs text-amber-400 font-bold uppercase tracking-widest block flex items-center gap-1.5">
+            <span className="text-xs text-amber-400 font-bold block flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {t('Stock déclaré par la station')}
             </span>
             <h2 className="text-2xl font-black text-white tracking-tight">
@@ -220,7 +220,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
             const percent = Math.round((stock.availableLiters / stock.maxCapacityLiters) * 100);
 
             return (
-              <div key={f.type} className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl hover:border-amber-400/80 rounded-2xl space-y-4 text-center text-white shadow-2xl transition-all">
+              <div key={f.type} className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl hover:border-amber-400/80 rounded-2xl space-y-4 text-center text-white shadow-2xl transition">
                 <div className="text-xs font-black text-amber-300 border-b border-neutral-800/80 pb-2">
                   {f.label}
                 </div>
@@ -266,7 +266,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                 <button
                   disabled={stock.availableLiters <= 0}
                   onClick={() => onBook(station)}
-                  className={`w-full py-3 text-xs font-black tracking-wider transition-all rounded-xl shadow-lg ${
+                  className={`w-full py-3 text-xs font-black transition rounded-xl shadow-lg ${
                     stock.availableLiters > 0
                       ? 'bg-amber-400 text-black hover:bg-amber-300 shadow-amber-400/20'
                       : 'bg-neutral-900 text-neutral-500 border border-neutral-800 cursor-not-allowed'
@@ -317,7 +317,7 @@ export const StationDetailView: React.FC<StationDetailViewProps> = ({
                 href={directionsUrl(station)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-3 bg-amber-400 text-black font-black text-xs inline-flex items-center gap-2 rounded-xl hover:bg-amber-300 transition-all shadow-lg shadow-amber-400/20"
+                className="px-4 py-3 bg-amber-400 text-black font-black text-xs inline-flex items-center gap-2 rounded-xl hover:bg-amber-300 transition shadow-lg shadow-amber-400/20"
               >
                 <Navigation className="w-4 h-4" />
                 <span>{t('Lancer le GPS')}</span>

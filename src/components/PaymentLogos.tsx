@@ -12,11 +12,11 @@ interface PaymentLogoProps {
 export const MixxByYasBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md' | 'lg' }> = ({ selected, size = 'md' }) => {
   const isSm = size === 'sm';
   return (
-    <div className={`flex items-center gap-2.5 transition-all ${isSm ? 'scale-90' : ''}`}>
+    <div className={`flex items-center gap-2.5 transition ${isSm ? 'scale-90' : ''}`}>
       {/* Visual Logo Emblem */}
       <div className={`relative flex items-center justify-center font-black rounded-xl overflow-hidden shadow-md shrink-0 ${
         isSm ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
-      } bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-500 text-black border border-yellow-200`}>
+      } bg-amber-400 text-black border border-yellow-200`}>
         <span className="font-extrabold tracking-tighter text-black font-sans">
           mixx
         </span>
@@ -45,11 +45,11 @@ export const MixxByYasBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md' |
 export const MoovAfricaBadge: React.FC<{ selected?: boolean; size?: 'sm' | 'md' | 'lg' }> = ({ selected, size = 'md' }) => {
   const isSm = size === 'sm';
   return (
-    <div className={`flex items-center gap-2.5 transition-all ${isSm ? 'scale-90' : ''}`}>
+    <div className={`flex items-center gap-2.5 transition ${isSm ? 'scale-90' : ''}`}>
       {/* Visual Logo Emblem */}
       <div className={`relative flex items-center justify-center font-black rounded-xl overflow-hidden shadow-md shrink-0 ${
         isSm ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
-      } bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 text-white border border-blue-400/40`}>
+      } bg-blue-800 text-white border border-blue-400/40`}>
         <span className="font-extrabold tracking-tighter text-amber-400 font-sans">
           Moov
         </span>
@@ -79,7 +79,7 @@ export const PaymentMethodLabel: React.FC<{ method: PaymentMethod; showDetails?:
   if (method === 'MIXX_BY_YAS' || method === 'TMONEY') {
     return (
       <span className="inline-flex items-center gap-1.5 font-mono-code">
-        <span className="px-2 py-0.5 bg-yellow-400 text-black font-black text-[11px] rounded uppercase shadow-sm">
+        <span className="px-2 py-0.5 bg-yellow-400 text-black font-black text-[11px] rounded shadow-sm">
           Mixx by Yas
         </span>
         {showDetails && <span className="text-neutral-300 font-medium">(Togocom)</span>}
@@ -90,7 +90,7 @@ export const PaymentMethodLabel: React.FC<{ method: PaymentMethod; showDetails?:
   if (method === 'MOOV_MONEY' || method === 'FLOOZ') {
     return (
       <span className="inline-flex items-center gap-1.5 font-mono-code">
-        <span className="px-2 py-0.5 bg-blue-600 text-white font-black text-[11px] rounded uppercase shadow-sm">
+        <span className="px-2 py-0.5 bg-blue-600 text-white font-black text-[11px] rounded shadow-sm">
           Moov Africa
         </span>
         {showDetails && <span className="text-neutral-300 font-medium">(Flooz Moov Money)</span>}
@@ -101,7 +101,7 @@ export const PaymentMethodLabel: React.FC<{ method: PaymentMethod; showDetails?:
   // Old tickets only: cards are no longer offered.
   return (
     <span className="inline-flex items-center gap-1.5 font-mono-code">
-      <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 border border-neutral-700 font-black text-[11px] rounded uppercase shadow-sm">
+      <span className="px-2 py-0.5 bg-neutral-800 text-amber-300 border border-neutral-700 font-black text-[11px] rounded shadow-sm">
         {t('Carte bancaire')}
       </span>
     </span>

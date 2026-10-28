@@ -76,7 +76,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Header */}
         <div className="border-b border-black pb-3 space-y-1">
-          <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-widest block">
+          <span className="text-[11px] text-neutral-500 font-bold block">
             {t('Accès espace sécurisé Togo')}
           </span>
           <h2 className="text-2xl font-extrabold tracking-tight">
@@ -177,7 +177,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   href={whatsappUrl(t('Bonjour Pleino, j’ai oublié mon mot de passe. Mon numéro de compte est : {phone}', { phone: phone || '…' }))}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-black font-bold rounded"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-whatsapp text-black font-bold rounded"
                 >
                   <MessageCircle className="w-3.5 h-3.5" /> {t('Écrire à Pleino sur WhatsApp')}
                 </a>
@@ -192,11 +192,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 id="referral-code"
                 type="text"
                 value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value)}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                 placeholder="AMI-XXXXXX"
                 autoCapitalize="characters"
                 autoComplete="off"
-                className="w-full p-2.5 border border-black text-xs font-bold uppercase focus:outline-none"
+                className="w-full p-2.5 border border-black text-xs font-bold focus:outline-none"
               />
             </div>
           )}
@@ -224,7 +224,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs tracking-wider hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
+            className="w-full py-3 disabled:opacity-60 bg-black text-white font-bold text-xs hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 border border-black"
           >
             <span>{mode === 'login' ? t('Se connecter') : t('Créer mon compte')}</span>
             <ArrowRight className="w-4 h-4" />

@@ -116,7 +116,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {stats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="p-4 bg-neutral-950/80 border border-neutral-800 rounded-xl space-y-1">
-              <span className="text-[11px] text-neutral-400 uppercase font-bold flex items-center gap-1.5">
+              <span className="text-[11px] text-neutral-400 font-bold flex items-center gap-1.5">
                 <Icon className="w-3.5 h-3.5 text-amber-400" /> {label}
               </span>
               <span className="text-lg sm:text-xl font-black text-white block">{value}</span>

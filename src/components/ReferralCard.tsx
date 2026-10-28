@@ -63,8 +63,8 @@ export const ReferralCard: React.FC = () => {
       </p>
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 px-4 py-3 bg-neutral-900 border border-dashed border-emerald-500/60 rounded-xl text-center">
-          <span className="block text-[11px] text-neutral-400 uppercase font-bold">{t('Votre code')}</span>
-          <span className="text-2xl font-black tracking-widest text-white font-mono-code">{data.code}</span>
+          <span className="block text-[11px] text-neutral-400 font-bold">{t('Votre code')}</span>
+          <span className="text-2xl font-black text-white font-mono-code">{data.code}</span>
         </div>
         <div className="flex gap-2">
           <button

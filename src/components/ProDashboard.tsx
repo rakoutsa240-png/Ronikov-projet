@@ -143,7 +143,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
       <div className="bg-black/90 backdrop-blur-xl border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3">
           {stationChoices.length > 1 && (
-            <label className="flex flex-col gap-1 text-[11px] uppercase font-bold text-neutral-400">
+            <label className="flex flex-col gap-1 text-[11px] font-bold text-neutral-400">
               {t('Station affichée')}
               <select
                 value={managedStation.id}
@@ -189,11 +189,11 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
 
         {!isAttendant && (
           <div className="p-4 bg-black/80 border border-neutral-700 rounded-2xl text-center min-w-[180px] shadow-inner shrink-0">
-            <span className="text-[11px] text-neutral-400 uppercase font-bold block flex items-center justify-center gap-1">
+            <span className="text-[11px] text-neutral-400 font-bold block flex items-center justify-center gap-1">
               <Clock className="w-3 h-3 text-amber-400" /> {t('Attente déclarée')}
             </span>
             <span className="text-3xl font-black text-amber-300 my-0.5 block">{queueTime} {t('MIN')}</span>
-            <span className="text-[11px] text-emerald-400 font-bold uppercase block">{t('Flux en direct')}</span>
+            <span className="text-[11px] text-emerald-400 font-bold block">{t('Flux en direct')}</span>
           </div>
         )}
       </div>
@@ -204,7 +204,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
         <div className={`${isAttendant ? 'lg:col-span-12 max-w-2xl w-full mx-auto' : 'lg:col-span-6'} space-y-6`}>
           <div className="p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-6">
             <div className="border-b border-neutral-800 pb-4">
-              <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+              <span className="text-xs text-amber-400 font-bold block">
                 {t('Terminal de scan & saisie pompiste')}
               </span>
               <h2 className="text-2xl font-black text-white tracking-tight">
@@ -224,9 +224,9 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                     autoComplete="off"
                     spellCheck={false}
                     value={inputCode}
-                    onChange={(e) => setInputCode(e.target.value)}
+                    onChange={(e) => setInputCode(e.target.value.toUpperCase())}
                     placeholder="RNK-AB7K-Q3"
-                    className="w-full min-w-0 px-4 py-3.5 text-lg font-black font-mono-code tracking-widest text-amber-300 placeholder-neutral-600 bg-transparent focus:outline-none uppercase"
+                    className="w-full min-w-0 px-4 py-3.5 text-lg font-black font-mono-code text-amber-300 placeholder-neutral-600 bg-transparent focus:outline-none"
                   />
                   <button
                     type="submit"
@@ -332,7 +332,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
                       </div>
                     </div>
                     <span
-                      className={`px-2.5 py-1 text-[11px] font-black uppercase rounded border ${
+                      className={`px-2.5 py-1 text-[11px] font-black rounded border ${
                         r.status === 'VALIDATED'
                           ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                           : 'bg-amber-400/20 text-amber-300 border-amber-400/40'
@@ -352,7 +352,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
           <div className="lg:col-span-6 p-6 border border-neutral-800 bg-black/85 backdrop-blur-xl rounded-2xl shadow-2xl space-y-6">
             <div className="border-b border-neutral-800 pb-4 flex justify-between items-center gap-2">
               <div>
-                <span className="text-xs text-amber-400 font-bold uppercase block tracking-widest">
+                <span className="text-xs text-amber-400 font-bold block">
                   {t('Gestion des stocks & files en direct')}
                 </span>
                 <h2 className="text-2xl font-black text-white tracking-tight">
@@ -363,7 +363,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
               <button
                 onClick={handleSaveStock}
                 disabled={isSaving}
-                className="px-4 py-2.5 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition-all rounded-xl flex items-center gap-1.5 shadow-lg shrink-0 disabled:opacity-60"
+                className="px-4 py-2.5 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 transition rounded-xl flex items-center gap-1.5 shadow-lg shrink-0 disabled:opacity-60"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{isSaving ? t('Enregistrement…') : t('Enregistrer')}</span>
@@ -378,7 +378,7 @@ export const ProDashboard: React.FC<ProDashboardProps> = ({
             </div>
 
             {stockSavedMessage && (
-              <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn">
+              <div className="p-3.5 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-bold text-center rounded-xl animate-fadeIn motion-reduce:animate-none">
                 {t("Stocks et temps d'attente à jour : les clients le voient tout de suite.")}
               </div>
             )}

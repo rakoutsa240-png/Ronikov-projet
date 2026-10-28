@@ -1,3 +1,7 @@
+/* Hallmark · checked: 2026-10-28 · genre: editorial (inferred)
+ * floor: 0 FAIL · fixed: 2a, 10a, 19, 26a, 27, 33, 34, 40, 48, 49a, 54, 67 · reflex left: 7b (print receipts), 39b, 49b, 72, 81, 28b
+ * built: the project · redesign: polish · v2.0.0 */
+/* Hallmark · dropped onChange={(e) => setCode(e.target.value)}, onChange={(e) => setInputCode(e.target.value)}, onChange={(e) => setReferralCode(e.target.value)} · the same handlers now also turn typed codes into capitals, replacing the uppercase class */
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
@@ -10,6 +14,7 @@
 @theme {
   --font-sans: 'Figtree Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Bricolage Grotesque Variable', 'Figtree Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-code: 'Space Mono', monospace;
 
   --color-brand-50: #e9f6f0;
   --color-brand-100: #cdeadc;
@@ -23,6 +28,19 @@
   --color-brand-900: #003f2c;
   --color-brand-950: #032a1e;
   --color-flag-red: #d21034;
+  --color-whatsapp: #25d366;
+  /* The pump screen ticket is always drawn dark-on-white, whatever the theme. */
+  --color-ticket-ink: #0f1f18;
+  --color-ticket-muted: #5a6661;
+  --color-ticket-rule: #d5ddd9;
+  --shadow-sheet: 0 -10px 30px -10px rgb(0 0 0 / 0.25);
+  --shadow-ticket: 0 8px 24px -14px rgb(0 60 40 / 0.3);
+  --shadow-knob: 0 1px 4px rgb(0 0 0 / 0.25);
+  /* Keyboard focus ring: gold on dark surfaces, brand green on the light theme (set below). */
+  --color-focus: #ffc81e;
+  /* Printed receipts stay plain black on white paper. */
+  --color-print-paper: #ffffff;
+  --color-print-ink: #000000;
 
   --color-amber-50: #fffaeb;
   --color-amber-100: #fff1c7;
@@ -50,13 +68,40 @@
 }
 
 @layer base {
+  html,
+  body {
+    overflow-x: clip;
+  }
   body {
     font-family: var(--font-sans);
   }
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
+    text-wrap: balance;
   }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* A visible ring for people who move through the site with a keyboard, drawn instantly. */
+:where(a, button, input, select, textarea, summary, [tabindex], [role='button']):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+:root:not([data-theme='dark']) {
+  --color-focus: var(--color-brand-700);
+}
+:root:not([data-theme='dark']) .theme-fixed {
+  --color-focus: var(--color-amber-400);
+}
+/* Pressed buttons darken a touch; disabled ones say so with the cursor. */
+:where(button, a, [role='button']):active {
+  filter: brightness(0.94);
+}
+:where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
 }
 
 .font-mono-code {
@@ -67,8 +112,8 @@
 
 /* Ticket codes (RNK-XXXX-XX) keep a fixed-width font, so 0/O and 1/I are easy to tell apart. */
 .font-code {
-  font-family: 'Space Mono', monospace;
-  letter-spacing: 0.05em;
+  font-family: var(--font-code);
+  letter-spacing: 0.1em;
 }
 
 ::-webkit-scrollbar {
@@ -86,8 +131,8 @@
 /* High-quality print styling for fuel receipt tickets */
 @media print {
   body {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    background-color: var(--color-print-paper) !important;
+    color: var(--color-print-ink) !important;
   }
 
   body * {
@@ -114,18 +159,18 @@
     max-width: 650px !important;
     margin: 0 auto !important;
     padding: 20px !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    border: 2px solid #000000 !important;
+    background: var(--color-print-paper) !important;
+    color: var(--color-print-ink) !important;
+    border: 2px solid var(--color-print-ink) !important;
     border-radius: 12px !important;
     box-shadow: none !important;
   }
 
   #printable-receipt div,
   .printable-receipt div {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border-color: #000000 !important;
+    background-color: var(--color-print-paper) !important;
+    color: var(--color-print-ink) !important;
+    border-color: var(--color-print-ink) !important;
     text-shadow: none !important;
   }
 
@@ -133,7 +178,7 @@
   .printable-receipt img {
     max-width: 200px !important;
     height: auto !important;
-    border: 2px solid #000000 !important;
+    border: 2px solid var(--color-print-ink) !important;
     display: block !important;
     margin: 10px auto !important;
   }
@@ -148,7 +193,7 @@
    --------------------------------------------------------------------------- */
 :root:not([data-theme='dark']) {
   color-scheme: light;
-  --color-black: #fff;
+  --color-black: #fbfdfc;
   --color-white: #0f1f18;
   --color-neutral-50: oklch(17% 0.012 165);
   --color-neutral-100: oklch(22% 0.012 165);
@@ -166,6 +211,23 @@
   color-scheme: dark;
 }
 
+/* The drawn (dark) palette, kept for surfaces that never swap: header, footer, gold buttons. */
+:root {
+  --pleino-dark-black: #06120d;
+  --pleino-dark-white: #fbfdfc;
+  --pleino-dark-neutral-50: oklch(98.5% 0.003 165);
+  --pleino-dark-neutral-100: oklch(97% 0.004 165);
+  --pleino-dark-neutral-200: oklch(92.2% 0.006 165);
+  --pleino-dark-neutral-300: oklch(87% 0.008 165);
+  --pleino-dark-neutral-400: oklch(70.8% 0.01 165);
+  --pleino-dark-neutral-500: oklch(55.6% 0.012 165);
+  --pleino-dark-neutral-600: oklch(43.9% 0.012 165);
+  --pleino-dark-neutral-700: oklch(37.1% 0.013 165);
+  --pleino-dark-neutral-800: oklch(26.9% 0.013 165);
+  --pleino-dark-neutral-900: oklch(20.5% 0.012 165);
+  --pleino-dark-neutral-950: oklch(15.5% 0.011 165);
+}
+
 :root:not([data-theme='dark']) :is(
     .theme-fixed,
     .bg-amber-300, .bg-amber-400, .bg-amber-500, .bg-yellow-400,
@@ -173,19 +235,19 @@
     .bg-orange-500, .bg-sky-600, .bg-teal-600, .bg-purple-600,
     .hover\:bg-amber-300:hover, .hover\:bg-amber-400:hover, .hover\:bg-rose-500:hover
   ) {
-  --color-black: #06120d;
-  --color-white: #fff;
-  --color-neutral-50: oklch(98.5% 0.003 165);
-  --color-neutral-100: oklch(97% 0.004 165);
-  --color-neutral-200: oklch(92.2% 0.006 165);
-  --color-neutral-300: oklch(87% 0.008 165);
-  --color-neutral-400: oklch(70.8% 0.01 165);
-  --color-neutral-500: oklch(55.6% 0.012 165);
-  --color-neutral-600: oklch(43.9% 0.012 165);
-  --color-neutral-700: oklch(37.1% 0.013 165);
-  --color-neutral-800: oklch(26.9% 0.013 165);
-  --color-neutral-900: oklch(20.5% 0.012 165);
-  --color-neutral-950: oklch(15.5% 0.011 165);
+  --color-black: var(--pleino-dark-black);
+  --color-white: var(--pleino-dark-white);
+  --color-neutral-50: var(--pleino-dark-neutral-50);
+  --color-neutral-100: var(--pleino-dark-neutral-100);
+  --color-neutral-200: var(--pleino-dark-neutral-200);
+  --color-neutral-300: var(--pleino-dark-neutral-300);
+  --color-neutral-400: var(--pleino-dark-neutral-400);
+  --color-neutral-500: var(--pleino-dark-neutral-500);
+  --color-neutral-600: var(--pleino-dark-neutral-600);
+  --color-neutral-700: var(--pleino-dark-neutral-700);
+  --color-neutral-800: var(--pleino-dark-neutral-800);
+  --color-neutral-900: var(--pleino-dark-neutral-900);
+  --color-neutral-950: var(--pleino-dark-neutral-950);
 }
 
 /* Gold text and outlines are made for a dark background: the brand green on a light one.
@@ -221,7 +283,7 @@
 .chip-selected {
   background-color: var(--color-brand-700);
   border-color: var(--color-brand-700);
-  color: #fff;
+  color: var(--color-brand-50);
 }
 .text-active {
   color: var(--color-brand-700);
@@ -270,7 +332,7 @@ input[type='range']::-webkit-slider-thumb {
   border-radius: 9999px;
   background: var(--color-amber-400);
   border: 3px solid var(--color-brand-800);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-knob);
 }
 input[type='range']::-moz-range-thumb {
   width: 16px;
@@ -278,4 +340,16 @@ input[type='range']::-moz-range-thumb {
   border-radius: 9999px;
   background: var(--color-amber-400);
   border: 3px solid var(--color-brand-800);
+}
+
+/* People who asked their phone for less motion get none: no slides, fades or smooth scrolling. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

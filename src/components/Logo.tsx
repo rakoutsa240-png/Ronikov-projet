@@ -18,7 +18,7 @@ export const Logo: React.FC<{ subtitle?: string }> = ({ subtitle }) => (
     <LogoMark className="w-9 h-9 shrink-0" />
     <span className="leading-none">
       <span className="font-display block text-[22px] font-extrabold tracking-wide text-white">Pleino</span>
-      {subtitle && <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70 mt-1">{subtitle}</span>}
+      {subtitle && <span className="block text-[11px] font-semibold text-white/70 mt-1">{subtitle}</span>}
     </span>
   </span>
 );

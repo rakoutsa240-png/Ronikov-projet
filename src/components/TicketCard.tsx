@@ -51,7 +51,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
             </button>
           )}
 
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-black text-amber-300 text-[11px] font-bold uppercase rounded">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-black text-amber-300 text-[11px] font-bold rounded">
             <Check className="w-3.5 h-3.5 text-amber-400" /> {t('Paiement confirmé & stock réservé')}
           </div>
           <h2 className="text-xl font-black tracking-tight text-black">
@@ -66,10 +66,10 @@ export const TicketCard: React.FC<TicketCardProps> = ({
         <div className="border-2 border-amber-400/60 p-6 bg-black/90 text-center space-y-5 rounded-2xl shadow-2xl relative overflow-hidden">
           {/* Main Code Box */}
           <div>
-            <span className="text-xs text-neutral-400 uppercase tracking-widest block font-bold">
+            <span className="text-xs text-neutral-400 block font-bold">
               {t('Code sécurisé unique pompiste')}
             </span>
-            <div className="text-3xl sm:text-4xl font-black tracking-widest text-amber-300 my-2 py-3 bg-neutral-950 border border-neutral-800 rounded-xl select-all shadow-inner font-code">
+            <div className="text-3xl sm:text-4xl font-black text-amber-300 my-2 py-3 bg-neutral-950 border border-neutral-800 rounded-xl select-all shadow-inner font-code">
               {reservation.code}
             </div>
           </div>
@@ -95,17 +95,17 @@ export const TicketCard: React.FC<TicketCardProps> = ({
           {/* Detailed Info Grid */}
           <div className="grid grid-cols-2 gap-3 text-xs border-t border-neutral-800 pt-4 text-left text-neutral-200">
             <div>
-              <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Station :')}</span>
+              <span className="text-neutral-400 block text-[11px] font-bold">{t('Station :')}</span>
               <span className="font-bold text-white text-sm">{reservation.stationName}</span>
             </div>
             <div>
-              <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Carburant :')}</span>
+              <span className="text-neutral-400 block text-[11px] font-bold">{t('Carburant :')}</span>
               <span className="font-bold text-white text-sm">
                 {reservation.liters}L ({t(reservation.fuelLabel)})
               </span>
             </div>
             <div>
-              <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Montant payé :')}</span>
+              <span className="text-neutral-400 block text-[11px] font-bold">{t('Montant payé :')}</span>
               <span className="font-bold text-amber-400 text-sm">
                 {num(reservation.totalAmountXOF)} FCFA
               </span>
@@ -116,7 +116,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               )}
             </div>
             <div>
-              <span className="text-neutral-400 block text-[11px] uppercase font-bold">{t('Mode paiement :')}</span>
+              <span className="text-neutral-400 block text-[11px] font-bold">{t('Mode paiement :')}</span>
               <div className="mt-0.5">
                 <PaymentMethodLabel method={reservation.paymentMethod} />
               </div>
@@ -140,7 +140,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => copyCode(reservation.code)}
-              className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition-all shadow-md"
+              className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition shadow-md"
             >
               <Copy className="w-4 h-4 text-amber-400" />
               <span>{copied ? t('Code copié !') : t('Copier le code')}</span>
@@ -148,7 +148,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
 
             <button
               onClick={handlePrint}
-              className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition-all shadow-md"
+              className="px-4 py-2.5 border border-neutral-700 bg-neutral-900 text-white text-xs font-bold hover:border-amber-400 rounded-xl flex items-center gap-2 transition shadow-md"
             >
               <Printer className="w-4 h-4 text-amber-400" />
               <span>{t('Imprimer le ticket')}</span>
@@ -160,7 +160,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 rounded-xl shadow-lg shadow-amber-400/20 transition-all"
+              className="px-6 py-2.5 bg-amber-400 text-black font-black text-xs hover:bg-amber-300 rounded-xl shadow-lg shadow-amber-400/20 transition"
             >
               {t('Fermer')}
             </button>
