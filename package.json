@@ -23,6 +23,8 @@
     "@fontsource-variable/bricolage-grotesque": "5.3.0",
     "@fontsource-variable/figtree": "5.3.0",
     "@fontsource/space-mono": "5.3.0",
+    "@remotion/cli": "^4.0.540",
+    "@remotion/player": "^4.0.540",
     "@tailwindcss/vite": "^4.1.14",
     "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-react": "^5.0.4",
@@ -38,6 +40,7 @@
     "react-dom": "^19.0.1",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.10.1",
+    "remotion": "^4.0.540",
     "vite": "^6.2.3",
     "zod": "^4.6.5"
   },
