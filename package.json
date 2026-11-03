@@ -15,7 +15,10 @@
     "start:api": "tsx server/index.ts",
     "db:generate": "drizzle-kit generate",
     "db:seed": "tsx server/seed.ts",
-    "user:create": "tsx server/create-user.ts"
+    "user:create": "tsx server/create-user.ts",
+    "video:studio": "remotion studio",
+    "video:render": "remotion render WrestlingPromo out/wrestling-promo.mp4 --codec=h264 --crf=16",
+    "video:soundtrack": "python3 video/scripts/make-soundtrack.py video/public/soundtrack.wav"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",

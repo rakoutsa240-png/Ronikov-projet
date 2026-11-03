@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+out/
+video/public/footage.mp4
+video/public/soundtrack.wav
